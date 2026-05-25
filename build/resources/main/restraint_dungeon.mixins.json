@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.twi.restraint_dungeon.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinEntity",
+    "MixinSendChatMessage"
+  ],
+  "client": [
+    "MixinEntity",
+    "client.MixinItemInHandLayer",
+    "client.PlayerCameraMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

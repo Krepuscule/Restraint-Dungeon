@@ -1,0 +1,79 @@
+package com.twi.restraint_dungeon.attachment;
+
+import com.twi.restraint_dungeon.attachment.capability.common_capability.*;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerActionCapability;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerCarryCapability;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.RestraintRenderOffsets;
+import com.twi.restraint_dungeon.attachment.restraint_stack.RestraintStack;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+
+import java.util.function.Supplier;
+
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+
+public class ModAttachments {
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
+            DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
+
+    public static final Supplier<AttachmentType<RestraintCapability>> ENTITY_RESTRAINT =
+            ATTACHMENT_TYPES.register("entity_restraint", () -> AttachmentType.builder(RestraintCapability::new)
+                    .serialize(RestraintCapability.CODEC)
+                    .sync(RestraintCapability.STREAM_CODEC)
+//                    .copyOnDeath() // 死亡后保留数据
+                    .build());
+
+    public static final Supplier<AttachmentType<PleasantCapability>> ENTITY_PLEASANT =
+            ATTACHMENT_TYPES.register("entity_pleasant", () -> AttachmentType.builder(PleasantCapability::new)
+                    .serialize(PleasantCapability.CODEC)
+                    .sync(PleasantCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<StruggleCapability>> ENTITY_STRUGGLE =
+            ATTACHMENT_TYPES.register("entity_struggle", () -> AttachmentType.builder(StruggleCapability::new)
+                    .serialize(StruggleCapability.CODEC)
+                    .sync(StruggleCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<KidnapCapability>> ENTITY_KIDNAP =
+            ATTACHMENT_TYPES.register("entity_kidnap", () -> AttachmentType.builder(KidnapCapability::new)
+                    .serialize(KidnapCapability.CODEC)
+                    .sync(KidnapCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<ReleaseCapability>> ENTITY_RELEASE =
+            ATTACHMENT_TYPES.register("entity_release", () -> AttachmentType.builder(ReleaseCapability::new)
+                    .serialize(ReleaseCapability.CODEC)
+                    .sync(ReleaseCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<PlayerActionCapability>> PLAYER_ACTION =
+            ATTACHMENT_TYPES.register("player_action", () -> AttachmentType.builder(PlayerActionCapability::new)
+                    .serialize(PlayerActionCapability.CODEC)
+                    .sync(PlayerActionCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<PlayerCarryCapability>> PLAYER_CARRY = ATTACHMENT_TYPES.register(
+            "player_carry",
+            () -> AttachmentType.builder(PlayerCarryCapability::new)
+                    .serialize(PlayerCarryCapability.CODEC)
+                    .sync(PlayerCarryCapability.STREAM_CODEC)
+                    .build()
+    );
+
+    public static final Supplier<AttachmentType<RestraintRenderOffsets>> RENDER_OFFSETS = ATTACHMENT_TYPES.register(
+            "render_offsets",
+            () -> AttachmentType.builder(RestraintRenderOffsets::new)
+                    .serialize(RestraintRenderOffsets.CODEC)
+                    .copyOnDeath()
+                    .build()
+    );
+
+    public static final Supplier<AttachmentType<RestraintStack>> RESTRAINT_STACK =
+            ATTACHMENT_TYPES.register("restraint_stack", () -> AttachmentType.builder(RestraintStack::new)
+                    .serialize(RestraintStack.CODEC)
+                    .sync(RestraintStack.STREAM_CODEC)
+                    .copyOnDeath()
+                    .build());
+}

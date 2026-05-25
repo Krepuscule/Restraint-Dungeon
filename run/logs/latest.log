@@ -1,0 +1,212 @@
+[245月2026 17:20:01.523] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.227, --assetIndex, 17, --assetsDir, C:\\Users\\20535\\.gradle\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.227, --fml.neoFormVersion, 20240808.144430]
+[245月2026 17:20:01.527] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Azul Systems, Inc. OpenJDK 64-Bit Server VM 21.0.11+10-LTS
+[245月2026 17:20:01.529] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.11 by Azul Systems, Inc.; OS Windows 11 arch amd64 version 10.0
+[245月2026 17:20:01.658] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[245月2026 17:20:02.012] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[245月2026 17:20:02.378] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[245月2026 17:20:02.673] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/20535/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[245月2026 17:20:02.844] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 4050 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 596.49, NVIDIA Corporation
+[245月2026 17:20:03.535] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[245月2026 17:20:03.543] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Bendy lib 5.1 (bendylib)
+		GeckoLib 4 4.8.4 (geckolib)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.227 (neoforge)
+		Player Animator 2.0.4+1.21.1 (playeranimator)
+		RestraintDungeon 0.0.1 (restraint_dungeon)
+[245月2026 17:20:06.147] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[245月2026 17:20:06.151] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[245月2026 17:20:06.169] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.227, --gameDir, ., --assetsDir, C:\Users\20535\.gradle\caches\neoformruntime\assets, --assetIndex, 17]
+[245月2026 17:20:06.455] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[245月2026 17:20:11.711] [pool-10-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[245月2026 17:20:12.105] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 1450 milliseconds
+[245月2026 17:20:21.765] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[245月2026 17:20:21.767] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[245月2026 17:20:21.769] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[245月2026 17:20:21.769] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[245月2026 17:20:21.771] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[245月2026 17:20:21.913] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/Develop/idea_project/RestraintDungeon/build/moddev/artifacts/neoforge-21.1.227.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[245月2026 17:20:21.914] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/Develop/idea_project/RestraintDungeon/build/moddev/artifacts/neoforge-21.1.227.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[245月2026 17:20:22.001] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[245月2026 17:20:22.093] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[245月2026 17:20:22.187] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[245月2026 17:20:22.622] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.227, for MC 1.21.1
+[245月2026 17:20:25.192] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: [restraint_dungeon]
+[245月2026 17:20:25.546] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/bendylib, mod/geckolib, mod/restraint_dungeon, mod/playeranimator, mod/neoforge
+[245月2026 17:20:26.137] [Worker-Main-7/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[245月2026 17:20:26.194] [Worker-Main-9/ERROR] [net.minecraft.client.resources.model.ModelManager/]: Failed to load model restraint_dungeon:models/block/placed_sword.json
+com.google.gson.JsonSyntaxException: Missing base, expected to find a JsonObject
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.GsonHelper.getAsJsonObject(GsonHelper.java:345) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.client.model.SeparateTransformsModel$Loader.read(SeparateTransformsModel.java:157) ~[neoforge-21.1.227.jar%23190!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.client.model.SeparateTransformsModel$Loader.read(SeparateTransformsModel.java:150) ~[neoforge-21.1.227.jar%23190!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer.deserializeGeometry(ExtendedBlockModelDeserializer.java:105) ~[neoforge-21.1.227.jar%23190!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer.deserialize(ExtendedBlockModelDeserializer.java:53) ~[neoforge-21.1.227.jar%23190!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer.deserialize(ExtendedBlockModelDeserializer.java:37) ~[neoforge-21.1.227.jar%23190!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.1.jar%23110!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.GsonHelper.fromNullableJson(GsonHelper.java:432) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.GsonHelper.fromJson(GsonHelper.java:439) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.GsonHelper.fromJson(GsonHelper.java:491) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.renderer.block.model.BlockModel.fromStream(BlockModel.java:83) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.resources.model.ModelManager.lambda$loadBlockModels$8(ModelManager.java:144) ~[neoforge-21.1.227.jar%23189!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) [?:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.exec(CompletableFuture.java:1760) [?:?]
+	at java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387) [?:?]
+	at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1312) [?:?]
+	at java.base/java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1843) [?:?]
+	at java.base/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1808) [?:?]
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:188) [?:?]
+[245月2026 17:20:26.376] [Worker-Main-10/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[245月2026 17:20:27.033] [Worker-Main-14/WARN] [net.minecraft.client.renderer.texture.SpriteLoader/]: Texture restraint_dungeon:item/restraints/merchant_latex with size 24x24 limits mip level from 4 to 3
+[245月2026 17:20:29.252] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/ghost_block.json' missing model for variant: 'restraint_dungeon:ghost_block#'
+[245月2026 17:20:29.253] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=north'
+[245月2026 17:20:29.253] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=east'
+[245月2026 17:20:29.253] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=south'
+[245月2026 17:20:29.253] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=down'
+[245月2026 17:20:29.253] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=up'
+[245月2026 17:20:29.256] [Worker-Main-8/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'restraint_dungeon:blockstates/placed_sword.json' missing model for variant: 'restraint_dungeon:placed_sword#facing=west'
+[245月2026 17:20:31.062] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[245月2026 17:20:31.062] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[245月2026 17:20:31.168] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on 扬声器 (Star Y360)
+[245月2026 17:20:31.169] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[245月2026 17:20:31.235] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/blocks.png-atlas
+[245月2026 17:20:31.240] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[245月2026 17:20:31.241] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[245月2026 17:20:31.241] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[245月2026 17:20:31.241] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[245月2026 17:20:31.243] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[245月2026 17:20:31.243] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[245月2026 17:20:31.243] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[245月2026 17:20:31.243] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[245月2026 17:20:31.333] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[245月2026 17:20:31.335] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[245月2026 17:20:31.335] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[245月2026 17:20:31.336] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[245月2026 17:20:31.336] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[245月2026 17:20:31.360] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[245月2026 17:20:31.470] [Render thread/ERROR] [dev.kosmx.playerAnim.minecraftApi.codec.AnimationCodecs/]: Unknown error when trying to apply emotecraft
+java.lang.NullPointerException: Cannot invoke "com.google.gson.JsonElement.getAsJsonObject()" because the return value of "com.google.gson.JsonObject.get(String)" is null
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.lambda$readAnimations$0(GeckoLibSerializer.java:84) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75) ~[?:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.readAnimations(GeckoLibSerializer.java:65) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.deserialize(GeckoLibSerializer.java:58) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.AnimationJson.deserialize(AnimationJson.java:53) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.AnimationJson.deserialize(AnimationJson.java:16) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1227) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1137) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1107) ~[gson-2.10.1.jar%23110!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.codec.AbstractGsonCodec.decode(AbstractGsonCodec.java:25) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.codec.AnimationCodecs.deserialize(AnimationCodecs.java:77) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.resourceLoaderCallback(PlayerAnimationRegistry.java:108) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.ResourceManagerReloadListener.lambda$reload$0(ResourceManagerReloadListener.java:21) ~[neoforge-21.1.227.jar%23189!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$UniRun.tryFire(CompletableFuture.java:787) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:482) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.SimpleReloadInstance.lambda$new$3(SimpleReloadInstance.java:86) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:148) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1155) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:807) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23189!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23128!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+[245月2026 17:20:31.473] [Render thread/ERROR] [dev.kosmx.playerAnim.minecraftApi.codec.AnimationCodecs/]: Unknown error when trying to apply gecko_legacy
+java.lang.NullPointerException: Cannot invoke "com.google.gson.JsonElement.getAsJsonObject()" because the return value of "com.google.gson.JsonObject.get(String)" is null
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.lambda$readAnimations$0(GeckoLibSerializer.java:84) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75) ~[?:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.readAnimations(GeckoLibSerializer.java:65) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.deserialize(GeckoLibSerializer.java:58) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.deserialize(GeckoLibSerializer.java:53) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.core.data.gson.GeckoLibSerializer.deserialize(GeckoLibSerializer.java:24) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1227) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1137) ~[gson-2.10.1.jar%23110!/:?]
+	at MC-BOOTSTRAP/com.google.gson@2.10.1/com.google.gson.Gson.fromJson(Gson.java:1107) ~[gson-2.10.1.jar%23110!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.codec.AbstractGsonCodec.decode(AbstractGsonCodec.java:25) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.codec.AnimationCodecs.deserialize(AnimationCodecs.java:77) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/playeranimator@2.0.4+1.21.1/dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry.resourceLoaderCallback(PlayerAnimationRegistry.java:108) ~[player-animation-lib-forge-2.0.4+1.21.1.jar%23194!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.ResourceManagerReloadListener.lambda$reload$0(ResourceManagerReloadListener.java:21) ~[neoforge-21.1.227.jar%23189!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$UniRun.tryFire(CompletableFuture.java:787) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:482) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.SimpleReloadInstance.lambda$new$3(SimpleReloadInstance.java:86) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:148) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1155) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:807) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23189!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23146!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23128!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23128!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+[245月2026 17:20:31.485] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
+[245月2026 17:20:58.127] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1290 recipes
+[245月2026 17:20:58.291] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
+[245月2026 17:20:58.596] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21.1
+[245月2026 17:20:58.596] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[245月2026 17:20:59.440] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[245月2026 17:20:59.736] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: 准备生成区域中：0%
+[245月2026 17:20:59.914] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[245月2026 17:20:59.923] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 479 ms
+[245月2026 17:20:59.998] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
+[245月2026 17:20:59.998] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[245月2026 17:21:01.058] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:209abc3e] logged in with entity id 107 at (123.32357692976265, 65.0, -26.97521757416403)
+[245月2026 17:21:01.136] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev加入了游戏
+[245月2026 17:21:01.571] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 52 advancements
+[245月2026 17:21:02.921] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[245月2026 17:21:02.959] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:overworld
+[245月2026 17:21:02.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_end
+[245月2026 17:21:02.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_nether
+[245月2026 17:21:10.217] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[245月2026 17:21:10.230] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:overworld
+[245月2026 17:21:10.257] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_end
+[245月2026 17:21:10.257] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_nether
+[245月2026 17:21:10.601] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[245月2026 17:21:10.626] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: 连接中断
+[245月2026 17:21:10.627] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev退出了游戏
+[245月2026 17:21:10.643] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
+[245月2026 17:21:10.671] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[245月2026 17:21:10.672] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[245月2026 17:21:10.672] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[245月2026 17:21:10.810] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:overworld
+[245月2026 17:21:10.972] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_end
+[245月2026 17:21:10.979] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[新的世界]'/minecraft:the_nether
+[245月2026 17:21:10.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (新的世界): All chunks are saved
+[245月2026 17:21:10.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[245月2026 17:21:10.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[245月2026 17:21:10.998] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved

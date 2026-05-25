@@ -1,0 +1,14 @@
+[
+  {
+    "uuid": "530fa97a-357f-3c19-94d3-0c5c65c18fe8",
+    "name": "test",
+    "level": 4,
+    "bypassesPlayerLimit": false
+  },
+  {
+    "uuid": "2debe4aa-3f7d-3e4b-875f-8b8bc66b5a39",
+    "name": "Thalia_April",
+    "level": 4,
+    "bypassesPlayerLimit": false
+  }
+]

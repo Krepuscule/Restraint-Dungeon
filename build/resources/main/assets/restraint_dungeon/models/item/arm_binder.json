@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "restraint_dungeon:item/restraints/arm_binder"
+  }
+}

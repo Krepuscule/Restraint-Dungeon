@@ -1,0 +1,48 @@
+/restraint equip Dev restraint_arms_bind
+/restraint equip Dev restraint_body_bind
+/restraint equip Dev restraint_legs_bind
+/kill
+/restraint equip Dev restraint_arms_bind
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_body_bind
+/kill
+/restraint equip Dev restraint_arms_bind
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_blindfold
+/kill
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_gag
+/restraint equip Dev restraint_collar
+/kill
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_hands_bind
+/kill
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_body_bind
+/kill
+/restraint equip Dev restraint_legs_bind
+/restraint equip Dev restraint_arms_bind
+/time set day
+/weather clear
+/effect give Dev restraint_dungeon:climax 10 1
+/effect give Dev restraint_dungeon:climax
+/kill
+/effect give Dev restraint_dungeon:climax 10
+/effect give Dev restraint_dungeon:calm 10
+/effect give Dev restraint_dungeon:climax 10
+/restraint equip Dev restraint_gag
+/restraint equip Dev restraint_gag 2
+/time set day
+/kill
+/restraint equip Dev restraint_body_bind
+/restraint equip Dev restraint_gag
+/effect give Dev restraint_dungeon:sticky
+/weather rain
+/weather clear
+/kill
+/setworldspawn
+/restraint equip Dev restraint_arms_bind
+/kill
+/restraint equip Dev restraint_arms_bind
+/kill
+/restraint equip Dev restraint_arms_bind

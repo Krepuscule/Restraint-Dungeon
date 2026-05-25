@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "restraint_dungeon:block/restraint_device/wooden_x_cross/icon/cherry_wooden_x_cross"
+  }
+}
