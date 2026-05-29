@@ -66,7 +66,7 @@ public class MiraiTechSleevesItem extends RestraintItem {
     }
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
         ItemStack suitStack = getMiraiTechSuit(entity);
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 
@@ -76,13 +76,22 @@ public class MiraiTechSleevesItem extends RestraintItem {
 
 
             String suffix = (aroused ? "_aroused" : "") + (locked ? "_lock" : "_unlock");
-            return ResourceLocation.fromNamespaceAndPath(MODID,
-                    "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/" + itemName + suffix + ".png");
+            if(isSlim){
+                return ResourceLocation.fromNamespaceAndPath(MODID,
+                        "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/slim/" + itemName + suffix + ".png");
+            }else{
+                return ResourceLocation.fromNamespaceAndPath(MODID,
+                        "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/wide/" + itemName + suffix + ".png");
+            }
         }
 
-        // 默认返回未锁定贴图
-        return ResourceLocation.fromNamespaceAndPath(MODID, 
-                "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/" + itemName + "_unlock.png");
+        if(isSlim){
+            return ResourceLocation.fromNamespaceAndPath(MODID,
+                    "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/slim/" + itemName + "_unlock.png");
+        }else{
+            return ResourceLocation.fromNamespaceAndPath(MODID,
+                    "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/wide/" + itemName + "_unlock.png");
+        }
     }
 
     @Override

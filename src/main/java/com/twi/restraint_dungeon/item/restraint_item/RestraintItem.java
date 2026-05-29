@@ -17,9 +17,11 @@ import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -488,7 +490,7 @@ public class RestraintItem extends Item implements GeoItem {
      * @param player 当前玩家
      * @param stack 连接部位的拘束具
      */
-    public Vec3 getConnectBindViewOffset(Player player, ItemStack stack){
+    public Vector3f getConnectBindViewOffset(Player player, ItemStack stack){
         return null;
     }
 
@@ -832,13 +834,23 @@ public class RestraintItem extends Item implements GeoItem {
      * @param bodyPart 指定目标部位
      * @param stack 拘束具ItemStack
      */
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
 
         ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String itemName = itemKey.getPath();
 
-        return ResourceLocation.fromNamespaceAndPath(MODID,
-                "textures/models/restraints/" + itemName + "/" + bodyPart + "/" + itemName + ".png");
+        if(Objects.equals(bodyPart, PlayerRestraintPart.restraint_arms_bind.toString())){
+            if(isSlim){
+                return ResourceLocation.fromNamespaceAndPath(MODID,
+                        "textures/models/restraints/" + itemName + "/" + bodyPart + "/slim/" + itemName + ".png");
+            }else{
+                return ResourceLocation.fromNamespaceAndPath(MODID,
+                        "textures/models/restraints/" + itemName + "/" + bodyPart + "/wide/" + itemName + ".png");
+            }
+        }else{
+            return ResourceLocation.fromNamespaceAndPath(MODID,
+                    "textures/models/restraints/" + itemName + "/" + bodyPart + "/" + itemName + ".png");
+        }
     }
 
     /**
@@ -849,10 +861,16 @@ public class RestraintItem extends Item implements GeoItem {
             M innerModel, M parentModel, T player, PlayerRestraintPart part, int index, ItemStack stack,
             PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
 
+        boolean isSlim = false;
+
+        if(player instanceof AbstractClientPlayer clientPlayer){
+            isSlim = clientPlayer.getSkin().model() == PlayerSkin.Model.SLIM;
+        }
+
         this.applyRestraintVisibility(innerModel, parentModel,part, player);
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
 
-        ResourceLocation texture = this.getTextureResourceLocation(player, part.toString(), stack);
+        ResourceLocation texture = this.getTextureResourceLocation(player, part.toString(), stack,isSlim);
         VertexConsumer baseBuffer = bufferSource.getBuffer(RenderType.armorCutoutNoCull(texture));
 
 
@@ -869,6 +887,9 @@ public class RestraintItem extends Item implements GeoItem {
         innerModel.renderToBuffer(poseStack, baseBuffer, packedLight, overlay);
     }
 
+    /**
+     * 拘束具渲染的UV调整，主要针对眼罩和口塞的位置，通过直接移动UV的放置调整其上下位置，若无特殊需求不建议修改
+     */
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer getRenderOffsetVertexConsumer(VertexConsumer baseBuffer,float Offset) {
 

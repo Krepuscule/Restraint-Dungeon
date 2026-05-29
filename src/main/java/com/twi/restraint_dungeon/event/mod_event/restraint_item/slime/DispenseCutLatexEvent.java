@@ -34,14 +34,10 @@ import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils
 public class DispenseCutLatexEvent {
     @SubscribeEvent
     public static void onSetup(FMLCommonSetupEvent event) {
-        // 使用 enqueueWork 确保在主线程上安全地执行并发注册
-        event.enqueueWork(() -> {
-            registerDispenserBehavior();
-        });
+        event.enqueueWork(DispenseCutLatexEvent::registerDispenserBehavior);
     }
 
     private static void registerDispenserBehavior() {
-        // 创建 1.21.1 兼容的发射行为
         DispenseItemBehavior latexCutBehavior = new DispenseItemBehavior() {
             @Override
             public ItemStack dispense(BlockSource blockSource, ItemStack itemStack) {

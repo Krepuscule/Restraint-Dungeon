@@ -24,13 +24,11 @@ public class SlapAction extends CarryingAction {
     }
 
     @Override
-    public double getMaxDistance() {
-        return 2.0;
-    }
-
-    @Override
     public @Nullable Component canUse(Player carrier, HitResult result) {
-        return super.canUse(carrier, result);
+        if(super.canUse(carrier, result) != null){
+            return super.canUse(carrier,result);
+        }
+        return null;
     }
 
     @Override

@@ -194,7 +194,7 @@ public class MiraiTechSuitItem extends RestraintItem {
 
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         String mode = isArousedMode(stack) ? "_aroused" : "";
         String lock = isModuleLocked(stack, 4) ? "_lock" : "_unlock";

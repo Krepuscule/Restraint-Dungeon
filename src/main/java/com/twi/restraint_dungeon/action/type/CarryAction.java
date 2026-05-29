@@ -19,7 +19,7 @@ import java.util.Set;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDevice;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
-import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.clearCarryData;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 
 public abstract class CarryAction extends BaseAction {
@@ -120,34 +120,73 @@ public abstract class CarryAction extends BaseAction {
         return true;
     }
 
+    // TODO:动画状态机重构为本地的纯动画播放
+
     @Override
-    public void onStart(ServerPlayer carrier, LivingEntity target) {
-        float lookYaw = carrier.getYRot();
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
 
-        double rad = Math.toRadians(lookYaw);
-        double offsetX = -Math.sin(rad) * 0.5;
-        double offsetZ = Math.cos(rad) * 0.5;
+        float yaw = actionPlayer.getYRot();
+        float radians = (float) Math.toRadians(yaw);
 
-        target.teleportTo(
-                carrier.serverLevel(),
-                carrier.getX() + offsetX,
-                carrier.getY(),
-                carrier.getZ() + offsetZ,
-                Set.of(),
-                lookYaw,
-                0f
-        );
+        double offsetX = -Math.sin(radians) * 1.0F;
+        double offsetZ = Math.cos(radians) * 1.0F;
+
+        double targetX = actionPlayer.getX() + offsetX;
+        double targetY = actionPlayer.getY();
+        double targetZ = actionPlayer.getZ() + offsetZ;
+
+        actionPlayer.setYRot(yaw);
+        actionPlayer.setYBodyRot(yaw);
+        actionPlayer.setYHeadRot(yaw);
+        actionPlayer.connection.teleport(actionPlayer.getX(), actionPlayer.getY(), actionPlayer.getZ(), yaw, actionPlayer.getXRot());
+
+        target.setYRot(yaw);
+        target.setYBodyRot(yaw);
+        target.setYHeadRot(yaw);
+
+        if (target instanceof ServerPlayer targetPlayer) {
+            targetPlayer.connection.teleport(targetX, targetY, targetZ, yaw, target.getXRot());
+        } else {
+            target.moveTo(targetX, targetY, targetZ, yaw, target.getXRot());
+        }
     }
 
     @Override
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
-         PlayerCarryUtils.startCarrying(carrier, target,getCarryType(carrier, target));
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
+        float syncYaw = actionPlayer.getYRot();
+        float radians = (float) Math.toRadians(syncYaw);
+
+        double offsetX = -Math.sin(radians) * 1.0F;
+        double offsetZ = Math.cos(radians) * 1.0F;
+
+        double targetX = actionPlayer.getX() + offsetX;
+        double targetY = actionPlayer.getY();
+        double targetZ = actionPlayer.getZ() + offsetZ;
+
+        actionPlayer.setYBodyRot(syncYaw);
+        actionPlayer.setYHeadRot(syncYaw);
+
+        target.setYRot(syncYaw);
+        target.setYBodyRot(syncYaw);
+        target.setYHeadRot(syncYaw);
+
+        if (target instanceof ServerPlayer targetPlayer) {
+            targetPlayer.connection.teleport(targetX, targetY, targetZ, syncYaw, targetPlayer.getXRot());
+        } else {
+            target.moveTo(targetX, targetY, targetZ, syncYaw, target.getXRot());
+        }
+    }
+
+
+    @Override
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
+         startCarrying(actionPlayer, target,getCarryType(actionPlayer, target));
     }
 
     @Override
-    public void onAbort(ServerPlayer carrier, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
         target.stopRiding();
-        clearCarryData(carrier);
+        clearCarryData(actionPlayer);
         clearCarryData(target);
     }
 }

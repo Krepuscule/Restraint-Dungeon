@@ -70,6 +70,7 @@ public class LatexEvent {
         actionPlayer.swing(event.getHand(), true);
 
         ItemStack latex = getPartLastRestraint(target,bodyPart).copy();
+        removeRestraintItem(target, bodyPart);
 
         if(!actionPlayer.getInventory().add(latex)){
             actionPlayer.drop(latex, false);

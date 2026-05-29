@@ -82,40 +82,70 @@ public abstract class AnimAction extends BaseAction {
         return true;
     }
 
-    @Override
-    public void onStart(ServerPlayer carrier, LivingEntity target) {
-        float yaw = carrier.getYRot();
+    // TODO:动画状态机重构为本地的纯动画播放
 
-        carrier.setYRot(yaw);
-        carrier.setYBodyRot(yaw);
-        carrier.setYHeadRot(yaw);
-        carrier.connection.teleport(carrier.getX(), carrier.getY(), carrier.getZ(), yaw, carrier.getXRot());
+    @Override
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
+
+        float yaw = actionPlayer.getYRot();
+        float radians = (float) Math.toRadians(yaw);
+
+        double offsetX = -Math.sin(radians) * 1.0F;
+        double offsetZ = Math.cos(radians) * 1.0F;
+
+        double targetX = actionPlayer.getX() + offsetX;
+        double targetY = actionPlayer.getY();
+        double targetZ = actionPlayer.getZ() + offsetZ;
+
+        actionPlayer.setYRot(yaw);
+        actionPlayer.setYBodyRot(yaw);
+        actionPlayer.setYHeadRot(yaw);
+        actionPlayer.connection.teleport(actionPlayer.getX(), actionPlayer.getY(), actionPlayer.getZ(), yaw, actionPlayer.getXRot());
 
         target.setYRot(yaw);
         target.setYBodyRot(yaw);
         target.setYHeadRot(yaw);
+
         if (target instanceof ServerPlayer targetPlayer) {
-            targetPlayer.connection.teleport(target.getX(), target.getY(), target.getZ(), yaw, target.getXRot());
+            targetPlayer.connection.teleport(targetX, targetY, targetZ, yaw, target.getXRot());
         } else {
-            target.moveTo(target.getX(), target.getY(), target.getZ(), yaw, target.getXRot());
+            target.moveTo(targetX, targetY, targetZ, yaw, target.getXRot());
         }
     }
 
     @Override
-    public void onTick(ServerPlayer carrier, LivingEntity target, int ticksRemaining) {
-        float syncYaw = carrier.getYRot();
-        carrier.setYBodyRot(syncYaw);
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
+        float syncYaw = actionPlayer.getYRot();
+        float radians = (float) Math.toRadians(syncYaw);
+
+        double offsetX = -Math.sin(radians) * 1.0F;
+        double offsetZ = Math.cos(radians) * 1.0F;
+
+        double targetX = actionPlayer.getX() + offsetX;
+        double targetY = actionPlayer.getY();
+        double targetZ = actionPlayer.getZ() + offsetZ;
+
+        actionPlayer.setYBodyRot(syncYaw);
+        actionPlayer.setYHeadRot(syncYaw);
+
         target.setYRot(syncYaw);
         target.setYBodyRot(syncYaw);
+        target.setYHeadRot(syncYaw);
+
+        if (target instanceof ServerPlayer targetPlayer) {
+            targetPlayer.connection.teleport(targetX, targetY, targetZ, syncYaw, targetPlayer.getXRot());
+        } else {
+            target.moveTo(targetX, targetY, targetZ, syncYaw, target.getXRot());
+        }
     }
 
     @Override
-    public void onAbort(ServerPlayer carrier, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
 
     }
 
     @Override
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
 
     }
 }

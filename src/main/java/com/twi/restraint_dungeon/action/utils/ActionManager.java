@@ -3,7 +3,6 @@ package com.twi.restraint_dungeon.action.utils;
 import com.twi.restraint_dungeon.action.BaseAction;
 import com.twi.restraint_dungeon.action.type.CarryingAction;
 import com.twi.restraint_dungeon.event.custom_event.PlayerActionEvent;
-import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -64,10 +63,11 @@ public class ActionManager {
             target = living;
         }
 
-        PlayerActionUtils.linkAction(actionPlayer, target, actionId);
-
-        ActionTask task = new ActionTask(actionPlayer, target, action);
-        ACTIVE_TASKS.add(task);
+        if (target != null) {
+            PlayerActionUtils.linkAction(actionPlayer, target, actionId);
+            ActionTask task = new ActionTask(actionPlayer, target, action);
+            ACTIVE_TASKS.add(task);
+        }
 
         action.onStart(actionPlayer, target);
         NeoForge.EVENT_BUS.post(new PlayerActionEvent.Start(actionPlayer,action,hitResult));

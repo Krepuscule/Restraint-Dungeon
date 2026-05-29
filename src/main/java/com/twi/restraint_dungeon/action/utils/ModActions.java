@@ -6,7 +6,6 @@ public class ModActions {
 
 
     public static void register() {
-
         ActionManager.register(new HugAction());
         ActionManager.register(new ShoulderAction());
 

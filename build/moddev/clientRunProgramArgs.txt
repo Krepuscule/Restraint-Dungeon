@@ -9,7 +9,7 @@ forgeclientdev
 --assetIndex
 17
 --assetsDir
-C:\\Users\\20535\\.gradle\\caches\\neoformruntime\\assets
+D:\\Develop\\gradle\\repository\\caches\\neoformruntime\\assets
 --gameDir
 .
 --fml.fmlVersion

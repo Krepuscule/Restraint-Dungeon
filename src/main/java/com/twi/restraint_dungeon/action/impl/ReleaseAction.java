@@ -46,8 +46,9 @@ public class ReleaseAction extends CarryingAction {
 
     @Override
     public @Nullable Component canUse(Player carrier, HitResult result) {
-        Component baseCheck = super.canUse(carrier, result);
-        if (baseCheck != null) return baseCheck;
+        if(super.canUse(carrier, result) != null){
+            return super.canUse(carrier,result);
+        }
 
         LivingEntity target = PlayerCarryUtils.getCarriedPassenger(carrier);
         if (target == null) return null;

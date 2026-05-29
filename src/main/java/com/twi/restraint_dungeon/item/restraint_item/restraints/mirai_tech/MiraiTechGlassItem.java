@@ -72,7 +72,7 @@ public class MiraiTechGlassItem extends RestraintItem {
     }
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
         ItemStack suitStack = getMiRaiTechSuit(entity);
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 

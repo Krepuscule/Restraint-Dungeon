@@ -1,16 +1,22 @@
 package com.twi.restraint_dungeon.animation.utils;
 
+import com.twi.restraint_dungeon.action.BaseAction;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.PlayerRestraintMove;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePayload;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.twi.restraint_dungeon.animation.utils.PlayerAnimationController.*;
+import static com.twi.restraint_dungeon.animation.utils.PlayerAnimationController.getStrugglingBodyAnimation;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 
 public class AnimationPlayerUtils {
 
@@ -109,7 +115,9 @@ public class AnimationPlayerUtils {
         sendAnimationSequence(player, legs_animations,AnimationLayer.LEGS);
 
         List<String> body_animations = new ArrayList<>();
-        body_animations.add(getStrugglingBodyAnimation(player,part));
+        if(getStrugglingBodyAnimation(player,part) != null){
+            body_animations.add(getStrugglingBodyAnimation(player,part));
+        }
         sendAnimationSequence(player, body_animations,AnimationLayer.BASE_BODY);
     }
 
@@ -135,10 +143,35 @@ public class AnimationPlayerUtils {
         }
     }
 
-    public static void updateCarryAnimation(ServerPlayer player, boolean isTarget) {
+    public static void updateCarryingAnimation(ServerPlayer player, boolean isTarget) {
+        List<String> arms_animations = new ArrayList<>();
+        if(getCarryingArmsPoseAnimation(player,isTarget) != null){
+            arms_animations.add(getCarryingArmsPoseAnimation(player,isTarget));
+        }
+
+        sendAnimationSequence(player, arms_animations, AnimationLayer.ARMS);
+
+        List<String> legs_animations = new ArrayList<>();
+        if(getCarryingLegsPoseAnimation(player,isTarget) != null){
+            legs_animations.add(getCarryingLegsPoseAnimation(player, isTarget));
+        }
+        sendAnimationSequence(player, legs_animations,AnimationLayer.LEGS);
+
+        List<String> body_animations = new ArrayList<>();
+        if(getCarryingBodyAnimation(player,isTarget) != null){
+            body_animations.add(getCarryingBodyAnimation(player,isTarget));
+        }
+        sendAnimationSequence(player, body_animations,AnimationLayer.BASE_BODY);
+    }
+
+    public static void updateActionAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
         List<String> full_body_animations = new ArrayList<>();
-        full_body_animations.add(getPlayerCarryingAnimation(player,isTarget));
-        sendAnimationSequence(player, full_body_animations,AnimationLayer.FULL_BODY);
+
+        if(getActionFullBodyAnimation(player, action, hitResult, isTarget) != null){
+            full_body_animations.add(getActionFullBodyAnimation(player, action, hitResult, isTarget));
+        }
+
+        sendAnimationSequence(player,full_body_animations,AnimationLayer.FULL_BODY);
     }
 
 
@@ -151,13 +184,46 @@ public class AnimationPlayerUtils {
 
     // 传送/进入视野时的同步逻辑
     public static void syncPlayerAnimation(ServerPlayer trackedPlayer, ServerPlayer observer) {
-        for (AnimationLayer layer : AnimationLayer.values()) {
-            List<String> currentAnims = List.of("hello");
 
-            if (!currentAnims.isEmpty()) {
-                PacketDistributor.sendToPlayer(observer,
-                        new PlayerAnimationSequencePayload(trackedPlayer.getUUID(), currentAnims, layer));
+        if(isCarrier(trackedPlayer)){
+            List<String> arms_animations = new ArrayList<>();
+            if(getCarryingArmsPoseAnimation(trackedPlayer,false) != null){
+                arms_animations.add(getCarryingArmsPoseAnimation(trackedPlayer,false));
             }
+
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),arms_animations,AnimationLayer.ARMS));
+
+            List<String> legs_animations = new ArrayList<>();
+            if(getCarryingLegsPoseAnimation(trackedPlayer,false) != null){
+                legs_animations.add(getCarryingLegsPoseAnimation(trackedPlayer, false));
+            }
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),legs_animations,AnimationLayer.LEGS));
+
+            List<String> body_animations = new ArrayList<>();
+            if(getCarryingBodyAnimation(trackedPlayer,false) != null){
+                body_animations.add(getCarryingBodyAnimation(trackedPlayer,false));
+            }
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),body_animations,AnimationLayer.BASE_BODY));
+
+        }else if(isBeingCarried(trackedPlayer)){
+            List<String> arms_animations = new ArrayList<>();
+            if(getCarryingArmsPoseAnimation(trackedPlayer,true) != null){
+                arms_animations.add(getCarryingArmsPoseAnimation(trackedPlayer,true));
+            }
+
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),arms_animations,AnimationLayer.ARMS));
+
+            List<String> legs_animations = new ArrayList<>();
+            if(getCarryingLegsPoseAnimation(trackedPlayer,true) != null){
+                legs_animations.add(getCarryingLegsPoseAnimation(trackedPlayer, true));
+            }
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),legs_animations,AnimationLayer.LEGS));
+
+            List<String> body_animations = new ArrayList<>();
+            if(getCarryingBodyAnimation(trackedPlayer,true) != null){
+                body_animations.add(getCarryingBodyAnimation(trackedPlayer,true));
+            }
+            PacketDistributor.sendToPlayer(observer,new PlayerAnimationSequencePayload(trackedPlayer.getUUID(),body_animations,AnimationLayer.BASE_BODY));
         }
     }
 }

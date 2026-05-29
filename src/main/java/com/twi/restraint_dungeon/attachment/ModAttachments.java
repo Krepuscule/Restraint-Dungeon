@@ -66,6 +66,7 @@ public class ModAttachments {
             "render_offsets",
             () -> AttachmentType.builder(RestraintRenderOffsets::new)
                     .serialize(RestraintRenderOffsets.CODEC)
+                    .sync(RestraintRenderOffsets.STREAM_CODEC)
                     .copyOnDeath()
                     .build()
     );

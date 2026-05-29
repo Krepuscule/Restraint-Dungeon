@@ -152,8 +152,8 @@ public class RopeItem extends RestraintItem {
     }
 
     @Override
-    public Vec3 getConnectBindViewOffset(Player player, ItemStack stack){
-        return new Vec3(0.05, -1.2, -0.25);
+    public Vector3f getConnectBindViewOffset(Player player, ItemStack stack){
+        return new Vector3f(0.05f, -1.2f, -0.25f);
     }
 
     @Override

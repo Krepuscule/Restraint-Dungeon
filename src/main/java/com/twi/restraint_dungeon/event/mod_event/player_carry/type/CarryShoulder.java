@@ -3,11 +3,13 @@ package com.twi.restraint_dungeon.event.mod_event.player_carry.type;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent;
+import dev.kosmx.playerAnim.core.util.Vec3f;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.Objects;
 
@@ -62,13 +64,17 @@ public class CarryShoulder implements CarryType {
     @Override
     public Vec3 getPassengerRidingOffset(Player carrier, LivingEntity passenger) {
 
-        return new Vec3(-0.4F, 0.9F, 0.25F);
+        return new Vec3(-0.4F, 1.0F, -0.25F);
     }
 
     @Override
-    public float getPassengerBodyRotation(Player carrier, LivingEntity passenger) {
+    public Vector3f getPassengerFirstPersonCameraOffset(Player carrier, LivingEntity passenger){
+        return new Vector3f(0.0f,-0.4f,-1.0f);
+    }
 
-        return 175F;
+    @Override
+    public Vector3f getPassengerFirstPersonCameraRotation(Player carrier, LivingEntity passenger) {
+        return new Vector3f(0.0f,180.0f,0.0f);
     }
 
     @Override

@@ -50,12 +50,6 @@ public class ArmBinderItem extends RestraintItem {
     }
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack) {
-        String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
-        return ResourceLocation.fromNamespaceAndPath(MODID, "textures/models/restraints/" + itemName + "/" + bodyPart + "/" + itemName + ".png");
-    }
-
-    @Override
     public <T extends Player, M extends PlayerModel<T>> void applyRestraintVisibility(
             M child, M parent,PlayerRestraintPart part, T player) {
 

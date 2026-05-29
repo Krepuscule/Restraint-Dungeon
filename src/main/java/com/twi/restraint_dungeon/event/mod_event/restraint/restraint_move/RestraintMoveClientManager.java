@@ -14,8 +14,10 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindLegs;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBusyState;
 
 @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
 public class RestraintMoveClientManager {
@@ -147,6 +149,8 @@ public class RestraintMoveClientManager {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) return;
+        if(getRestraintPosition(player) == RestraintPosition.CARRIED) return;
+        if(isDoingAction(player)) return;
         boolean isRestricted = (getRestraintPosition(player) != RestraintPosition.STANDING || isBeenBindLegs(player));
         if (isRestricted) {
             if (!wasRestricted) { visualBodyRot = targetBodyRot = player.getYRot(); wasRestricted = true; }

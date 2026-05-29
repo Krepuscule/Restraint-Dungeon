@@ -1,0 +1,37 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"base_body_carry_hug_target": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": {
+							"vector": [-60, -90, 0]
+						},
+						"4.0": {
+							"vector": [-60, -90, 0]
+						}
+					}
+				}
+			}
+		},
+		"base_body_carry_shoulder_target": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": {
+							"vector": [-130, 5, 170]
+						},
+						"4.0": {
+							"vector": [-130, 5, 170]
+						}
+					}
+				}
+			}
+		}
+	}
+}

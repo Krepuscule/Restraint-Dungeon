@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getIsStruggling;
 
 public abstract class CarryingAction extends BaseAction {
 
@@ -57,6 +58,11 @@ public abstract class CarryingAction extends BaseAction {
 
         if(!target.isPassenger() || !(target.getVehicle() instanceof Player) || getPartnerUUID(target) != actionPlayer.getUUID()) {
             return Component.translatable("action." + MODID + ".fail_carrying.not_carrying").withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(getIsStruggling(target)){
+            return Component.translatable("action." + MODID + ".fail_carrying.target_is_sturggling")
+                    .withStyle(ChatFormatting.RED);
         }
 
         return null;
@@ -102,7 +108,7 @@ public abstract class CarryingAction extends BaseAction {
 
     @Override
     public void onStart(ServerPlayer carrier, LivingEntity target) {
-        // playCarryingAnim(carrier, target, getActionId());
+
     }
 
     @Override
@@ -117,7 +123,7 @@ public abstract class CarryingAction extends BaseAction {
 
     @Override
     public void onAbort(ServerPlayer carrier, LivingEntity target) {
-        // 动画异常中断时不一定要解除骑乘，只需重置动画状态
+
     }
 
     /** 查找释放时的安全位置 */

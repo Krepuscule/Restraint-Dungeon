@@ -110,7 +110,7 @@ public abstract class BaseAction {
     /** 
      * Action 开始时执行 (仅服务端)
      */
-    public void onStart(ServerPlayer carrier, LivingEntity target) {
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
 
     }
 
@@ -118,14 +118,14 @@ public abstract class BaseAction {
      * 每 Tick 执行 (仅服务端)
      * @param ticksRemaining 距离结束还剩多少 Tick
      */
-    public void onTick(ServerPlayer carrier, LivingEntity target, int ticksRemaining) {
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
 
     }
 
     /** 
      * Action 正常播放结束时执行 (仅服务端)
      */
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
 
     }
 
@@ -133,7 +133,7 @@ public abstract class BaseAction {
      * 当 canContinueUse 不满足或外部强行中断时调用
      * 此时应清理所有 Action 状态，确保玩家不会卡在固定状态
      */
-    public void onAbort(ServerPlayer carrier, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
 
     }
 }

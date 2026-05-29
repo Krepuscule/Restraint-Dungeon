@@ -19,6 +19,8 @@ import net.minecraft.world.phys.HitResult;
 import javax.annotation.Nullable;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.getCarriedPassenger;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getIsStruggling;
 
 public class FeedAction extends CarryingAction {
 
@@ -33,19 +35,15 @@ public class FeedAction extends CarryingAction {
     }
 
     @Override
-    public double getMaxDistance() {
-        return 2.0;
-    }
-
-    @Override
     public boolean renderMainHandItem(Player actionPlayer) {
         return true;
     }
 
     @Override
     public @Nullable Component canUse(Player carrier, HitResult result) {
-        Component baseCheck = super.canUse(carrier, result);
-        if (baseCheck != null) return baseCheck;
+        if(super.canUse(carrier, result) != null){
+            return super.canUse(carrier,result);
+        }
 
         if (!canBeFed(carrier.getMainHandItem())) {
             return Component.translatable("action." + MODID + ".fail_feed.food_not_in_main_hand")

@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindArms;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindHands;
@@ -30,13 +31,15 @@ public class MixinItemInHandLayer {
     )
     private void onRenderArmWithItem(LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext, HumanoidArm arm, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, CallbackInfo ci) {
 
-        if (isBeenBindHands(entity) || isBeenBindArms(entity) || (entity instanceof Player player && isCarrier(player))) {
-            ci.cancel();
-        }
-
-        if(entity instanceof Player player) {
-            BaseAction action = ActionManager.get(getCurrentAction(player));
-            if(action != null  && !action.renderMainHandItem(player)) {
+        if(isDoingAction(entity)){
+            if(entity instanceof Player player) {
+                BaseAction action = ActionManager.get(getCurrentAction(player));
+                if(action != null  && !action.renderMainHandItem(player)) {
+                    ci.cancel();
+                }
+            }
+        }else{
+            if (isBeenBindHands(entity) || isBeenBindArms(entity) || (entity instanceof Player player && isCarrier(player))) {
                 ci.cancel();
             }
         }

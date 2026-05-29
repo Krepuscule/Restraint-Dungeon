@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.carry;
 
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerCarryCapability;
+import com.twi.restraint_dungeon.event.custom_event.PlayerCarryStateEvent;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent;
 import net.minecraft.ChatFormatting;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -206,11 +208,14 @@ public class PlayerCarryUtils {
                     mob.setNoAi(true);
                 }
                 type.onStart(carrier, passenger);
+
+                NeoForge.EVENT_BUS.post(new PlayerCarryStateEvent.Start(carrier,type,passenger));
             } else {
                 clearCarryData(carrier);
                 clearCarryData(passenger);
             }
             carrier.refreshDimensions();
+
         }
     }
 
@@ -240,5 +245,7 @@ public class PlayerCarryUtils {
         if (carrier != null) {
             carrier.refreshDimensions();
         }
+
+        NeoForge.EVENT_BUS.post(new PlayerCarryStateEvent.Stop(carrier,type,passenger));
     }
 }

@@ -21,7 +21,6 @@ import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 
 public record ActionExecutePayload(String actionId, int targetId) implements CustomPacketPayload {
 
-    // 定义协议类型的唯一标识
     public static final Type<ActionExecutePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(MODID, "action_execute"));
 
 

@@ -307,6 +307,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".fail_shoulder.need_target_standing", "You need let the target standing!");
 
         add("action." + MODID + ".fail_carrying.not_carrying", "You didn't carry any target!");
+        add("action." + MODID + ".fail_carrying.target_is_struggling", "You carried target is Struggling!");
 
         add("action." + MODID + ".fail_release.no_place", "There can't release the target!");
         add("action." + MODID + ".fail_release.vehicle_has_full", "Can't release the target on this vehicle!");
@@ -600,6 +601,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".fail_shoulder.need_target_standing", "需要让目标先站起来！");
 
         add("action." + MODID + ".fail_carrying.not_carrying", "当前没有抱着任何目标！");
+        add("action." + MODID + ".fail_carrying.target_is_struggling", "你抱着的目标正在用力挣扎！");
 
         add("action." + MODID + ".fail_release.no_place", "无法在此处释放目标！");
         add("action." + MODID + ".fail_release.vehicle_has_full", "无法将目标放置在该载具上！");

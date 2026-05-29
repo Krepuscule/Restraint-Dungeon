@@ -1,9 +1,11 @@
 package com.twi.restraint_dungeon.event.mod_event.player_carry;
 
+import dev.kosmx.playerAnim.core.util.Vec3f;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenFullyBind;
 
@@ -32,12 +34,17 @@ public interface CarryType {
 
     /** 获取乘客相对于载具的坐标偏移 */
     default Vec3 getPassengerRidingOffset(Player carrier, LivingEntity passenger) {
-        return new Vec3(0, 1.2, 0.5); // 默认前方
+        return new Vec3(0, 1.2, 0.5);
     }
 
-    /** 获取乘客的身体旋转角度  */
-    default float getPassengerBodyRotation(Player carrier, LivingEntity passenger) {
-        return 0.0F; // 默认与载具方向一致
+    /** 获取乘客玩家第一人称相机位置的偏移 */
+    default Vector3f getPassengerFirstPersonCameraOffset(Player carrier,LivingEntity passenger){
+        return new Vector3f(0.0f,0.0f,0.0f);
+    }
+
+    /** 获取乘客玩家第一人称相机位置的旋转 */
+    default Vector3f getPassengerFirstPersonCameraRotation(Player carrier, LivingEntity passenger) {
+        return new Vector3f(0.0f,0.0f,0.0f);
     }
 
 
