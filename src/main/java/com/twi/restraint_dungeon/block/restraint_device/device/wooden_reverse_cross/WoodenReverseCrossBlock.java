@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,6 +37,11 @@ public class WoodenReverseCrossBlock extends RestraintDevice {
     }
 
     @Override
+    public String getID(){
+        return "WOODEN_REVERSE_CROSS";
+    }
+
+    @Override
     protected @NotNull MapCodec<? extends WoodenReverseCrossBlock> codec() {
         return CODEC;
     }
@@ -43,10 +49,23 @@ public class WoodenReverseCrossBlock extends RestraintDevice {
     @Override
     protected List<BBCube> getBBCubes() {
         return List.of(
-                new BBCube(-8, 0, -8, 16, 2, 16),   // 底板
-                new BBCube(-6, 2, -1, 12, 48, 2),  // 主结构
-                new BBCube(-18, 14, -1, 12, 8, 2), // 左侧板
-                new BBCube(6, 14, -1, 12, 8, 2)    // 右侧板
+                new BBCube(-6, 2, -1, 12, 48, 2),
+
+                new BBCube(-5,35,-6,1,2,5),
+                new BBCube(-4,35,-6,8,2,1),
+                new BBCube(4,35,-6,1,2,5),
+
+                new BBCube(-18, 14, -1, 12, 8, 2),
+                new BBCube(-11,20,-6,2,1,5),
+                new BBCube(-11,16,-6,2,4,1),
+                new BBCube(-11,15,-6,2,1,5),
+
+                new BBCube(6, 14, -1, 12, 8, 2),
+                new BBCube(9,20,-6,2,1,5),
+                new BBCube(9,16,-6,2,4,1),
+                new BBCube(9,15,-6,2,1,5),
+
+                new BBCube(-8, 0, -8, 16, 2, 16)
         );
     }
 
@@ -61,8 +80,17 @@ public class WoodenReverseCrossBlock extends RestraintDevice {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    @Override protected double getBaseOffsetY() { return 0.5; }
-    @Override protected double getBaseOffsetX() { return 0.5; }
-    @Override protected double getBaseOffsetZ() { return 0.5; }
-    @Override protected double getPushBack() { return 0.2; }
+
+    @Override
+    public double getBaseOffsetZ() { return -0.2; }
+
+    @Override
+    public Vector3f getRiderFirstCameraOffset(){
+        return new Vector3f(0.0f,-0.2f,0.35f);
+    }
+
+    @Override
+    public boolean canBindHands(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
 }

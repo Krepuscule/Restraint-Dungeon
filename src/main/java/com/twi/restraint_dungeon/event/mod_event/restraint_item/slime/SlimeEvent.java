@@ -17,6 +17,8 @@ public class SlimeEvent {
 
     @SubscribeEvent
     public static void StickyEffectCounter(EntityTickEvent.Post event) {
+
+        if (event.getEntity().level().isClientSide()) return;
         if (event.getEntity() instanceof LivingEntity livingEntity) {
 
             if (!livingEntity.hasEffect(ModEffects.STICKY)) {
@@ -28,7 +30,7 @@ public class SlimeEvent {
 
             if (livingEntity.isInWaterRainOrBubble()) {
                 livingEntity.removeEffect(ModEffects.STICKY);
-                // 效果消失，顺便重置并清除计时器
+                // 效果消失，重置并清除计时器
                 livingEntity.getPersistentData().remove(TIMER_KEY);
                 return;
             }

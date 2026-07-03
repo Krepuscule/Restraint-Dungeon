@@ -17,7 +17,7 @@ public class ModCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands.literal("restraint")
-                .requires(source -> source.hasPermission(2)) // 需要管理员权限
+                .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("equip")
                     .then(Commands.argument("targets", EntityArgument.players())
                         .then(Commands.argument("part", RestraintPartArgument.restraintPart())

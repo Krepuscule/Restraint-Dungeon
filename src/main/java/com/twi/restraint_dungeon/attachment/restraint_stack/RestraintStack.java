@@ -14,19 +14,20 @@ import java.util.stream.Collectors;
 public class RestraintStack {
 
     private static final int DEFAULT_LIMIT = 8;
+    private static final int DEFAULT_COLLAR_LIMIT = 1;
 
     /**
      * 各个部位拘束具的上限值
      */
     public static int getPartRestraintLimit(PlayerRestraintPart part) {
         return switch (part) {
-            case restraint_blindfold -> 8;
-            case restraint_gag -> 8;
-            case restraint_collar -> 1;
-            case restraint_body_bind -> 8;
-            case restraint_arms_bind -> 8;
-            case restraint_hands_bind -> 8;
-            case restraint_legs_bind -> 8;
+            case restraint_blindfold -> DEFAULT_LIMIT;
+            case restraint_gag -> DEFAULT_LIMIT;
+            case restraint_collar -> DEFAULT_COLLAR_LIMIT;
+            case restraint_body_bind -> DEFAULT_LIMIT;
+            case restraint_arms_bind -> DEFAULT_LIMIT;
+            case restraint_hands_bind -> DEFAULT_LIMIT;
+            case restraint_legs_bind -> DEFAULT_LIMIT;
             case restraint_connection -> 1;
             default -> DEFAULT_LIMIT;
         };
@@ -60,12 +61,10 @@ public class RestraintStack {
         return ItemStack.EMPTY;
     }
 
-    /**
-     * 修改：使用 getPartRestraintLimit 判定上限
-     */
+
     public void addByIndex(PlayerRestraintPart part, int index, ItemStack stack) {
         List<ItemStack> list = storage.get(part);
-        if (list.size() >= getPartRestraintLimit(part)) return; // 修改处
+        if (list.size() >= getPartRestraintLimit(part)) return;
 
         if (index >= list.size()) {
             list.add(stack);

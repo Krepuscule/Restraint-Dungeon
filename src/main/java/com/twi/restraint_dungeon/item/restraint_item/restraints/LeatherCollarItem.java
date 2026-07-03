@@ -3,7 +3,9 @@ package com.twi.restraint_dungeon.item.restraint_item.restraints;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -11,19 +13,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
+
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class LeatherCollarItem extends RestraintItem {
 
     public static final RestraintDefaults LEATHER_COLLAR_DEFAULTS = new RestraintDefaults(
             100,
             50.0,
-            0.25,
-            0.25,
-            0.5
+            0.1,
+            0.1,
+            0.25
     );
 
-    private final List<String> canEquipPartList = List.of(
-            PlayerRestraintPart.restraint_collar.toString()
+    private final List<PlayerRestraintPart> canEquipPartList = List.of(
+            PlayerRestraintPart.restraint_collar
     );
 
     public LeatherCollarItem(Properties properties) {

@@ -149,7 +149,7 @@ public class RestraintMoveClientManager {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) return;
-        if(getRestraintPosition(player) == RestraintPosition.CARRIED) return;
+        if(getRestraintPosition(player) == RestraintPosition.CARRIED || getRestraintPosition(player) == RestraintPosition.RIDING) return;
         if(isDoingAction(player)) return;
         boolean isRestricted = (getRestraintPosition(player) != RestraintPosition.STANDING || isBeenBindLegs(player));
         if (isRestricted) {

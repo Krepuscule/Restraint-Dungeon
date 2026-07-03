@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
 
 @Mixin(Gui.class)
@@ -18,7 +19,7 @@ public class GuiMixin {
     @Inject(method = "setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V", at = @At("HEAD"), cancellable = true)
     private void onSetOverlayMessage(Component component, boolean animate, CallbackInfo ci) {
         Player player = Minecraft.getInstance().player;
-        if(isBeingCarried(player)){
+        if(isBeingCarried(player) || isRidingRestraintDevice(player)){
             if (component != null) {
                 if (component.getContents() instanceof TranslatableContents translatable) {
 

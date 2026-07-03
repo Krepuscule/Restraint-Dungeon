@@ -34,7 +34,7 @@ public class RestraintJerkingMove extends PlayerRestraintMove {
     @Override
     public boolean canMove(Player player) {
         return getRestraintPosition(player) == RestraintPositionEvent.RestraintPosition.SITTING && getLegsPose(player) == LegsPose.LEGS_TOGETHER
-                && isBeenBindLegs(player) && getRestraintPosition(player) != RestraintPositionEvent.RestraintPosition.CARRIED
+                && isBeenBindLegs(player)
                 && !isBusyState(player) && !isRidingRestraintDevice(player);
     }
 

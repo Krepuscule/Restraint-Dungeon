@@ -6,8 +6,14 @@ public class ModActions {
 
 
     public static void register() {
+
+        ActionManager.register(new MountDeviceAction());
+        ActionManager.register(new DismountDeviceAction());
+        ActionManager.register(new ReleaseDeviceRiderAction());
+
         ActionManager.register(new HugAction());
         ActionManager.register(new ShoulderAction());
+        ActionManager.register(new RopeConnectionCarryAction());
 
         ActionManager.register(new ReleaseAction());
         ActionManager.register(new FeedAction());

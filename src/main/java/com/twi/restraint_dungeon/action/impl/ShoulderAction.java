@@ -29,7 +29,7 @@ public class ShoulderAction extends CarryAction {
 
     @Override
     public int getAnimTicks() {
-        return 40;
+        return 10;
     }
 
     @Override
@@ -45,7 +45,10 @@ public class ShoulderAction extends CarryAction {
             return super.canUse(actionPlayer,result);
         }
 
-        LivingEntity entity = (LivingEntity) ((EntityHitResult) result).getEntity();
+        LivingEntity entity = null;
+        if (result != null) {
+            entity = (LivingEntity) ((EntityHitResult) result).getEntity();
+        }
 
         if(getRestraintPosition(entity) != RestraintPosition.STANDING){
             return Component.translatable("action." + MODID + ".fail_shoulder.need_target_standing").withStyle(ChatFormatting.DARK_RED);

@@ -21,7 +21,7 @@ import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapab
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 
 
-public class CarryHug implements CarryType {
+public class CarryHug extends CarryType {
 
     @Override
     public String getID() {
@@ -31,25 +31,8 @@ public class CarryHug implements CarryType {
     @Override
     public Component canUse(Player carrier, LivingEntity passenger) {
 
-        if(!carrier.isAlive() || !passenger.isAlive()){
-            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
-        }
-
-        if(isBeenBindArms(carrier) || isBeenBindHands(carrier) || isBeenBindLegs(carrier)) {
-            return Component.translatable("action." + MODID + ".fail_common.is_being_binding").withStyle(ChatFormatting.DARK_RED);
-        }
-
-        if(!isBeenFullyBind(passenger)) {
-            return Component.translatable("action." + MODID + ".fail_carry.need_bind").withStyle(ChatFormatting.DARK_RED);
-        }
-
-        if(isRidingRestraintDevice(passenger)
-                && getRestraintDevice(passenger) instanceof RestraintDevice rd && !rd.canDismount(
-                passenger.level(),
-                Objects.requireNonNull(passenger.getVehicle()).blockPosition(),
-                passenger)
-        ){
-            return Component.translatable("action." + MODID + ".fail_carry.locked_by_block").withStyle(ChatFormatting.DARK_RED);
+        if(super.canUse(carrier, passenger) != null){
+            return super.canUse(carrier, passenger);
         }
 
         if(getRestraintPosition(passenger) != RestraintPosition.SITTING){
@@ -62,11 +45,12 @@ public class CarryHug implements CarryType {
 
     @Override
     public boolean canContinue(Player carrier, LivingEntity passenger) {
-        return CarryType.super.canContinue(carrier,passenger);
+        return super.canContinue(carrier,passenger);
     }
 
     @Override
     public Vec3 getPassengerRidingOffset(Player carrier, LivingEntity passenger) {
+
         return new Vec3(0.1F, 0.9F, -0.4F);
     }
 
@@ -82,17 +66,17 @@ public class CarryHug implements CarryType {
 
     @Override
     public void onStart(Player carrier, LivingEntity passenger) {
-        CarryType.super.onStart(carrier, passenger);
+        super.onStart(carrier, passenger);
     }
 
     @Override
     public void onTicks(Player carrier, LivingEntity passenger) {
-        CarryType.super.onTicks(carrier, passenger);
+        super.onTicks(carrier, passenger);
     }
 
     @Override
     public void onRelease(Player carrier, LivingEntity passenger) {
-        CarryType.super.onRelease(carrier, passenger);
+        super.onRelease(carrier, passenger);
         updateRestraintPosition(passenger, RestraintPosition.SITTING);
     }
 }

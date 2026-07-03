@@ -129,12 +129,13 @@ public class SwordInsertEvent implements IInteractHandler {
     private static void playInsertSound(ServerPlayer player, BlockPos pos, ItemStack stack) {
         if (!(stack.getItem() instanceof SwordItem sword)) return;
         Tier tier = sword.getTier();
-        SoundEvent sound = (tier == Tiers.WOOD)
-                ? SoundEvents.WOOD_PLACE : (tier == Tiers.STONE)
-                ? SoundEvents.STONE_PLACE : (tier == Tiers.GOLD)
-                ? SoundEvents.METAL_PLACE : (tier == Tiers.NETHERITE)
-                ? SoundEvents.NETHERITE_BLOCK_PLACE : (tier == Tiers.DIAMOND)
-                ? SoundEvents.METAL_PLACE : SoundEvents.ANVIL_LAND;
+        SoundEvent sound;
+        if(tier == Tiers.WOOD) sound = SoundEvents.WOOD_PLACE;
+        else if(tier == Tiers.STONE) sound = SoundEvents.STONE_PLACE;
+        else if(tier == Tiers.IRON || tier == Tiers.GOLD || tier == Tiers.DIAMOND) sound = SoundEvents.METAL_PLACE;
+        else if(tier == Tiers.NETHERITE) sound = SoundEvents.NETHERITE_BLOCK_PLACE;
+        else sound = SoundEvents.METAL_PLACE;
+
         player.level().playSound(null, pos, sound, SoundSource.BLOCKS, 0.6f, 1.0f);
         player.level().playSound(null, pos, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 0.5f, 1.2f);
     }

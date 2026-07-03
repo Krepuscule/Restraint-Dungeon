@@ -5,20 +5,24 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRidingEntity;
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.PleasantUtils.getPleasantValue;
 
 public class WoodenTriangleHorseBlock extends RestraintDevice {
@@ -41,6 +45,11 @@ public class WoodenTriangleHorseBlock extends RestraintDevice {
     }
 
     @Override
+    public String getID(){
+        return "WOODEN_TRIANGLE_HORSE";
+    }
+
+    @Override
     protected @NotNull MapCodec<? extends WoodenTriangleHorseBlock> codec() {
         return CODEC;
     }
@@ -48,22 +57,18 @@ public class WoodenTriangleHorseBlock extends RestraintDevice {
     @Override
     protected List<BBCube> getBBCubes() {
         return List.of(
-                new BBCube(-1,30,-8,2,1,16),
-                new BBCube(-2,29,-8,4,1,16),
-                new BBCube(-2,28,-8,4,1,16),
-                new BBCube(-3,27,-8,6,1,16),
-                new BBCube(-3,26,-8,6,1,16),
-                new BBCube(-4,25,-8,8,1,16),
-                new BBCube(-4,24,-8,8,1,16),
-                new BBCube(-5,23,-8,10,1,16),
-                new BBCube(-5,22,-8,10,1,16),
-                new BBCube(-6,21,-8,12,1,16),
-                new BBCube(-6,20,-8,12,1,16),
-                new BBCube(-7,19,-8,14,1,16),
-                new BBCube(-7,18,-8,14,1,16),
-                new BBCube(-8,17,-8,16,1,16),
                 new BBCube(-8,16,-8,16,1,16),
-                new BBCube(-2, 2, -2, 4, 14, 4),
+                new BBCube(-7,17,-8,15,1,16),
+                new BBCube(-6,18,-8,13,1,16),
+                new BBCube(-5,19,-8,11,1,16),
+                new BBCube(-4,20,-8,9,1,16),
+                new BBCube(-3,21,-8,7,1,16),
+                new BBCube(-2,22,-8,5,1,16),
+                new BBCube(-1,23,-8,3,1,16),
+                new BBCube(0,24,-8,1,1,16),
+
+                new BBCube(-2,2,-2,4,14,4),
+
                 new BBCube(-8, 0, -8, 16, 2, 16)
         );
     }
@@ -79,13 +84,49 @@ public class WoodenTriangleHorseBlock extends RestraintDevice {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    @Override protected double getBaseOffsetY() { return 1.0; }
-    @Override protected double getBaseOffsetX() { return 0.5; }
-    @Override protected double getBaseOffsetZ() { return 0.5; }
+    @Override
+    public double getBaseOffsetY() { return 1.5; }
 
-    /**
-     * 重写红石信号强度逻辑
-     */
+
+    @Override
+    public Vector3f getRiderFirstCameraOffset(){
+        return new Vector3f(0.0f,0.2f,0.1f);
+    }
+
+    @Override
+    public boolean canBindHands(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
+
+    @Override
+    public boolean canBindArms(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
+
+    @Override
+    public boolean isSignalSource(@NotNull BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getSignal(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull Direction direction) {
+        if (level instanceof Level world) {
+            return this.getAnalogOutputSignal(state, world, pos);
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean hasAnalogOutputSignal(@NotNull BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos) {
+        LivingEntity rider = getRidingEntity(level, pos);
+        return getSignalStrength(state,level,pos,rider);
+    }
+
     @Override
     protected int getSignalStrength(BlockState state, Level level, BlockPos pos, LivingEntity entity) {
         // TODO:完成NPC系统后补充

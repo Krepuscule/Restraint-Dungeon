@@ -2,13 +2,16 @@ package com.twi.restraint_dungeon.network;
 
 import com.twi.restraint_dungeon.network.payload.player_action.ActionExecutePayload;
 import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePayload;
-import com.twi.restraint_dungeon.network.payload.player_kidnap.KidnapInterruptStrugglePayload;
+import com.twi.restraint_dungeon.network.payload.player_self_bondage.SelfBondageActionPayload;
+import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.network.payload.player_kidnap.PlayerKidnapActionPayload;
 import com.twi.restraint_dungeon.network.payload.player_release.PlayerReleaseActionPayload;
 import com.twi.restraint_dungeon.network.payload.player_restraint.*;
 import com.twi.restraint_dungeon.network.payload.player_struggle.*;
-import com.twi.restraint_dungeon.network.payload.restraints_packet.SyncMiRaiTechControllerGUIPacket;
-import com.twi.restraint_dungeon.network.payload.restraints_packet.SyncMiRaiTechSuitPacket;
+import com.twi.restraint_dungeon.network.payload.restraints_packet.restraint_tool.RemoveRestraintToolPayload;
+import com.twi.restraint_dungeon.network.payload.restraints_packet.restraint_tool.SyncVibeLevelPayload;
+import com.twi.restraint_dungeon.network.payload.restraints_packet.restraints.SyncMiRaiTechControllerGUIPayload;
+import com.twi.restraint_dungeon.network.payload.restraints_packet.restraints.SyncMiRaiTechSuitPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -86,15 +89,21 @@ public class ModPayLoad {
         );
 
         registrar.playToServer(
-                ServerUpdateRenderOffsetPayload.TYPE,
-                ServerUpdateRenderOffsetPayload.STREAM_CODEC,
-                ServerUpdateRenderOffsetPayload::handle
+                ServerUpdatePlayerOptionsPayload.TYPE,
+                ServerUpdatePlayerOptionsPayload.STREAM_CODEC,
+                ServerUpdatePlayerOptionsPayload::handle
         );
 
         registrar.playToClient(
-                ClientRenderOffsetSyncPayload.TYPE,
-                ClientRenderOffsetSyncPayload.STREAM_CODEC,
-                ClientRenderOffsetSyncPayload::handle
+                ClientPlayerOptionsSyncPayload.TYPE,
+                ClientPlayerOptionsSyncPayload.STREAM_CODEC,
+                ClientPlayerOptionsSyncPayload::handle
+        );
+
+        registrar.playToServer(
+                RequestOpenTargetInventoryPayload.TYPE,
+                RequestOpenTargetInventoryPayload.STREAM_CODEC,
+                RequestOpenTargetInventoryPayload::handle
         );
 
         /* ----------------------------------------- 挣扎能力相关 ---------------------------------------*/
@@ -139,9 +148,9 @@ public class ModPayLoad {
 
 
         registrar.playToClient(
-                KidnapInterruptStrugglePayload.TYPE,
-                KidnapInterruptStrugglePayload.STREAM_CODEC,
-                KidnapInterruptStrugglePayload::handle
+                InterruptStrugglePayload.TYPE,
+                InterruptStrugglePayload.STREAM_CODEC,
+                InterruptStrugglePayload::handle
         );
 
         /* ----------------------------------------- 释放能力相关 ---------------------------------------*/
@@ -150,6 +159,13 @@ public class ModPayLoad {
                 PlayerReleaseActionPayload.TYPE,
                 PlayerReleaseActionPayload.STREAM_CODEC,
                 PlayerReleaseActionPayload::handle
+        );
+
+        /* ----------------------------------------- 自缚相关 ---------------------------------------*/
+        registrar.playToServer(
+                SelfBondageActionPayload.TYPE,
+                SelfBondageActionPayload.STREAM_CODEC,
+                SelfBondageActionPayload::handle
         );
 
         /* ----------------------------------------- 动作能力相关 ---------------------------------------*/
@@ -171,15 +187,27 @@ public class ModPayLoad {
         /* ----------------------------------------- 拘束具实现相关 ---------------------------------------*/
 
         registrar.playToServer(
-                SyncMiRaiTechSuitPacket.TYPE,
-                SyncMiRaiTechSuitPacket.STREAM_CODEC,
-                SyncMiRaiTechSuitPacket::handle
+                SyncMiRaiTechSuitPayload.TYPE,
+                SyncMiRaiTechSuitPayload.STREAM_CODEC,
+                SyncMiRaiTechSuitPayload::handle
         );
 
         registrar.playToClient(
-                SyncMiRaiTechControllerGUIPacket.TYPE,
-                SyncMiRaiTechControllerGUIPacket.STREAM_CODEC,
-                SyncMiRaiTechControllerGUIPacket::handle
+                SyncMiRaiTechControllerGUIPayload.TYPE,
+                SyncMiRaiTechControllerGUIPayload.STREAM_CODEC,
+                SyncMiRaiTechControllerGUIPayload::handle
+        );
+
+        registrar.playToServer(
+                SyncVibeLevelPayload.TYPE,
+                SyncVibeLevelPayload.STREAM_CODEC,
+                SyncVibeLevelPayload::handle
+        );
+
+        registrar.playToServer(
+                RemoveRestraintToolPayload.TYPE,
+                RemoveRestraintToolPayload.STREAM_CODEC,
+                RemoveRestraintToolPayload::handle
         );
     }
 }

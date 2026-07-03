@@ -3,7 +3,9 @@ package com.twi.restraint_dungeon.item.restraint_item.restraints;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -11,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
+
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearCutStrugglingState;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class BlindfoldMaskItem extends RestraintItem {
 
@@ -22,8 +28,8 @@ public class BlindfoldMaskItem extends RestraintItem {
             1.25
     );
 
-    private final List<String> canEquipPartList = List.of(
-            PlayerRestraintPart.restraint_blindfold.toString()
+    private final List<PlayerRestraintPart> canEquipPartList = List.of(
+            PlayerRestraintPart.restraint_blindfold
     );
 
     public BlindfoldMaskItem(Properties properties) {
@@ -31,6 +37,40 @@ public class BlindfoldMaskItem extends RestraintItem {
         this.setCanEquipPartList(canEquipPartList);
         this.setConnectPartMap(new HashMap<>());
         this.setCanBeLocked(true);
+    }
+
+    @Override
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
     }
 
     @Override

@@ -7,12 +7,19 @@ import com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -20,9 +27,16 @@ import net.minecraft.world.phys.*;
 
 import javax.annotation.Nullable;
 
+import java.util.Objects;
+
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 
 public class ReleaseAction extends CarryingAction {
+
+    public static final TagKey<EntityType<?>> ALLOWED_VEHICLES_TAG = TagKey.create(
+            Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(MODID, "release_action_rideable_whitelist")
+    );
 
     @Override
     public String getActionId() {
@@ -67,7 +81,7 @@ public class ReleaseAction extends CarryingAction {
     }
 
     @Override
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
+    public void onFinish(ServerPlayer carrier, LivingEntity target,HitResult hitResult) {
         HitResult raytrace = carrier.pick(getMaxDistance(), 1.0F, false);
         ReleaseResult result = findValidReleasePoint(carrier, target, raytrace);
 
@@ -76,7 +90,20 @@ public class ReleaseAction extends CarryingAction {
         boolean handled = false;
         if (result != null && result.failureReason == null) {
             if (result.isRestraintDevice && result.blockPos != null) {
-                handled = RestraintDevice.mount(carrier.level(), result.blockPos, target);
+
+                BlockPos DevicePos = result.blockPos;
+
+                if (carrier.level().getBlockEntity(result.blockPos) instanceof GhostBlockEntity ghostBE) {
+                    BlockPos master = ghostBE.getMasterPos();
+                    if (master != null) {
+                         DevicePos = master;
+                    }
+                }
+
+                if (carrier.level().getBlockState(DevicePos).getBlock() instanceof RestraintDevice device) {
+                    handled = device.mount(carrier.level(), result.blockPos, target);
+                }
+
             } else if (result.vehicle != null) {
                 handled = target.startRiding(result.vehicle, true);
             } else if (result.pos != null) {
@@ -102,11 +129,11 @@ public class ReleaseAction extends CarryingAction {
                 if (master != null) actualPos = master;
             }
 
-            if (level.getBlockState(actualPos).getBlock() instanceof RestraintDevice device) {
-                if (device.canMount(level, actualPos, target)) {
-                    return new ReleaseResult(actualPos, true);
+            if (level.getBlockState(actualPos).getBlock() instanceof RestraintDevice device && device.isMountableDevice(level, actualPos)) {
+                if (device.canMount(level, actualPos, target) != null) {
+                    return new ReleaseResult(device.canMount(level, actualPos, target));
                 } else {
-                    return new ReleaseResult(Component.translatable("action." + MODID + ".fail_release.device_limit").withStyle(ChatFormatting.RED));
+                    return new ReleaseResult(actualPos, true);
                 }
             }
         }
@@ -119,16 +146,19 @@ public class ReleaseAction extends CarryingAction {
         EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
                 carrier, eyePos, endPos,
                 carrier.getBoundingBox().inflate(limitDist),
-                (e) -> !e.isSpectator() && e.isPickable() && !e.equals(target) && !e.equals(carrier),
+                (e) -> !e.isSpectator() && e.isPickable() && !e.equals(target) && !e.equals(carrier) && !(e instanceof ItemEntity),
                 limitDist * limitDist
         );
 
         if (entityHit != null) {
             Entity vehicle = entityHit.getEntity();
-            if (vehicle.getPassengers().size() < getVehicleMaxCapacity(vehicle)) {
-                return new ReleaseResult(vehicle);
-            } else {
-                return new ReleaseResult(Component.translatable("action." + MODID + ".fail_release.vehicle_has_full").withStyle(ChatFormatting.RED));
+
+            if (isAllowedVehicle(vehicle)) {
+                if (vehicle.getPassengers().size() < getVehicleMaxCapacity(vehicle)) {
+                    return new ReleaseResult(vehicle);
+                } else {
+                    return new ReleaseResult(Component.translatable("action." + MODID + ".fail_release.vehicle_has_full").withStyle(ChatFormatting.RED));
+                }
             }
         }
 
@@ -152,6 +182,19 @@ public class ReleaseAction extends CarryingAction {
         }
 
         return null;
+    }
+
+
+    private boolean isAllowedVehicle(Entity vehicle) {
+        if (vehicle == null) return false;
+
+        if (vehicle instanceof Boat ||
+                vehicle instanceof AbstractMinecart ||
+                vehicle instanceof AbstractHorse) {
+            return true;
+        }
+
+        return false;
     }
 
     protected BlockPos findSafeSpaceNear(Level level, LivingEntity target, BlockPos start) {

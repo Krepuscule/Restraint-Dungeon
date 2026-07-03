@@ -1,11 +1,12 @@
 package com.twi.restraint_dungeon.attachment;
 
+import com.twi.restraint_dungeon.attachment.capability.NPCCapability.NPCData;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.*;
-import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerActionCapability;
-import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerCarryCapability;
-import com.twi.restraint_dungeon.attachment.capability.player_capability.RestraintRenderOffsets;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.*;
 import com.twi.restraint_dungeon.attachment.restraint_stack.RestraintStack;
+import com.twi.restraint_dungeon.attachment.restraint_stack.RestraintTools;
 import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
@@ -21,7 +22,6 @@ public class ModAttachments {
             ATTACHMENT_TYPES.register("entity_restraint", () -> AttachmentType.builder(RestraintCapability::new)
                     .serialize(RestraintCapability.CODEC)
                     .sync(RestraintCapability.STREAM_CODEC)
-//                    .copyOnDeath() // 死亡后保留数据
                     .build());
 
     public static final Supplier<AttachmentType<PleasantCapability>> ENTITY_PLEASANT =
@@ -40,6 +40,12 @@ public class ModAttachments {
             ATTACHMENT_TYPES.register("entity_kidnap", () -> AttachmentType.builder(KidnapCapability::new)
                     .serialize(KidnapCapability.CODEC)
                     .sync(KidnapCapability.STREAM_CODEC)
+                    .build());
+
+    public static final Supplier<AttachmentType<SelfBondageCapability>> ENTITY_SELF_BONDAGE =
+            ATTACHMENT_TYPES.register("entity_self_bondage", () -> AttachmentType.builder(SelfBondageCapability::new)
+                    .serialize(SelfBondageCapability.CODEC)
+                    .sync(SelfBondageCapability.STREAM_CODEC)
                     .build());
 
     public static final Supplier<AttachmentType<ReleaseCapability>> ENTITY_RELEASE =
@@ -62,11 +68,28 @@ public class ModAttachments {
                     .build()
     );
 
-    public static final Supplier<AttachmentType<RestraintRenderOffsets>> RENDER_OFFSETS = ATTACHMENT_TYPES.register(
+    public static final Supplier<AttachmentType<PlayerLeashData>> PLAYER_LEASH = ATTACHMENT_TYPES.register(
+            "player_leash",
+            () -> AttachmentType.builder(PlayerLeashData::new)
+                    .serialize(PlayerLeashData.CODEC)
+                    .sync(PlayerLeashData.STREAM_CODEC)
+                    .copyOnDeath()
+                    .build()
+    );
+
+    public static final Supplier<AttachmentType<PlayerAnimationData>> PLAYER_ANIMATION = ATTACHMENT_TYPES.register(
+            "player_animation",
+            () -> AttachmentType.builder(PlayerAnimationData::new)
+                    .serialize(PlayerAnimationData.CODEC)
+                    .build()
+    );
+
+
+    public static final Supplier<AttachmentType<PlayerRestraintOptions>> PLAYER_OPTION = ATTACHMENT_TYPES.register(
             "render_offsets",
-            () -> AttachmentType.builder(RestraintRenderOffsets::new)
-                    .serialize(RestraintRenderOffsets.CODEC)
-                    .sync(RestraintRenderOffsets.STREAM_CODEC)
+            () -> AttachmentType.builder(PlayerRestraintOptions::new)
+                    .serialize(PlayerRestraintOptions.CODEC)
+                    .sync(PlayerRestraintOptions.STREAM_CODEC)
                     .copyOnDeath()
                     .build()
     );
@@ -77,4 +100,25 @@ public class ModAttachments {
                     .sync(RestraintStack.STREAM_CODEC)
                     .copyOnDeath()
                     .build());
+
+    public static final Supplier<AttachmentType<RestraintTools>> RESTRAINT_TOOLS =
+            ATTACHMENT_TYPES.register("restraint_tools", () -> AttachmentType.builder(RestraintTools::new)
+                    .serialize(RestraintTools.CODEC)
+                    .sync(RestraintTools.STREAM_CODEC)
+                    .copyOnDeath()
+                    .build());
+
+
+
+    /* ---------------------------------------- NPC 专用 ------------------------------------------------*/
+
+
+    public static final Supplier<AttachmentType<NPCData>> NPC_DATA = ATTACHMENT_TYPES.register(
+            "npc_data",
+            () -> AttachmentType.builder(NPCData::new)
+                    .sync(NPCData.STREAM_CODEC)
+                    .serialize(NPCData.CODEC)
+                    .copyOnDeath()
+                    .build()
+    );
 }

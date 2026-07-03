@@ -1,6 +1,8 @@
 package com.twi.restraint_dungeon.mixin;
 
+import com.twi.restraint_dungeon.block.restraint_device.seat_entity.SeatEntity;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent;
 import com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -20,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
+
 @Mixin(Entity.class)
 public abstract class MixinEntity {
 
@@ -37,7 +41,8 @@ public abstract class MixinEntity {
     private void onGetPassengerAttachmentPoint(Entity pPassenger, EntityDimensions pDimensions, float pScale, CallbackInfoReturnable<Vec3> cir) {
         Entity self = (Entity) (Object) this;
 
-        if (self instanceof Player carrier && pPassenger instanceof LivingEntity passenger) {
+        if (self instanceof Player carrier && pPassenger instanceof LivingEntity passenger
+                && getRestraintPosition(passenger) == RestraintPositionEvent.RestraintPosition.CARRIED) {
             CarryType type = PlayerCarryUtils.getCurrentCarryType(carrier);
 
             if (type != null) {

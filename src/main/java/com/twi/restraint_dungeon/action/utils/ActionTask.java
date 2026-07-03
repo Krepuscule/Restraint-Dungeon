@@ -8,77 +8,89 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 public class ActionTask {
     private final UUID carrierUUID;
-    private final UUID targetUUID;
+    @Nullable private final UUID targetUUID;
     private final BaseAction action;
+    private final HitResult hitResult;
     private int remaining;
     private boolean aborted = false;
 
-    public ActionTask(ServerPlayer carrier, LivingEntity target, BaseAction action) {
+
+    public ActionTask(ServerPlayer carrier, @Nullable LivingEntity target, BaseAction action, HitResult hitResult) {
         this.carrierUUID = carrier.getUUID();
-        this.targetUUID = target.getUUID();
+        this.targetUUID = target != null ? target.getUUID() : null;
         this.action = action;
+        this.hitResult = hitResult;
         this.remaining = action.getAnimTicks();
     }
 
     public void abort() { this.aborted = true; }
     public UUID getCarrierUUID() { return carrierUUID; }
-    public UUID getTargetUUID() { return targetUUID; }
+    @Nullable public UUID getTargetUUID() { return targetUUID; }
+    public HitResult getHitResult() { return hitResult; }
 
-    /**
-     * @return true 如果任务已结束需要被移除
-     */
+
+
     public boolean tick(MinecraftServer server) {
         ServerPlayer actionPlayer = server.getPlayerList().getPlayer(carrierUUID);
-        LivingEntity target = getTarget(server,targetUUID);
 
-        // 异常中断检查
-        if (aborted || actionPlayer == null || target == null || !actionPlayer.isAlive() || !target.isAlive()) {
+        LivingEntity target = targetUUID != null ? getTarget(server, targetUUID) : null;
+
+        boolean isTargetInvalid = targetUUID != null && (target == null || !target.isAlive());
+        if (aborted || actionPlayer == null || !actionPlayer.isAlive() || isTargetInvalid) {
             handleAbort(actionPlayer, target);
             return true;
         }
 
-        // 距离或逻辑继续检查
         if (!action.canContinueUse(actionPlayer, target)) {
             handleAbort(actionPlayer, target);
             return true;
         }
 
-        // 执行 Tick 回调
-        action.onTick(actionPlayer, target, remaining);
+        action.onTick(actionPlayer, target,hitResult, remaining);
 
-        // 倒计时结束
         if (--remaining <= 0) {
-            action.onFinish(actionPlayer, target);
-            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Finish(actionPlayer,action,target));
-            // 动作完成，解绑状态
-            PlayerActionUtils.unlinkAction(actionPlayer, target);
+            action.onFinish(actionPlayer, target,hitResult);
+            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Finish(actionPlayer, action, target));
+
+            if (target != null) {
+                PlayerActionUtils.unlinkAction(actionPlayer, target);
+            } else {
+                PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
+            }
             return true;
         }
 
         return false;
     }
 
-    private void handleAbort(ServerPlayer actionPlayer, LivingEntity target) {
-        if (actionPlayer != null && target != null) {
-            action.onAbort(actionPlayer, target);
-            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Abort(actionPlayer,action,target));
-            PlayerActionUtils.unlinkAction(actionPlayer, target);
+
+    private void handleAbort(ServerPlayer actionPlayer, @Nullable LivingEntity target) {
+        if (actionPlayer != null) {
+            action.onAbort(actionPlayer, target,hitResult);
+            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Abort(actionPlayer, action, target));
+
+            if (target != null) {
+                PlayerActionUtils.unlinkAction(actionPlayer, target);
+            } else {
+                PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
+            }
         }
     }
 
+    @Nullable
     private static LivingEntity getTarget(MinecraftServer server, UUID uuid) {
         if (uuid == null) return null;
-        // 先检查在线玩家，这最快
         ServerPlayer player = server.getPlayerList().getPlayer(uuid);
         if (player != null) return player;
 
-        // 如果不是玩家，遍历所有维度查找该实体
         for (ServerLevel level : server.getAllLevels()) {
             Entity entity = level.getEntity(uuid);
             if (entity instanceof LivingEntity living) {

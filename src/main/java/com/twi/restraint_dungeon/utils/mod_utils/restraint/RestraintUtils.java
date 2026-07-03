@@ -1,12 +1,15 @@
 package com.twi.restraint_dungeon.utils.mod_utils.restraint;
 
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.item.ModDataComponents;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.item.restraint_lock.RestraintKeyItem;
 import com.twi.restraint_dungeon.item.restraint_lock.RestraintLockItem;
+import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,14 +20,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
-import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.isKidnappingActive;
 import static com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils.isReleaseActive;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils.isSelfBondaging;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getIsStruggling;
 import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils.*;
 
@@ -269,9 +274,25 @@ public class RestraintUtils {
      */
     public static boolean partHasBeenBound(LivingEntity entity, PlayerRestraintPart bodyPart) {
 
-        if((bodyPart == PlayerRestraintPart.restraint_hands_bind || bodyPart == PlayerRestraintPart.restraint_arms_bind || bodyPart == PlayerRestraintPart.restraint_legs_bind)
-                && isRidingRestraintDevice(entity)){
-            return true;
+        if(isRidingRestraintDevice(entity) && getRestraintDevice(entity) instanceof RestraintDevice device){
+            RestraintDeviceUtils.DeviceContext context = getRestraintDeviceContext(entity);
+            if(context != null){
+                if(bodyPart == PlayerRestraintPart.restraint_blindfold && device.canBlindfold(context.state(),context.pos())){
+                    return true;
+                }
+                if(bodyPart == PlayerRestraintPart.restraint_gag && device.canGag(context.state(),context.pos())){
+                    return true;
+                }
+                if (bodyPart == PlayerRestraintPart.restraint_arms_bind && device.canBindArms(context.state(), context.pos())) {
+                    return true;
+                }
+                if(bodyPart == PlayerRestraintPart.restraint_legs_bind && device.canBindLegs(context.state(), context.pos())){
+                    return true;
+                }
+                if(bodyPart == PlayerRestraintPart.restraint_hands_bind && device.canBindHands(context.state(), context.pos())){
+                    return true;
+                }
+            }
         }
 
 
@@ -412,7 +433,8 @@ public class RestraintUtils {
      */
     public static boolean isBusyState(LivingEntity entity) {
 
-        return isChangingPosition(entity)
+        return isSelfBondaging(entity)
+                || isChangingPosition(entity)
                 || getIsStruggling(entity)
                 || isDoingAction(entity)
                 || (entity instanceof Player targetPlayer_1 && isPlayerRestraintMoving(targetPlayer_1))
@@ -837,8 +859,11 @@ public class RestraintUtils {
 
     /**
      * 检查玩家指定部位的拘束具是否可以上锁
+     * @param entity 目标实体,
+     * @param bodyPart 动作者的目标部位
+     * @param partRestraintItem 上锁的目标部位的最后一个拘束具
      */
-    public static Component canBeLock(LivingEntity entity, PlayerRestraintPart bodyPart,ItemStack partRestraintItem) {
+    public static Component restraintCanBeLock(LivingEntity entity, PlayerRestraintPart bodyPart, ItemStack partRestraintItem) {
         if (entity == null) return Component.empty();
 
         if (partRestraintItem.isEmpty() || !(partRestraintItem.getItem() instanceof RestraintItem restraintItem)) {
@@ -859,9 +884,30 @@ public class RestraintUtils {
     }
 
     /**
+     * 检查玩家指定的拘束架是否可以上锁
+     * @param entity 目标实体,
+     * @param device 目标拘束设施，
+     * @param pos 方块位置,
+     * @param lockStack 锁具ItemStack
+     */
+    public static Component deviceCanBeLock(LivingEntity entity, RestraintDevice device, BlockPos pos,ItemStack lockStack,boolean isPlayer) {
+        if (entity == null || device == null) return Component.empty();
+
+        if(lockStack.getItem() instanceof RestraintLockItem lockItem && lockItem.getPairingID(lockStack) == null){
+            return Component.translatable("item." + MODID +".message.lock.no_pair").withStyle(ChatFormatting.RED);
+        }
+
+        if(device.canBeLocked(entity,device,pos,lockStack,isPlayer) != null){
+            return device.canBeLocked(entity,device,pos,lockStack,isPlayer);
+        }
+
+        return null;
+    }
+
+    /**
      * 检查玩家指定部位的拘束具是否可以解锁
      */
-    public static Component canBeUnlock(LivingEntity target, ItemStack keyStack, PlayerRestraintPart bodyPart, ItemStack restraintStack) {
+    public static Component restraintCanBeUnlock(LivingEntity target, ItemStack keyStack, PlayerRestraintPart bodyPart, ItemStack restraintStack) {
         if (target == null) return Component.empty();
 
         // 检查部位是否有拘束具
@@ -879,6 +925,36 @@ public class RestraintUtils {
         if (keyStack.getItem() instanceof RestraintKeyItem keyItem) {
             UUID keyID = keyStack.get(ModDataComponents.LOCK_PAIRING_ID);
             UUID lockID = lockInRestraint.get(ModDataComponents.LOCK_PAIRING_ID);
+
+            if (keyID == null) {
+                return Component.translatable("item.restraint_dungeon.message.key.no_pair").withStyle(ChatFormatting.DARK_RED);
+            }
+
+            if (!keyID.equals(lockID)) {
+                return Component.translatable("item.restraint_dungeon.message.key.disable_pair").withStyle(ChatFormatting.DARK_RED);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 检查玩家指定的拘束架是否可以解锁
+     * @param entity 目标实体,
+     * @param device 目标拘束设施，
+     * @param pos 方块位置,
+     * @param keyStack 钥匙ItemStack
+     */
+    public static Component deviceCanBeUnlock(LivingEntity entity, RestraintDevice device, BlockPos pos,ItemStack keyStack,boolean isPlayer) {
+        if (entity == null || device == null) return Component.empty();
+
+        if(device.canBeUnlocked(entity, device, pos, keyStack, isPlayer) != null){
+            return device.canBeUnlocked(entity, device, pos, keyStack, isPlayer);
+        }
+
+        if (keyStack.getItem() instanceof RestraintKeyItem) {
+            UUID keyID = keyStack.get(ModDataComponents.LOCK_PAIRING_ID);
+            UUID lockID = device.getLockType(entity.level(),pos).get(ModDataComponents.LOCK_PAIRING_ID);
 
             if (keyID == null) {
                 return Component.translatable("item.restraint_dungeon.message.key.no_pair").withStyle(ChatFormatting.DARK_RED);

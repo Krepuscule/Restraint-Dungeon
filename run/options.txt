@@ -35,8 +35,8 @@ chatLinksPrompt:true
 discrete_mouse_scroll:false
 invertYMouse:false
 realmsNotifications:true
-showSubtitles:false
-directionalAudio:false
+showSubtitles:true
+directionalAudio:true
 touchscreen:false
 bobView:true
 toggleCrouch:false
@@ -75,7 +75,7 @@ tutorialStep:none
 mouseWheelSensitivity:1.0
 rawMouseInput:true
 glDebugVerbosity:1
-skipMultiplayerWarning:false
+skipMultiplayerWarning:true
 hideMatchedNames:true
 joinedFirstServer:false
 hideBundleTutorial:false
@@ -121,6 +121,11 @@ key_key.hotbar.6:key.keyboard.6
 key_key.hotbar.7:key.keyboard.7
 key_key.hotbar.8:key.keyboard.8
 key_key.hotbar.9:key.keyboard.9
+key_key.jade.config:key.keyboard.keypad.0
+key_key.jade.show_overlay:key.keyboard.keypad.1
+key_key.jade.toggle_liquid:key.keyboard.keypad.2
+key_key.jade.narrate:key.keyboard.keypad.5
+key_key.jade.show_details:key.keyboard.left.shift
 key_key.restraint_dungeon.change_part_select_hud:key.keyboard.x
 key_key.restraint_dungeon.change_part_select_up:key.keyboard.up
 key_key.restraint_dungeon.change_part_select_down:key.keyboard.down
@@ -129,7 +134,7 @@ key_key.restraint_dungeon.action_menu:key.keyboard.v
 key_key.restraint_dungeon.restraint_menu:key.keyboard.h
 key_key.restraint_dungeon.struggle_menu:key.keyboard.r
 soundCategory_master:1.0
-soundCategory_music:0.0
+soundCategory_music:0.5066048635563379
 soundCategory_record:1.0
 soundCategory_weather:1.0
 soundCategory_block:1.0

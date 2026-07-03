@@ -41,12 +41,12 @@ public class MerchantSlimeItem extends RestraintItem {
         super(properties.stacksTo(1), MERCHANT_SLIME_DEFAULTS);
 
         this.setCanEquipPartList(List.of(
-                PlayerRestraintPart.restraint_blindfold.toString(),
-                PlayerRestraintPart.restraint_gag.toString(),
-                PlayerRestraintPart.restraint_body_bind.toString(),
-                PlayerRestraintPart.restraint_arms_bind.toString(),
-                PlayerRestraintPart.restraint_hands_bind.toString(),
-                PlayerRestraintPart.restraint_legs_bind.toString()
+                PlayerRestraintPart.restraint_blindfold,
+                PlayerRestraintPart.restraint_gag,
+                PlayerRestraintPart.restraint_body_bind,
+                PlayerRestraintPart.restraint_arms_bind,
+                PlayerRestraintPart.restraint_hands_bind,
+                PlayerRestraintPart.restraint_legs_bind
         ));
 
         Map<String, List<String>> connectMap = new HashMap<>();
@@ -219,7 +219,7 @@ public class MerchantSlimeItem extends RestraintItem {
     }
 
     @Override
-    public boolean shouldGagAndBlindfoldRenderOffset(){
+    public boolean shouldGagAndBlindfoldRenderOffset(PlayerRestraintPart part){
         return false;
     }
 }

@@ -61,7 +61,7 @@ public abstract class CarryingAction extends BaseAction {
         }
 
         if(getIsStruggling(target)){
-            return Component.translatable("action." + MODID + ".fail_carrying.target_is_sturggling")
+            return Component.translatable("action." + MODID + ".fail_carrying.target_is_struggling")
                     .withStyle(ChatFormatting.RED);
         }
 
@@ -77,7 +77,7 @@ public abstract class CarryingAction extends BaseAction {
 
 
     @Override
-    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,String CarryingState,Boolean isCarryTarget) {
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result,String CarryingState,Boolean isCarryTarget) {
 
         if(getCarriedPassenger(actionPlayer) == null || actionPlayer == null){
             return false;
@@ -107,12 +107,12 @@ public abstract class CarryingAction extends BaseAction {
     }
 
     @Override
-    public void onStart(ServerPlayer carrier, LivingEntity target) {
+    public void onStart(ServerPlayer carrier, LivingEntity target,HitResult hitResult) {
 
     }
 
     @Override
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
+    public void onFinish(ServerPlayer carrier, LivingEntity target,HitResult result) {
         if (shouldEndCarry()) {
              PlayerCarryUtils.stopCarrying(carrier);
 
@@ -122,7 +122,7 @@ public abstract class CarryingAction extends BaseAction {
     }
 
     @Override
-    public void onAbort(ServerPlayer carrier, LivingEntity target) {
+    public void onAbort(ServerPlayer carrier, LivingEntity target,HitResult result) {
 
     }
 

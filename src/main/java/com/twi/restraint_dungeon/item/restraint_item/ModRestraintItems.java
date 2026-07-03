@@ -35,6 +35,9 @@ public class ModRestraintItems {
     public static final DeferredHolder<Item, LeatherCollarItem> LEATHER_COLLAR = RESTRAINT_ITEMS.register("leather_collar",
             () -> new LeatherCollarItem(new Item.Properties()));
 
+    public static final DeferredHolder<Item, BellCollarItem> BELL_COLLAR = RESTRAINT_ITEMS.register("bell_collar",
+            () -> new BellCollarItem(new Item.Properties()));
+
     public static final DeferredHolder<Item, MagicRopeItem> MAGIC_ROPE = RESTRAINT_ITEMS.register("magic_rope",
             () -> new MagicRopeItem(new Item.Properties()));
 

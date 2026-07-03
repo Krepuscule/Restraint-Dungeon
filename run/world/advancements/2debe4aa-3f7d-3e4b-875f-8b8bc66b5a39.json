@@ -74,5 +74,95 @@
     },
     "done": false
   },
+  "minecraft:recipes/misc/firework_rocket_simple": {
+    "criteria": {
+      "has_gunpowder": "2026-06-06 04:13:59 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/redstone/tnt": {
+    "criteria": {
+      "has_gunpowder": "2026-06-06 04:13:59 +0800"
+    },
+    "done": true
+  },
+  "restraint_dungeon:recipes/tools/arm_binder": {
+    "criteria": {
+      "has_latex": "2026-06-11 04:49:07 +0800"
+    },
+    "done": true
+  },
+  "restraint_dungeon:recipes/tools/ball_gag": {
+    "criteria": {
+      "has_latex": "2026-06-11 04:49:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/chest": {
+    "criteria": {
+      "has_lots_of_items": "2026-06-29 12:25:53 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/has_rubber_from_smelting": {
+    "criteria": {
+      "has_latex": "2026-06-29 23:30:44 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/mangrove_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/acacia_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/cherry_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/bamboo_raft": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/spruce_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/birch_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/oak_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/jungle_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/dark_oak_boat": {
+    "criteria": {
+      "in_water": "2026-07-02 17:40:07 +0800"
+    },
+    "done": true
+  },
   "DataVersion": 3955
 }

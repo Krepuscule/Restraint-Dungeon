@@ -3,14 +3,18 @@ package com.twi.restraint_dungeon.block.restraint_device.ghost_block;
 import com.mojang.serialization.MapCodec;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -18,6 +22,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class GhostBlock extends BaseEntityBlock {
     public GhostBlock(Properties props) {
@@ -42,6 +48,25 @@ public class GhostBlock extends BaseEntityBlock {
             }
         }
         return InteractionResult.PASS;
+    }
+
+    @Override
+    protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack,
+                                                       @NotNull BlockState state,
+                                                       @NotNull Level level,
+                                                       @NotNull BlockPos pos,
+                                                       @NotNull Player player,
+                                                       @NotNull InteractionHand hand,
+                                                       @NotNull BlockHitResult hit) {
+        // 🚀 转发手持物品右键逻辑给主方块 (Master)
+        if (level.getBlockEntity(pos) instanceof GhostBlockEntity ghostBE) {
+            BlockPos mPos = ghostBE.getMasterPos();
+            if (mPos != null && level.getBlockState(mPos).getBlock() instanceof RestraintDevice master) {
+                // 使用 hit.withPosition(mPos) 修正点击坐标，让主方块收到正确的相对位置
+                return master.useItemOn(stack, level.getBlockState(mPos), level, mPos, player, hand, hit.withPosition(mPos));
+            }
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -103,13 +128,6 @@ public class GhostBlock extends BaseEntityBlock {
         return Shapes.empty();
     }
 
-//    @Override
-//    public @NotNull VoxelShape getInteractionShape(@NotNull BlockState state,
-//                                                   @NotNull BlockGetter level,
-//                                                   @NotNull BlockPos pos) {
-//        return getPreciseRelocatedShape(level, pos, CollisionContext.empty());
-//    }
-
     protected VoxelShape getPreciseRelocatedShape(BlockGetter level, BlockPos pos, CollisionContext context) {
         if (level == null || pos == null) return Shapes.empty();
 
@@ -132,5 +150,24 @@ public class GhostBlock extends BaseEntityBlock {
             }
         }
         return Shapes.empty();
+    }
+
+    @Override
+    protected float getDestroyProgress(@NotNull BlockState state, @NotNull Player player, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        if (level.getBlockEntity(pos) instanceof GhostBlockEntity ghostBE) {
+            BlockPos mPos = ghostBE.getMasterPos();
+            if (mPos != null && !mPos.equals(BlockPos.ZERO)) {
+                BlockState mState = level.getBlockState(mPos);
+                if (mState.getBlock() instanceof RestraintDevice) {
+                    return mState.getDestroyProgress(player, (Level) level, mPos);
+                }
+            }
+        }
+        return super.getDestroyProgress(state, player, level, pos);
+    }
+
+    @Override
+    protected @NotNull List<ItemStack> getDrops(@NotNull BlockState state, LootParams.@NotNull Builder params) {
+        return java.util.Collections.emptyList();
     }
 }

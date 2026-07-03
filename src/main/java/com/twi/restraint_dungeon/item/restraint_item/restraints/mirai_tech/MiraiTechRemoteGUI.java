@@ -3,7 +3,7 @@ package com.twi.restraint_dungeon.item.restraint_item.restraints.mirai_tech;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.DataComponentsUtils;
-import com.twi.restraint_dungeon.network.payload.restraints_packet.SyncMiRaiTechSuitPacket;
+import com.twi.restraint_dungeon.network.payload.restraints_packet.restraints.SyncMiRaiTechSuitPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -315,7 +315,7 @@ public class MiraiTechRemoteGUI extends Screen {
         }
 
         // 发送同步包
-        PacketDistributor.sendToServer(new SyncMiRaiTechSuitPacket(target.getUUID(), index, isActivationBtn));
+        PacketDistributor.sendToServer(new SyncMiRaiTechSuitPayload(target.getUUID(), index, isActivationBtn));
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
@@ -327,7 +327,7 @@ public class MiraiTechRemoteGUI extends Screen {
                 Boolean.TRUE.equals(DataComponentsUtils.getArousedMode(targetSuitStack)) :
                 Boolean.TRUE.equals(DataComponentsUtils.getDenyMode(targetSuitStack));
 
-        PacketDistributor.sendToServer(new SyncMiRaiTechSuitPacket(target.getUUID(), specialIndex, !currentState));
+        PacketDistributor.sendToServer(new SyncMiRaiTechSuitPayload(target.getUUID(), specialIndex, !currentState));
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.2F));
     }
 

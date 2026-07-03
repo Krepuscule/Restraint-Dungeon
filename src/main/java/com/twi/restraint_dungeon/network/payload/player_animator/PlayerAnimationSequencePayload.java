@@ -22,6 +22,10 @@ public record PlayerAnimationSequencePayload(
         AnimationLayer layer
 ) implements CustomPacketPayload {
 
+    public PlayerAnimationSequencePayload {
+        animationNames = List.copyOf(animationNames);
+    }
+
     public static final Type<PlayerAnimationSequencePayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(MODID, "animation_sync"));
 

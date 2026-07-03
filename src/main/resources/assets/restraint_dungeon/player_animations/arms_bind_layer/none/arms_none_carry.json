@@ -1,0 +1,139 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"arms_none_carry_hug_action": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [-10, -5, 30]
+						},
+						"4.0": {
+							"vector": [-10, -5, 30]
+						}
+					}
+				},
+				"left_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [-20.5939, 14.3821, -18.5152]
+						},
+						"4.0": {
+							"vector": [-20.5939, 14.3821, -18.5152]
+						}
+					}
+				},
+				"left_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-45, 0, 0]
+						},
+						"4.0": {
+							"vector": [-45, 0, 0]
+						}
+					}
+				},
+				"right_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-65, 0, 0]
+						},
+						"4.0": {
+							"vector": [-65, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"arms_none_carry_shoulder_action": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [17.6727, 65.9354, 71.8766]
+						},
+						"4.0": {
+							"vector": [17.6727, 65.9354, 71.8766]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, -1, 1]
+						},
+						"4.0": {
+							"vector": [0, -1, 1]
+						}
+					}
+				},
+				"left_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [-37.4438, -23.6713, 72.1972]
+						},
+						"4.0": {
+							"vector": [-37.4438, -23.6713, 72.1972]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, 0, -3]
+						},
+						"4.0": {
+							"vector": [0, 0, -3]
+						}
+					}
+				},
+				"left_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [30, 0, 0]
+						},
+						"4.0": {
+							"vector": [30, 0, 0]
+						}
+					}
+				},
+				"right_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-62.5, 0, 0]
+						},
+						"4.0": {
+							"vector": [-62.5, 0, 0]
+						}
+					}
+				}
+			}
+		},
+		"arms_none_carry_rope_connection_action": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [0, -10, 15]
+						},
+						"4.0": {
+							"vector": [0, -10, 15]
+						}
+					}
+				},
+				"right_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-10, 0, 0]
+						},
+						"4.0": {
+							"vector": [-10, 0, 0]
+						}
+					}
+				}
+			}
+		}
+	}
+}

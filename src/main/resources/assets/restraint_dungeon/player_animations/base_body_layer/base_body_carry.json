@@ -32,6 +32,30 @@
 					}
 				}
 			}
+		},
+		"base_body_carry_rope_connection_target": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": {
+							"vector": [-115, 0, 180]
+						},
+						"4.0": {
+							"vector": [-115, 0, 180]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [0, -10, 0]
+						},
+						"4.0": {
+							"vector": [0, -10, 0]
+						}
+					}
+				}
+			}
 		}
 	}
 }

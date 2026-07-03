@@ -24,6 +24,8 @@ repositories {
         name "KosmX's maven"
         url 'https://maven.kosmx.dev/'
     }
+
+    maven { url = "https://api.modrinth.com/maven" }
 }
 
 base {
@@ -112,6 +114,8 @@ dependencies {
     implementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_anim}"
 
     runtimeOnly "io.github.kosmx.bendy-lib:bendy-lib-forge:${bendylib_version}"
+
+    implementation "maven.modrinth:jade:${jade_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

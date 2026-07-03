@@ -23,6 +23,35 @@ public class RestraintDeviceUtils {
         return getRestraintDevice(entity) != null;
     }
 
+    public record DeviceContext(RestraintDevice device, BlockState state, BlockPos pos) {}
+
+    /**
+     * 获取实体正在骑乘的 RestraintDevice 实例的详细信息（state,pos)
+     */
+    @Nullable
+    public static DeviceContext getRestraintDeviceContext(LivingEntity entity) {
+        Entity vehicle = entity.getVehicle();
+
+        if (vehicle instanceof SeatEntity) {
+            BlockPos pos = vehicle.blockPosition();
+            Level level = entity.level();
+            BlockState state = level.getBlockState(pos);
+
+            if (level.getBlockEntity(pos) instanceof GhostBlockEntity ghostBE) {
+                BlockPos masterPos = ghostBE.getMasterPos();
+                if (masterPos != null) {
+                    pos = masterPos;
+                    state = level.getBlockState(pos);
+                }
+            }
+
+            if (state.getBlock() instanceof RestraintDevice restraintDevice) {
+                return new DeviceContext(restraintDevice, state, pos);
+            }
+        }
+        return null;
+    }
+
     /**
      * 获取实体正在骑乘的 RestraintDevice 实例
      */
@@ -73,10 +102,11 @@ public class RestraintDeviceUtils {
     @Nullable
     private static LivingEntity searchEntityOnRestraintDevice(Level level, BlockPos pos) {
 
+        AABB searchBox = new AABB(pos).inflate(0.05);
+
         List<SeatEntity> seats = level.getEntitiesOfClass(
-            SeatEntity.class,
-//            new AABB(pos).inflate(0.1)
-            new AABB(pos).deflate(0.1)
+                SeatEntity.class,
+                searchBox
         );
 
         for (SeatEntity seat : seats) {

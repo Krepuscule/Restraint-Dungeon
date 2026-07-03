@@ -1,6 +1,8 @@
 package com.twi.restraint_dungeon.action.impl;
 
 import com.twi.restraint_dungeon.action.type.CarryingAction;
+import com.twi.restraint_dungeon.event.mod_event.player_carry.type.CarryHug;
+import com.twi.restraint_dungeon.event.mod_event.player_carry.type.CarryShoulder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -19,7 +21,7 @@ import net.minecraft.world.phys.HitResult;
 import javax.annotation.Nullable;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
-import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.getCarriedPassenger;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getIsStruggling;
 
 public class FeedAction extends CarryingAction {
@@ -36,13 +38,18 @@ public class FeedAction extends CarryingAction {
 
     @Override
     public boolean renderMainHandItem(Player actionPlayer) {
-        return true;
+        return isCarrier(actionPlayer);
     }
 
     @Override
     public @Nullable Component canUse(Player carrier, HitResult result) {
         if(super.canUse(carrier, result) != null){
             return super.canUse(carrier,result);
+        }
+
+        if(!(getCurrentCarryType(carrier) instanceof CarryHug || getCurrentCarryType(carrier) instanceof CarryShoulder)){
+            return Component.translatable("action." + MODID + ".fail_feed.incorrect_carry_type")
+                    .withStyle(ChatFormatting.RED);
         }
 
         if (!canBeFed(carrier.getMainHandItem())) {
@@ -54,12 +61,12 @@ public class FeedAction extends CarryingAction {
     }
 
     @Override
-    public void onStart(ServerPlayer carrier, LivingEntity target) {
+    public void onStart(ServerPlayer carrier, LivingEntity target,HitResult hitResult) {
         playFeedingSound(target, carrier.getMainHandItem(), 0.5F);
     }
 
     @Override
-    public void onTick(ServerPlayer carrier, LivingEntity target, int remaining) {
+    public void onTick(ServerPlayer carrier, LivingEntity target,HitResult result, int remaining) {
         // 每 4 tick 播放一次持续进食/饮用音效
         if (remaining % 4 == 0) {
             playFeedingSound(target, carrier.getMainHandItem(), 0.5F);
@@ -67,7 +74,7 @@ public class FeedAction extends CarryingAction {
     }
 
     @Override
-    public void onFinish(ServerPlayer carrier, LivingEntity target) {
+    public void onFinish(ServerPlayer carrier, LivingEntity target,HitResult result) {
         ItemStack foodStack = carrier.getMainHandItem();
 
         if (canBeFed(foodStack)) {

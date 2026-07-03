@@ -42,6 +42,10 @@ public abstract class CarryAction extends BaseAction {
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
+        if(living.getVehicle() != null){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(living.distanceToSqr(actionPlayer) >= getMaxDistance() * getMaxDistance()){
             return Component.translatable("action." + MODID + ".fail_common.too_far").withStyle(ChatFormatting.DARK_RED);
         }
@@ -58,13 +62,8 @@ public abstract class CarryAction extends BaseAction {
             return Component.translatable("action." + MODID + ".fail_carry.need_bind").withStyle(ChatFormatting.DARK_RED);
         }
 
-        if(isRidingRestraintDevice(living)
-                && getRestraintDevice(living) instanceof RestraintDevice rd && !rd.canDismount(
-                living.level(),
-                Objects.requireNonNull(living.getVehicle()).blockPosition(),
-                living)
-        ){
-            return Component.translatable("action." + MODID + ".fail_carry.locked_by_block").withStyle(ChatFormatting.DARK_RED);
+        if(isRidingRestraintDevice(living)){
+            return Component.translatable("action." + MODID + ".fail_carry.target_in_device").withStyle(ChatFormatting.DARK_RED);
         }
 
         return null;
@@ -78,7 +77,7 @@ public abstract class CarryAction extends BaseAction {
     }
 
     @Override
-    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,String CarryingState,Boolean isCarryTarget){
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result,String CarryingState,Boolean isCarryTarget){
 //        if(target instanceof Player || target instanceof BaseNPCEntity)
         if(!actionPlayer.isAlive() || (target != null && !target.isAlive()) || target == null){
             return false;
@@ -109,11 +108,10 @@ public abstract class CarryAction extends BaseAction {
         }
 
         if(isRidingRestraintDevice(target)
-                && getRestraintDevice(target) instanceof RestraintDevice rd && !rd.canDismount(
+                && getRestraintDevice(target) instanceof RestraintDevice rd && rd.canDismount(
                 target.level(),
                 Objects.requireNonNull(target.getVehicle()).blockPosition(),
-                target)
-        ){
+                target) != null){
             return false;
         }
 
@@ -123,7 +121,7 @@ public abstract class CarryAction extends BaseAction {
     // TODO:动画状态机重构为本地的纯动画播放
 
     @Override
-    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target,HitResult hitResult) {
 
         float yaw = actionPlayer.getYRot();
         float radians = (float) Math.toRadians(yaw);
@@ -152,7 +150,7 @@ public abstract class CarryAction extends BaseAction {
     }
 
     @Override
-    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target,HitResult result, int ticksRemaining) {
         float syncYaw = actionPlayer.getYRot();
         float radians = (float) Math.toRadians(syncYaw);
 
@@ -179,12 +177,12 @@ public abstract class CarryAction extends BaseAction {
 
 
     @Override
-    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
          startCarrying(actionPlayer, target,getCarryType(actionPlayer, target));
     }
 
     @Override
-    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
         target.stopRiding();
         clearCarryData(actionPlayer);
         clearCarryData(target);

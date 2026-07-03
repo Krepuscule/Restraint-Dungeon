@@ -40,7 +40,7 @@ public class ModBlockEntities {
     public static final Map<String, DeferredHolder<BlockEntityType<?>, BlockEntityType<DollStandBlockEntity.Variant>>> DOLL_STAND_BE_MAP = new HashMap<>();
 
     static {
-        List<String> woods = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry");
+        List<String> woods = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry","crimson","warped");
 
         for (String wood : woods) {
             CROSS_BE_MAP.put(wood, BLOCK_ENTITIES.register(wood + "_wooden_cross_be",

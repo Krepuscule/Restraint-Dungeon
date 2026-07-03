@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -23,18 +24,6 @@ import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapab
 
 @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
 public class StruggleHUD {
-
-    @SubscribeEvent
-    public static void onPlayerDamage(LivingDamageEvent.Post event) {
-        if (event.getEntity() instanceof LocalPlayer player && StruggleHUDManager.isActive()) {
-            if (event.getOriginalDamage() > 0) {
-                StruggleHUDManager.cancel();
-                setTargetPart(player, getTargetPart(player));
-                PacketDistributor.sendToServer(new PlayerRestraintPartPayload(getTargetPart(player).name()));
-                player.displayClientMessage(Component.translatable("hud.restraint_dungeon.struggle_stopped_by_damage").withStyle(ChatFormatting.DARK_RED), true);
-            }
-        }
-    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onKeyInput(InputEvent.Key event) {

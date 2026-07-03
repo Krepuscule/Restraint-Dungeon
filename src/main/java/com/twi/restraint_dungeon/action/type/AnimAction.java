@@ -32,6 +32,10 @@ public abstract class AnimAction extends BaseAction {
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
+        if(living.getVehicle() != null){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(living.distanceToSqr(actionPlayer) >= getMaxDistance() * getMaxDistance()){
             return Component.translatable("action." + MODID + ".fail_common.too_far").withStyle(ChatFormatting.DARK_RED);
         }
@@ -53,7 +57,7 @@ public abstract class AnimAction extends BaseAction {
     }
 
     @Override
-    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target, String CarryingState, Boolean isCarryTarget){
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result, String CarryingState, Boolean isCarryTarget){
 //        if(target instanceof Player || target instanceof BaseNPCEntity)
         if(!actionPlayer.isAlive() || (target != null && !target.isAlive()) || target == null){
             return false;
@@ -82,10 +86,8 @@ public abstract class AnimAction extends BaseAction {
         return true;
     }
 
-    // TODO:动画状态机重构为本地的纯动画播放
-
     @Override
-    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target,HitResult hitResult) {
 
         float yaw = actionPlayer.getYRot();
         float radians = (float) Math.toRadians(yaw);
@@ -114,7 +116,7 @@ public abstract class AnimAction extends BaseAction {
     }
 
     @Override
-    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target,HitResult result, int ticksRemaining) {
         float syncYaw = actionPlayer.getYRot();
         float radians = (float) Math.toRadians(syncYaw);
 
@@ -140,12 +142,12 @@ public abstract class AnimAction extends BaseAction {
     }
 
     @Override
-    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
 
     }
 
     @Override
-    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
 
     }
 }

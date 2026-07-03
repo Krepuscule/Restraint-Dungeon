@@ -31,8 +31,7 @@ public class PlacedSwordBlockRenderer implements BlockEntityRenderer<PlacedSword
         Direction face = be.getBlockState().getValue(PlacedSwordBlock.FACING);
 
         poseStack.pushPose();
-
-        // 沿用你的坐标偏置
+        
         switch (face) {
             case NORTH -> {
                 poseStack.translate(0.5, 0.5, 0.7);

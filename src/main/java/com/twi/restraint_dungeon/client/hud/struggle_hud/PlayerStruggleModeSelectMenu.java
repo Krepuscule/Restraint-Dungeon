@@ -24,8 +24,12 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getTargetPart;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.setTargetPart;
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.isKidnappingActive;
+import static com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils.isReleaseActive;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.*;
 import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils.getAllRestraintsByPart;
@@ -40,13 +44,13 @@ public class PlayerStruggleModeSelectMenu extends Screen {
     public record MenuEntry(Component name, StruggleMode struggleMode) {}
 
     public PlayerStruggleModeSelectMenu() {
-        super(Component.translatable("hud.restraint_dungeon.struggle_mode_menu"));
+        super(Component.translatable("hud." + MODID + ".struggle_mode_menu"));
         this.player = Minecraft.getInstance().player;
 
 
-        entries.add(new MenuEntry(Component.translatable("hud.restraint_dungeon.struggle_menu.strength"), StruggleMode.STRENGTH));
-        entries.add(new MenuEntry(Component.translatable("hud.restraint_dungeon.struggle_menu.loose"), StruggleMode.LOOSE));
-        entries.add(new MenuEntry(Component.translatable("hud.restraint_dungeon.struggle_menu.unlock"), StruggleMode.UNLOCK));
+        entries.add(new MenuEntry(Component.translatable("hud." + MODID + ".struggle_menu.strength"), StruggleMode.STRENGTH));
+        entries.add(new MenuEntry(Component.translatable("hud." + MODID + ".struggle_menu.loose"), StruggleMode.LOOSE));
+        entries.add(new MenuEntry(Component.translatable("hud." + MODID + ".struggle_menu.unlock"), StruggleMode.UNLOCK));
 
 
         if (player != null && !isBeenBindArms(player) && !isBeenBindHands(player)) {
@@ -70,14 +74,20 @@ public class PlayerStruggleModeSelectMenu extends Screen {
             float startAngle = -90f - (i * sectorStep);
             float endAngle = -90f - ((i + 1) * sectorStep);
 
-            boolean hovered = isMouseInSector(mouseX, mouseY, cx, cy, startAngle, endAngle);
+            boolean hovered;
+            if (entryCount == 1) {
+                double dist = Math.sqrt(Math.pow(mouseX - cx, 2) + Math.pow(mouseY - cy, 2));
+                hovered = dist >= innerR && dist <= outerR;
+            } else {
+                hovered = isMouseInSector(mouseX, mouseY, cx, cy, startAngle, endAngle);
+            }
             MenuEntry entry = entries.get(i);
 
             int color = hovered ? 0xAA444444 : 0x55000000;
             drawRadialSector(graphics, cx, cy, innerR, outerR, startAngle, endAngle, color);
 
             if (hovered) {
-                drawRadialOutline(graphics, cx, cy, innerR, outerR, startAngle, endAngle, 0xFFFFFFFF);
+                drawRadialOutline(graphics, cx, cy, innerR, outerR, startAngle, endAngle, 0xFFFFFFFF, entryCount);
             }
 
             double textRad = Math.toRadians((startAngle + endAngle) / 2f);
@@ -136,6 +146,15 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         if (b == 0) {
             float cx = width / 2f;
             float cy = height / 2f;
+            int entryCount = entries.size();
+
+            if (entryCount == 1) {
+                double dist = Math.sqrt(Math.pow(mx - cx, 2) + Math.pow(my - cy, 2));
+                if (dist >= innerR && dist <= outerR) {
+                    executeEntry(entries.getFirst());
+                    return true;
+                }
+            }
             float sz = 360f / entries.size();
             for (int i = 0; i < entries.size(); i++) {
                 if (isMouseInSector(mx, my, cx, cy, -90f - (i * sz), -90f - ((i + 1) * sz))) {
@@ -154,21 +173,30 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         ItemStack strugglingItem = getPlayerStrugglingItem(player);
         int itemIndex = getPlayerStrugglingItemIndex(player);
 
-
         if (getAllRestraintsByPart(player, currentPart).isEmpty()) {
-            player.displayClientMessage(Component.translatable("hud.restraint_dungeon.struggle.no_restraint_on_part").withStyle(ChatFormatting.YELLOW),true);
+            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.no_restraint_on_part").withStyle(ChatFormatting.YELLOW),true);
             this.onClose();
             return;
         }
 
         if (!(strugglingItem.getItem() instanceof RestraintItem restraintItem)) {
-            player.displayClientMessage(Component.translatable("hud.restraint_dungeon.struggle.item_not_restraint").withStyle(ChatFormatting.YELLOW),true);
+            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.item_not_restraint").withStyle(ChatFormatting.YELLOW),true);
             this.onClose();
             return;
         }
 
         if (partHasBeenBlocked(player, currentPart, itemIndex)) {
-            player.displayClientMessage(Component.translatable("hud.restraint_dungeon.struggle.restraint_has_been_block").withStyle(ChatFormatting.YELLOW),true);
+            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.restraint_has_been_block").withStyle(ChatFormatting.YELLOW),true);
+            this.onClose();
+            return;
+        }
+
+        if(isKidnappingActive(player)
+                && isReleaseActive(player)
+                && isChangingPosition(player)
+                && isDoingAction(player)
+                && isPlayerRestraintMoving(player)){
+            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.cant_struggle").withStyle(ChatFormatting.YELLOW),true);
             this.onClose();
             return;
         }
@@ -182,7 +210,7 @@ public class PlayerStruggleModeSelectMenu extends Screen {
 
     private void handleSelfReleaseMode(RestraintItem item, ItemStack stack, PlayerRestraintPart part, int index) {
         if (!item.getLockType(Minecraft.getInstance().player,stack).isEmpty()) {
-            player.displayClientMessage(Component.translatable("hud.restraint_dungeon.struggle.restraint_has_been_lock").withStyle(ChatFormatting.YELLOW),true);
+            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.restraint_has_been_lock").withStyle(ChatFormatting.YELLOW),true);
         } else {
             Component failReason = part == PlayerRestraintPart.restraint_connection ? 
                 item.canConnectReleaseBySelf(player, stack) : 
@@ -228,10 +256,10 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         float g = (color >> 8 & 255) / 255f;
         float b = (color & 255) / 255f;
 
-        for (float angle = a1; angle >= a2; angle -= 2f) {
+        for (float angle = a1; angle >= a2; angle -= 1f) {
             double rad = Math.toRadians(angle);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r1, cy + (float)Math.sin(rad) * r1, 0).setColor(r, g, b, a);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r2, cy + (float)Math.sin(rad) * r2, 0).setColor(r, g, b, a);
+            buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r1, cy + (float) Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+            buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r2, cy + (float) Math.sin(rad) * r2, 0).setColor(r, g, b, a);
         }
 
         BufferUploader.drawWithShader(buffer.buildOrThrow());
@@ -240,28 +268,51 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         RenderSystem.disableBlend();
     }
 
-    private void drawRadialOutline(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color) {
+    private void drawRadialOutline(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color, int entryCount) {
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tesselator = Tesselator.getInstance();
         Matrix4f matrix = graphics.pose().last().pose();
         float a = (color >> 24 & 255) / 255f, r = (color >> 16 & 255) / 255f, g = (color >> 8 & 255) / 255f, b = (color & 255) / 255f;
 
-        // 绘制外圈
-        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-        for (float angle = a1; angle >= a2; angle -= 2f) {
-            double rad = Math.toRadians(angle);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r2, cy + (float)Math.sin(rad) * r2, 0).setColor(r, g, b, a);
-        }
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        BufferBuilder buffer;
 
-        // 绘制内圈
-        buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-        for (float angle = a2; angle <= a1; angle += 2f) {
-            double rad = Math.toRadians(angle);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r1, cy + (float)Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+        if (entryCount == 1) {
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r2, cy + (float) Math.sin(rad) * r2, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r1, cy + (float) Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+        } else {
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+            double radStart = Math.toRadians(a1);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radStart) * r1, cy + (float) Math.sin(radStart) * r1, 0).setColor(r, g, b, a);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radStart) * r2, cy + (float) Math.sin(radStart) * r2, 0).setColor(r, g, b, a);
+
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r2, cy + (float) Math.sin(rad) * r2, 0).setColor(r, g, b, a);
+            }
+
+            double radEnd = Math.toRadians(a2);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radEnd) * r2, cy + (float) Math.sin(radEnd) * r2, 0).setColor(r, g, b, a);
+
+            for (float angle = a2; angle <= a1; angle += 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r1, cy + (float) Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
         }
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        RenderSystem.disableBlend();
     }
 
     private boolean isMouseInSector(double mx, double my, float cx, float cy, float a1, float a2) {

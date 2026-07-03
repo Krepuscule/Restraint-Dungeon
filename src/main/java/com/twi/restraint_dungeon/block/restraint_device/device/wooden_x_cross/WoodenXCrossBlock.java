@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,6 +37,11 @@ public class WoodenXCrossBlock extends RestraintDevice {
     }
 
     @Override
+    public String getID(){
+        return "WOODEN_X_CROSS";
+    }
+
+    @Override
     protected @NotNull MapCodec<? extends WoodenXCrossBlock> codec() {
         return CODEC;
     }
@@ -44,7 +50,9 @@ public class WoodenXCrossBlock extends RestraintDevice {
     protected List<BBCube> getBBCubes() {
 
         return List.of(
-                new BBCube(-8, 0, -4, 16, 48, 8)
+                new BBCube(-18, 2, -1, 36, 41, 2),
+
+                new BBCube(-8,0,-8,16,2,16)
         );
     }
 
@@ -59,9 +67,16 @@ public class WoodenXCrossBlock extends RestraintDevice {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    // 骑乘参数对齐原设计
-    @Override protected double getBaseOffsetY() { return 0.5; }
-    @Override protected double getBaseOffsetX() { return 0.5; }
-    @Override protected double getBaseOffsetZ() { return 0.5; }
-    @Override protected double getPushBack() { return 0.1; }
+    @Override
+    public double getBaseOffsetZ() { return -0.25; }
+
+    @Override
+    public Vector3f getRiderFirstCameraOffset(){
+        return new Vector3f(0.0f,0.2f,0.1f);
+    }
+
+    @Override
+    public boolean canBindHands(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
 }

@@ -12,6 +12,7 @@ public class ModCommandRegisterEvents {
 
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
-        ModCommands.register(event.getDispatcher());
+
+//        ModCommands.register(event.getDispatcher());
     }
 }

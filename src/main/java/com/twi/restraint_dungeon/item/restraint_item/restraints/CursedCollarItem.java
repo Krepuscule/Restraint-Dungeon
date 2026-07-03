@@ -6,6 +6,7 @@ import com.twi.restraint_dungeon.item.DataComponentsUtils;
 import com.twi.restraint_dungeon.item.restraint_item.ModRestraintItems;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -16,9 +17,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.addRestraintItem;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getAllGag;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils.getAllRestraintsByPart;
 
 public class CursedCollarItem extends RestraintItem {
@@ -26,14 +29,14 @@ public class CursedCollarItem extends RestraintItem {
     public static final RestraintDefaults CURSED_COLLAR_DEFAULTS = new RestraintDefaults(
             100,
             50.0,
-            0.25,
-            0.25,
-            0.5
+            0.1,
+            0.1,
+            0.25
     );
 
     public CursedCollarItem(Properties properties) {
         super(properties.stacksTo(1), CURSED_COLLAR_DEFAULTS);
-        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_collar.toString()));
+        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_collar));
         this.setConnectPartMap(new HashMap<>());
         this.setCanBeLocked(true);
     }
@@ -65,6 +68,40 @@ public class CursedCollarItem extends RestraintItem {
                 executeCurseSpread(entity);
             }
         }
+    }
+
+    @Override
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
     }
 
     private void executeCurseSpread(LivingEntity entity) {

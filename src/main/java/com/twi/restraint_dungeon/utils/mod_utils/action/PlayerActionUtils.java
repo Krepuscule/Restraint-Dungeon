@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.action;
 
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerActionCapability;
+import net.minecraft.Util;
 import net.minecraft.world.entity.LivingEntity;
 
 import javax.annotation.Nullable;
@@ -82,6 +83,21 @@ public class PlayerActionUtils {
     }
 
     /**
+     * 针对单人的action动作执行绑定
+     *
+     * @param action  主动方（发起者）
+     * @param actionId 动作ID
+     *
+     */
+    public static void boundSingleAction(LivingEntity action,String actionId){
+        PlayerActionCapability carrierData = getData(action);
+        carrierData.setCurrentAction(actionId);
+        carrierData.setPartnerUUID(Util.NIL_UUID);
+        carrierData.setTarget(false);
+        setData(action, carrierData);
+    }
+
+    /**
      * 快速建立两个实体间的动作关系
      *
      * @param action  主动方（发起者）
@@ -105,10 +121,21 @@ public class PlayerActionUtils {
     }
 
     /**
+     * 清除单人的action信息
+     *
+     * @param action  主动方（发起者）
+     * @param actionId 动作ID
+     *
+     */
+    public static void resetSingleAction(LivingEntity action,String actionId){
+        reset(action);
+    }
+
+    /**
      * 快速解除两个实体间的动作关系
      */
-    public static void unlinkAction(LivingEntity carrier, @Nullable LivingEntity target) {
-        reset(carrier);
+    public static void unlinkAction(LivingEntity action, @Nullable LivingEntity target) {
+        reset(action);
         if (target != null) {
             reset(target);
         }

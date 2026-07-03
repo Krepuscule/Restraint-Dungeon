@@ -8,6 +8,8 @@ import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.item.restraint_lock.ModLockAndKeyItems;
 import com.twi.restraint_dungeon.item.restraint_lock.lock.MiRaiTechLockItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -38,6 +40,7 @@ import static com.twi.restraint_dungeon.event.mod_event.pleasant.PleasantValueMa
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.ThrillUtils.getThrillLevel;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getAllPartRestraint;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.hasRestraint;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 
 public class MiraiTechSuitItem extends RestraintItem {
@@ -45,9 +48,9 @@ public class MiraiTechSuitItem extends RestraintItem {
     public static final RestraintDefaults MIRAI_TECH_SUIT_DEFAULTS = new RestraintDefaults(
             500,
             50.0,
-            0.2,
-            0.2,
-            0.2
+            0.1,
+            0.1,
+            0.1
     );
 
     // 模块常量
@@ -61,7 +64,7 @@ public class MiraiTechSuitItem extends RestraintItem {
 
     public MiraiTechSuitItem(Properties properties) {
         super(properties.stacksTo(1), MIRAI_TECH_SUIT_DEFAULTS);
-        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_body_bind.toString()));
+        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_body_bind));
         this.setCanBeLocked(true);
     }
 
@@ -151,6 +154,40 @@ public class MiraiTechSuitItem extends RestraintItem {
     }
 
     @Override
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
+    }
+
+    @Override
     public Component canUseKidnap(LivingEntity actionEntity,LivingEntity target,ItemStack stack,PlayerRestraintPart bodyPart,int index){
         if(hasRestraint(target,bodyPart,stack,false)){
             return Component.translatable("item.restraint_dungeon.cant_use_kidnap.mirai_tech").withStyle(ChatFormatting.DARK_RED);
@@ -194,7 +231,7 @@ public class MiraiTechSuitItem extends RestraintItem {
 
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,int index,boolean isSlim) {
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         String mode = isArousedMode(stack) ? "_aroused" : "";
         String lock = isModuleLocked(stack, 4) ? "_lock" : "_unlock";
@@ -204,28 +241,35 @@ public class MiraiTechSuitItem extends RestraintItem {
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> void applyRestraintVisibility(M child, M parent,PlayerRestraintPart part, T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity)  {
 
         child.setAllVisible(false);
 
         child.body.visible = true;
 
-        if(shouldRenderSencondLayer(child,parent,part,player)){
-            setSecondLayerVisibility(child,parent,part,player);
+        if(shouldRenderSecondLayer(child,parent,part,entity)){
+            setSecondLayerVisibility(child,parent,part,entity);
         }
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> boolean shouldRenderSencondLayer(M child, M parent,PlayerRestraintPart part, T player){
+    public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
+            M child, M parent, PlayerRestraintPart part, T entity) {
         return false;
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> void setSecondLayerVisibility(
-            M child, M parent,PlayerRestraintPart part, T player) {
-
-        child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-        child.jacket.copyFrom(parent.body);
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity){
+        if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent){
+            if(entity instanceof Player player){
+                playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+            }else{
+                playerChild.jacket.visible = true;
+            }
+            playerChild.jacket.copyFrom(playerParent.body);
+        }
     }
 
     public ItemStack getMiRaiTechPartItem(LivingEntity entity, String bodyPart) {

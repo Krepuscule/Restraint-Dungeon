@@ -44,13 +44,19 @@ public class DollStandBlock extends RestraintDevice {
     }
 
     @Override
+    public String getID() {
+        return "DOLL_STAND";
+    }
+
+
+    @Override
     protected @NotNull MapCodec<? extends DollStandBlock> codec() {
         return CODEC;
     }
 
     @Override
     protected List<BBCube> getBBCubes() {
-        return List.of(new BBCube(-8, 0, -8, 16, 22, 16));
+        return List.of(new BBCube(-8, 0, -8, 16, 26, 16));
     }
 
     @Nullable
@@ -82,17 +88,25 @@ public class DollStandBlock extends RestraintDevice {
     @Override
     public int getAnalogOutputSignal(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos) {
         LivingEntity rider = getRidingEntity(level, pos);
-        return getSignalStrength(rider);
+        return getSignalStrength(state,level,pos,rider);
     }
 
-    protected int getSignalStrength(LivingEntity entity) {
+    @Override
+    protected int getSignalStrength(BlockState state, Level level, BlockPos pos, @Nullable LivingEntity entity) {
         if (entity instanceof Player player) {
             return Math.min(getAllRestraint(player).size(), 15);
         }
         return 0;
     }
 
-    @Override protected double getBaseOffsetY() { return 0.2; }
-    @Override protected double getBaseOffsetX() { return 0.5; }
-    @Override protected double getBaseOffsetZ() { return 0.5; }
+
+    @Override
+    public double getBaseOffsetY() {
+        return 0.8;
+    }
+
+    @Override
+    public boolean canBindHands(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
 }

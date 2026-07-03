@@ -63,6 +63,13 @@ public class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> DENY_ACTIVATE_TIME =
             register("deny_activate_time", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG));
 
+
+    // 小玩具属性
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> VIBE_ACTIVATE =
+            register("vibe_activate", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> VIBE_LEVEL =
+            register("vibe_level", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT));
+
     // 锁具/钥匙配对属性
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> LOCK_PAIRING_ID =
             register("lock_pairing_id", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));

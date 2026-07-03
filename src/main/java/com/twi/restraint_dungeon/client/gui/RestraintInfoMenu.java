@@ -1,10 +1,14 @@
 package com.twi.restraint_dungeon.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.network.payload.player_restraint.RequestOpenTargetInventoryPayload;
+import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils;
+import com.twi.restraint_dungeon.utils.restraint_stack.RestraintToolsUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -22,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -38,6 +43,8 @@ import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtil
 
 public class RestraintInfoMenu extends Screen {
     private final LivingEntity targetEntity;
+    private final boolean isSelf;
+    private final boolean isNPC;
     private final List<SlotLine> slotLines = new ArrayList<>();
 
     private static final double MAX_DISTANCE = 16.0;
@@ -62,19 +69,19 @@ public class RestraintInfoMenu extends Screen {
     };
 
     private static final Component[] SLOT_NAMES = new Component[]{
-            Component.translatable("part.restraint_dungeon.restraint_blindfold"),
-            Component.translatable("part.restraint_dungeon.restraint_gag"),
-            Component.translatable("part.restraint_dungeon.restraint_collar"),
-            Component.translatable("part.restraint_dungeon.restraint_body_bind"),
-            Component.translatable("part.restraint_dungeon.restraint_connection"),
-            Component.translatable("part.restraint_dungeon.restraint_arms_bind"),
-            Component.translatable("part.restraint_dungeon.restraint_hands_bind"),
-            Component.translatable("part.restraint_dungeon.restraint_legs_bind")
+            Component.translatable("part." + MODID + ".restraint_blindfold"),
+            Component.translatable("part." + MODID + ".restraint_gag"),
+            Component.translatable("part." + MODID + ".restraint_collar"),
+            Component.translatable("part." + MODID + ".restraint_body_bind"),
+            Component.translatable("part." + MODID + ".restraint_connection"),
+            Component.translatable("part." + MODID + ".restraint_arms_bind"),
+            Component.translatable("part." + MODID + ".restraint_hands_bind"),
+            Component.translatable("part." + MODID + ".restraint_legs_bind")
     };
 
     private final List<StatusIcon> statusIcons = List.of(
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/blindfold_status.png"),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/blindfold_status.png"),
                     entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.blindfolding").withStyle(ChatFormatting.DARK_RED),
                     RestraintUtils::isBeenBlindfold
             ),
@@ -84,17 +91,17 @@ public class RestraintInfoMenu extends Screen {
                     RestraintUtils::isBeenGag
             ),
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/arms_bind_status.png"),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/arms_bind_status.png"),
                     entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.binding_arms").withStyle(ChatFormatting.DARK_RED),
                     RestraintUtils::isBeenBindArms
             ),
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/hands_bind_status.png"),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/hands_bind_status.png"),
                     entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.binding_hands").withStyle(ChatFormatting.DARK_RED),
                     RestraintUtils::isBeenBindHands
             ),
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/legs_bind_status.png"),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/legs_bind_status.png"),
                     entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.binding_legs").withStyle(ChatFormatting.DARK_RED),
                     RestraintUtils::isBeenBindLegs
             ),
@@ -104,13 +111,18 @@ public class RestraintInfoMenu extends Screen {
                     entity -> getThrillLevel(entity) > 0
             ),
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/cut_status.png"),
-                    entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.near_cut_tool").withStyle(ChatFormatting.GREEN),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID,"textures/gui/screen/status_icon/on_device_status.png") ,
+                    entity -> Component.translatable("gui." + MODID + ".restraint_menu.status.on_device").withStyle(ChatFormatting.DARK_RED),
+                    RestraintDeviceUtils::isRidingRestraintDevice
+            ),
+            new StatusIcon(
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/cut_status.png"),
+                    entity -> Component.translatable("gui." + MODID + ".restraint_menu.status.near_cut_tool").withStyle(ChatFormatting.GREEN),
                     StruggleUtils::isNearCutStrugglingState
             ),
             new StatusIcon(
-                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/hook_status.png"),
-                    entity -> Component.translatable("gui.restraint_dungeon.restraint_menu.status.near_hook_tool").withStyle(ChatFormatting.GREEN),
+                    entity -> ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/hook_status.png"),
+                    entity -> Component.translatable("gui." + MODID + ".restraint_menu.status.near_hook_tool").withStyle(ChatFormatting.GREEN),
                     StruggleUtils::isNearHookStrugglingState
             )
 
@@ -120,9 +132,11 @@ public class RestraintInfoMenu extends Screen {
     private static final ResourceLocation STACK_ICON = ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/icon/restraint_stack.png");
     private static final ResourceLocation LOCK_ICON = ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/icon/restraint_lock.png");
 
-    public RestraintInfoMenu(LivingEntity targetEntity) {
+    public RestraintInfoMenu(LivingEntity targetEntity,boolean isSelf,boolean isNPC) {
         super(Component.translatable("gui.restraint_dungeon.title.restraint_info_menu"));
         this.targetEntity = targetEntity;
+        this.isSelf = isSelf;
+        this.isNPC = isNPC;
     }
 
     @Override
@@ -140,25 +154,61 @@ public class RestraintInfoMenu extends Screen {
             slotLines.add(new SlotLine(RESTRAINT_PARTS[i], SLOT_NAMES[i], slotStartX, yPos, this.width, this.height));
         }
 
-        int RenderOffset_buttonWidth = 80;
-        int RenderOffset_buttonHeight = 20;
+        List<ItemStack> tools = RestraintToolsUtils.getAllRestraintTools(this.targetEntity);
 
-        int buttonX = this.width - RenderOffset_buttonWidth - 20;
-        int buttonY = (int) (this.height * 0.75F) - (RenderOffset_buttonHeight / 2);
+        int buttonWidth = 80;
+        int buttonHeight = 20;
+        int buttonX = this.width - buttonWidth - 20;
 
-        this.addRenderableWidget(
-                Button.builder(
-                                Component.translatable("gui.restraint_dungeon.button.restraint_item_render_offset"),
-                                button -> {
-                                    net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-                                    if (mc.player != null) {
-                                        mc.setScreen(new RestraintItemRenderOffsetConfigScreen(mc.player));
+        int baseButtonY = (int) (this.height * 0.75F) - (buttonHeight / 2);
+
+        if (!tools.isEmpty()) {
+            int toolBtnY = baseButtonY - buttonHeight - 5;
+
+            this.addRenderableWidget(
+                    Button.builder(
+                                    Component.translatable("gui." + MODID + ".button.manage_tools"),
+                                    button -> {
+                                        Minecraft.getInstance().setScreen(new RestraintToolsConfigMenu(this.targetEntity, this.isSelf));
                                     }
-                                }
-                        )
-                        .bounds(buttonX, buttonY, RenderOffset_buttonWidth, RenderOffset_buttonHeight)
-                        .build()
-        );
+                            )
+                            .bounds(buttonX, toolBtnY, buttonWidth, buttonHeight)
+                            .build()
+            );
+        }
+
+        if(!isNPC){
+            if(isSelf){
+                this.addRenderableWidget(
+                        Button.builder(
+                                        Component.translatable("gui." + MODID + ".button.player_options"),
+                                        button -> {
+                                            Minecraft mc = Minecraft.getInstance();
+                                            if (mc.player != null) {
+                                                mc.setScreen(new PlayerRestraintOptionsMenu(mc.player));
+                                            }
+                                        }
+                                )
+                                .bounds(buttonX, baseButtonY, buttonWidth, buttonHeight)
+                                .build()
+                );
+            }
+            else{
+                if(isBeenFullyBind(targetEntity) && targetEntity.getData(ModAttachments.PLAYER_OPTION).canOpenInventory()){
+                    this.addRenderableWidget(
+                            Button.builder(
+                                            Component.translatable("gui." + MODID + ".button.open_target_inventory"),
+                                            button -> {
+                                                PacketDistributor.sendToServer(new RequestOpenTargetInventoryPayload(targetEntity.getUUID()));
+                                                this.onClose();
+                                            }
+                                    )
+                                    .bounds(buttonX, baseButtonY, buttonWidth, buttonHeight)
+                                    .build()
+                    );
+                }
+            }
+        }
 
         super.init();
     }
@@ -167,11 +217,20 @@ public class RestraintInfoMenu extends Screen {
     public void tick() {
         super.tick();
         Player player = Minecraft.getInstance().player;
-        if (targetEntity == null || !targetEntity.isAlive() || targetEntity.isRemoved() ||
-                (player != null && player.distanceToSqr(targetEntity) > MAX_DISTANCE * MAX_DISTANCE)) {
+
+        if (targetEntity == null || !targetEntity.isAlive() || targetEntity.isRemoved()) {
             this.onClose();
             return;
         }
+
+        if (player != null) {
+            double distSqr = player.distanceToSqr(targetEntity.getX(), targetEntity.getY(), targetEntity.getZ());
+            if (distSqr > MAX_DISTANCE * MAX_DISTANCE) {
+                this.onClose();
+                return;
+            }
+        }
+
         updateSlotItems();
     }
 
@@ -260,7 +319,7 @@ public class RestraintInfoMenu extends Screen {
     }
 
     private ResourceLocation getGagStatusTexture(LivingEntity entity) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, isBeenHeavyGag(entity) ? "textures/gui/screen/state_icon/heavy_gag_status.png" : "textures/gui/screen/state_icon/gag_status.png");
+        return ResourceLocation.fromNamespaceAndPath(MODID, isBeenHeavyGag(entity) ? "textures/gui/screen/status_icon/heavy_gag_status.png" : "textures/gui/screen/status_icon/gag_status.png");
     }
 
     private Component getGagStatusTooltips(LivingEntity entity) {
@@ -270,7 +329,7 @@ public class RestraintInfoMenu extends Screen {
 
     private ResourceLocation getThrillLevelStatusTexture(LivingEntity entity) {
         int level = Mth.clamp(getThrillLevel(entity), 1, 10);
-        return ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/state_icon/thrill_level/thrill_level_" + level + ".png");
+        return ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/screen/status_icon/thrill_level/thrill_level_" + level + ".png");
     }
 
     private Component getThrillLevelStatusTooltips(LivingEntity entity) {

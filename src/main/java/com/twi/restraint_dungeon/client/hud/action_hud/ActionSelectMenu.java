@@ -9,9 +9,15 @@ import com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
@@ -26,16 +32,18 @@ public class ActionSelectMenu extends Screen {
 
     private final Player actionPlayer;
     private final @Nullable LivingEntity target;
+    private final HitResult hitResult;
     private final List<MenuEntry> entries = new ArrayList<>();
     private final float innerR = 45f;
     private final float outerR = 105f;
 
     public record MenuEntry(Component name, String actionId) {}
 
-    public ActionSelectMenu(Player actionPlayer, @Nullable LivingEntity target) {
+    public ActionSelectMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result) {
         super(Component.literal("Action Menu"));
         this.target = target;
         this.actionPlayer = actionPlayer;
+        this.hitResult = result;
 
         String carryingState = PlayerCarryUtils.getCarryState(actionPlayer);
         boolean isCarryTarget = PlayerCarryUtils.isTargetFlag(actionPlayer);
@@ -44,18 +52,16 @@ public class ActionSelectMenu extends Screen {
         for (String id : ActionManager.getRegisteredIds()) {
             BaseAction action = ActionManager.get(id);
 
-            if (action != null && action.shouldShowInMenu(actionPlayer, target, carryingState,isCarryTarget)) {
+            if (action != null && action.shouldShowInMenu(actionPlayer, target,result, carryingState,isCarryTarget)) {
                 entries.add(new MenuEntry(action.getDisplayName(), id));
             }
         }
 
-        // 如果没有可用动作，显示一个置灰的“无”
         if (entries.isEmpty()) {
             entries.add(new MenuEntry(Component.translatable("action." + MODID + ".none"), "NONE"));
         }
     }
 
-    // --- 渲染逻辑部分 (保持你提供的绘制代码不变) ---
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -68,22 +74,23 @@ public class ActionSelectMenu extends Screen {
             float startAngle = -90f - (i * sectorStep);
             float endAngle = -90f - ((i + 1) * sectorStep);
 
+            MenuEntry entry = entries.get(i);
+            boolean isNone = entry.actionId().equals("NONE");
             boolean hovered;
-            if (entryCount == 1) {
+            if (isNone) {
+                hovered = false;
+            } else if (entryCount == 1) {
                 double dist = Math.sqrt(Math.pow(mouseX - cx, 2) + Math.pow(mouseY - cy, 2));
                 hovered = (dist >= innerR && dist <= outerR);
             } else {
                 hovered = isMouseInSector(mouseX, mouseY, cx, cy, startAngle, endAngle);
             }
 
-            MenuEntry entry = entries.get(i);
-            boolean isNone = entry.actionId().equals("NONE");
-
             int color = isNone ? 0x44000000 : (hovered ? 0xAA444444 : 0x88000000);
             drawRadialSector(graphics, cx, cy, innerR, outerR, startAngle, endAngle, color);
 
-            if (hovered && !isNone) {
-                drawRadialOutline(graphics, cx, cy, innerR, outerR, startAngle, endAngle, 0xFFFFFFFF);
+            if (hovered) {
+                drawRadialOutline(graphics, cx, cy, innerR, outerR, startAngle, endAngle, 0xFFFFFFFF, entryCount);
             }
 
             double textRad = Math.toRadians((startAngle + endAngle) / 2f);
@@ -95,7 +102,7 @@ public class ActionSelectMenu extends Screen {
         }
     }
 
-    // [在此处保留你提供的 drawRadialSector, drawRadialOutline, isMouseInSector 方法...]
+
 
     private void drawRadialSector(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color) {
         RenderSystem.enableBlend();
@@ -111,17 +118,19 @@ public class ActionSelectMenu extends Screen {
         float g = (color >> 8 & 255) / 255f;
         float b = (color & 255) / 255f;
 
-        for (float angle = a1; angle >= a2; angle -= 2f) {
+        for (float angle = a1; angle >= a2; angle -= 1f) {
             double rad = Math.toRadians(angle);
-            float cos = (float)Math.cos(rad);
-            float sin = (float)Math.sin(rad);
+            float cos = (float) Math.cos(rad);
+            float sin = (float) Math.sin(rad);
             buffer.addVertex(matrix, cx + cos * r1, cy + sin * r1, 0).setColor(r, g, b, a);
             buffer.addVertex(matrix, cx + cos * r2, cy + sin * r2, 0).setColor(r, g, b, a);
         }
         BufferUploader.drawWithShader(buffer.buildOrThrow());
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
     }
 
-    private void drawRadialOutline(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color) {
+    private void drawRadialOutline(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color, int entryCount) {
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tesselator = Tesselator.getInstance();
@@ -129,19 +138,44 @@ public class ActionSelectMenu extends Screen {
 
         float a = (color >> 24 & 255) / 255f, r = (color >> 16 & 255) / 255f, g = (color >> 8 & 255) / 255f, b = (color & 255) / 255f;
 
-        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-        for (float angle = a1; angle >= a2; angle -= 2f) {
-            double rad = Math.toRadians(angle);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r2, cy + (float)Math.sin(rad) * r2, 0).setColor(r, g, b, a);
-        }
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        BufferBuilder buffer;
 
-        buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-        for (float angle = a2; angle <= a1; angle += 2f) {
-            double rad = Math.toRadians(angle);
-            buffer.addVertex(matrix, cx + (float)Math.cos(rad) * r1, cy + (float)Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+        if (entryCount == 1) {
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r2, cy + (float) Math.sin(rad) * r2, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r1, cy + (float) Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
+        } else {
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+
+            double radStart = Math.toRadians(a1);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radStart) * r1, cy + (float) Math.sin(radStart) * r1, 0).setColor(r, g, b, a);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radStart) * r2, cy + (float) Math.sin(radStart) * r2, 0).setColor(r, g, b, a);
+
+            for (float angle = a1; angle >= a2; angle -= 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r2, cy + (float) Math.sin(rad) * r2, 0).setColor(r, g, b, a);
+            }
+
+            double radEnd = Math.toRadians(a2);
+            buffer.addVertex(matrix, cx + (float) Math.cos(radEnd) * r2, cy + (float) Math.sin(radEnd) * r2, 0).setColor(r, g, b, a);
+
+            for (float angle = a2; angle <= a1; angle += 1f) {
+                double rad = Math.toRadians(angle);
+                buffer.addVertex(matrix, cx + (float) Math.cos(rad) * r1, cy + (float) Math.sin(rad) * r1, 0).setColor(r, g, b, a);
+            }
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
         }
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        RenderSystem.disableBlend();
     }
 
     private boolean isMouseInSector(double mx, double my, float cx, float cy, float a1, float a2) {
@@ -180,11 +214,26 @@ public class ActionSelectMenu extends Screen {
     private void executeEntry(MenuEntry entry) {
         if (entry.actionId().equals("NONE")) return;
 
-        // 获取目标的 Runtime ID，如果没有目标则传 -1
-        int targetId = (target != null) ? target.getId() : -1;
+        int entityId = -1;
+        BlockPos blockPos = null;
+        Direction direction = Direction.UP;
+        Vec3 hitVec = this.hitResult != null ? this.hitResult.getLocation() : Vec3.ZERO;
 
-        // 发送网络包到服务端请求执行 Action
-        PacketDistributor.sendToServer(new ActionExecutePayload(entry.actionId(), targetId));
+        if (this.hitResult instanceof EntityHitResult entityHit) {
+            entityId = entityHit.getEntity().getId();
+        }
+        else if (this.hitResult instanceof BlockHitResult blockHit && blockHit.getType() != HitResult.Type.MISS) {
+            blockPos = blockHit.getBlockPos();
+            direction = blockHit.getDirection();
+        }
+
+        PacketDistributor.sendToServer(new ActionExecutePayload(
+                entry.actionId(),
+                entityId,
+                java.util.Optional.ofNullable(blockPos),
+                direction,
+                hitVec
+        ));
 
         this.onClose();
     }

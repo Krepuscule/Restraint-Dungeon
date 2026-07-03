@@ -1,8 +1,10 @@
 package com.twi.restraint_dungeon.item;
 
 import com.twi.restraint_dungeon.block.ModBlocks;
+import com.twi.restraint_dungeon.item.materials.ModMaterials;
 import com.twi.restraint_dungeon.item.restraint_item.ModRestraintItems;
 import com.twi.restraint_dungeon.item.restraint_lock.ModLockAndKeyItems;
+import com.twi.restraint_dungeon.item.restraint_tool.ModRestraintTools;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -22,7 +24,7 @@ public class ModCreativeTabs {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> RESTRAINT_TAB =
             CREATIVE_MODE_TABS.register("restraints_creative_mode_tab", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("creative_mode_tab.restraint_dungeon.restraints.title"))
+                    .title(Component.translatable("creative_mode_tab." + MODID + ".restraints.title"))
                     .icon(() -> new ItemStack(ModRestraintItems.ROPE.get()))
                     .displayItems((parameters, output) -> {
 
@@ -32,6 +34,7 @@ public class ModCreativeTabs {
                         output.accept(ModRestraintItems.BALL_GAG.get());
                         output.accept(ModRestraintItems.BLINDFOLD_MASK.get());
                         output.accept(ModRestraintItems.LEATHER_COLLAR.get());
+                        output.accept(ModRestraintItems.BELL_COLLAR.get());
                         output.accept(ModRestraintItems.CURSED_COLLAR.get());
                         output.accept(ModRestraintItems.LEATHER_CUFFS.get());
                         output.accept(ModRestraintItems.ARM_BINDER.get());
@@ -52,19 +55,31 @@ public class ModCreativeTabs {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> LOCK_AND_KEY_TAB =
             CREATIVE_MODE_TABS.register("locks_and_keys_creative_mode_tab", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("creative_mode_tab.restraint_dungeon.restraint_locks_and_keys.title"))
+                    .title(Component.translatable("creative_mode_tab." + MODID + ".restraint_locks_and_keys.title"))
                     .icon(() -> new ItemStack(ModLockAndKeyItems.IRON_LOCK.get()))
                     .displayItems((parameters, output) -> {
 
                         output.accept(ModLockAndKeyItems.IRON_LOCK.get());
                         output.accept(ModLockAndKeyItems.IRON_KEY.get());
+                        output.accept(ModLockAndKeyItems.PERSONAL_COMMON_LOCK.get());
+                        output.accept(ModLockAndKeyItems.PERSONAL_COMMON_KEY.get());
+
+                    })
+                    .build());
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> RESTRAINT_TOOLS_TAB =
+            CREATIVE_MODE_TABS.register("restraint_tools_creative_mode_tab", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("creative_mode_tab." + MODID + ".restraint_tools.title"))
+                    .icon(() -> new ItemStack(ModRestraintTools.VIBRATOR.get()))
+                    .displayItems((parameters, output) -> {
+                        output.accept(ModRestraintTools.VIBRATOR.get());
 
                     })
                     .build());
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> RESTRAINT_BLOCK_TAB =
             CREATIVE_MODE_TABS.register("restraint_device_creative_mode_tab", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("creative_mode_tab.restraint_dungeon.restraint_device_title"))
+                    .title(Component.translatable("creative_mode_tab." + MODID + ".restraint_device_title"))
                     .icon(() -> ModBlocks.CROSS_MAP.get("oak").get().asItem().getDefaultInstance())
                     .displayItems((parameters, output) -> {
                         addMapToTab(ModBlocks.CROSS_MAP, output);
@@ -72,9 +87,18 @@ public class ModCreativeTabs {
                         addMapToTab(ModBlocks.X_CROSS_MAP, output);
                         addMapToTab(ModBlocks.TRIANGLE_HORSE_MAP, output);
 
-                        // 3. 遍历金属拘束具
                         addMapToTab(ModBlocks.CAGE_MAP, output);
                         addMapToTab(ModBlocks.DOLL_STAND_MAP, output);
+
+                    })
+                    .build());
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> RESTRAINT_MATERIALS =
+            CREATIVE_MODE_TABS.register("restraints_materials_creative_mode_tab", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("creative_mode_tab." + MODID + ".restraint_materials_title"))
+                    .icon(() -> ModMaterials.RUBBER.get().getDefaultInstance())
+                    .displayItems((parameters, output) -> {
+                        output.accept(ModMaterials.RUBBER.get());
 
                     })
                     .build());

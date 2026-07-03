@@ -8,13 +8,18 @@ import com.twi.restraint_dungeon.block.ModBlockEntities;
 import com.twi.restraint_dungeon.block.ModBlocks;
 import com.twi.restraint_dungeon.block.restraint_device.seat_entity.SeatEntities;
 import com.twi.restraint_dungeon.client.command.ModArgumentTypes;
+import com.twi.restraint_dungeon.client.ModMenuTypes;
+import com.twi.restraint_dungeon.client.sound.ModSounds;
 import com.twi.restraint_dungeon.effect.ModEffects;
 import com.twi.restraint_dungeon.effect.ModPotions;
+import com.twi.restraint_dungeon.entity.npc.ModNPCs;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.ModCarryTypes;
 import com.twi.restraint_dungeon.item.ModCreativeTabs;
 import com.twi.restraint_dungeon.item.ModDataComponents;
+import com.twi.restraint_dungeon.item.materials.ModMaterials;
 import com.twi.restraint_dungeon.item.restraint_item.ModRestraintItems;
 import com.twi.restraint_dungeon.item.restraint_lock.ModLockAndKeyItems;
+import com.twi.restraint_dungeon.item.restraint_tool.ModRestraintTools;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -34,14 +39,19 @@ public class RestraintDungeon {
         ModDataComponents.COMPONENTS.register(modEventBus);
         ModAttributes.ATTRIBUTES.register(modEventBus);
 
+        ModSounds.SOUNDS.register(modEventBus);
+
         ModRestraintItems.RESTRAINT_ITEMS.register(modEventBus);
         ModLockAndKeyItems.LOCK_AND_KEY_ITEMS.register(modEventBus);
+        ModRestraintTools.RESTRAINT_TOOLS.register(modEventBus);
+        ModMaterials.MATERIALS.register(modEventBus);
 
         SeatEntities.SEAT_ENTITIES.register(modEventBus);
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlocks.BLOCK_ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
 
+        ModMenuTypes.MENUS.register(modEventBus);
         ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
 
         ModEffects.EFFECTS.register(modEventBus);
@@ -51,5 +61,7 @@ public class RestraintDungeon {
 
         ModCarryTypes.register();
         ModActions.register();
+
+        ModNPCs.register(modEventBus);
     }
 }

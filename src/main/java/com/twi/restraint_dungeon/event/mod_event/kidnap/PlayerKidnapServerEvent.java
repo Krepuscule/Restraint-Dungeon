@@ -2,7 +2,7 @@ package com.twi.restraint_dungeon.event.mod_event.kidnap;
 
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
-import com.twi.restraint_dungeon.network.payload.player_kidnap.KidnapInterruptStrugglePayload;
+import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -82,7 +82,7 @@ public class PlayerKidnapServerEvent {
         // 打断挣扎逻辑
         if (target instanceof ServerPlayer targetPlayer) {
              if (getIsStruggling(targetPlayer)){
-                 PacketDistributor.sendToPlayer(targetPlayer, new KidnapInterruptStrugglePayload());
+                 PacketDistributor.sendToPlayer(targetPlayer, new InterruptStrugglePayload());
              }
         }
 

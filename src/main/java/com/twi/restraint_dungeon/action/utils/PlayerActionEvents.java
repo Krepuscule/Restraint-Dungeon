@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -47,6 +48,7 @@ public class PlayerActionEvents {
             if (PlayerActionUtils.isTarget(mc.player)) return;
 
             LivingEntity target = null;
+            HitResult hitResult = mc.hitResult;
 
             if (!mc.player.getPassengers().isEmpty()) {
                 Entity passenger = mc.player.getPassengers().get(0);
@@ -59,9 +61,9 @@ public class PlayerActionEvents {
                 target = living;
             }
 
-            if(target != null) {
-                mc.setScreen(new ActionSelectMenu(mc.player, target));
-            }
+
+            mc.setScreen(new ActionSelectMenu(mc.player, target,hitResult));
+
         }
     }
 

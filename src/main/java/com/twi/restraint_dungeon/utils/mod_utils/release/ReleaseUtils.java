@@ -3,6 +3,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.release;
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,11 +15,16 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.RestraintDungeon.NULL_UUID;
 import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.isKidnappingActive;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.isChangingPosition;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils.isSelfBondaging;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getIsStruggling;
 
 public class ReleaseUtils {
@@ -123,7 +129,7 @@ public class ReleaseUtils {
     public static ReleaseResult targetCanBeRelease(LivingEntity target, LivingEntity actionEntity) {
         // 自身限制检查
         if (isBeenBindArms(actionEntity) || isBeenBindHands(actionEntity)) {
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.has_been_bind").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.has_been_bind").withStyle(ChatFormatting.RED));
         }
 
         // 手持物品检查
@@ -131,33 +137,44 @@ public class ReleaseUtils {
 
 //        if(!actionEntity.getMainHandItem().isEmpty() || !(actionEntity.getMainHandItem().getItem() instanceof ReleaseToolItem)){}
         if(!actionEntity.getMainHandItem().isEmpty()){
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.need_main_hand_empty_or_release_tool").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.need_main_hand_empty_or_release_tool").withStyle(ChatFormatting.RED));
         }
 
         // 正在释放其他目标的检查
         if (isReleaseActive(actionEntity) && isReleaser(actionEntity)) {
             if (!getPartnerUUID(actionEntity).equals(target.getUUID())) {
-                return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.already_releasing").withStyle(ChatFormatting.RED));
+                return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.already_releasing").withStyle(ChatFormatting.RED));
             }
         }
 
         // 目标状态检查
         if (getIsStruggling(target)) {
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.need_stop_struggle").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.need_stop_struggle").withStyle(ChatFormatting.RED));
+        }
+
+        if(isChangingPosition(target)
+                || isDoingAction(target)
+                || isSelfBondaging(target)
+                || (target instanceof Player targetPlayer_1 && isPlayerRestraintMoving(targetPlayer_1))
+                || (target instanceof Player targetPlayer_2) && isCarrier(targetPlayer_2)
+                || isBeingCarried(target)){
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.invalid_target").withStyle(ChatFormatting.DARK_RED));
         }
 
         // 目标冲突检查
         if (isKidnappingActive(target)
                 || (isReleaseActive(target) && !getPartnerUUID(target).equals(actionEntity.getUUID()))) {
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.target_is_being_occupy").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.target_is_being_occupy").withStyle(ChatFormatting.RED));
         }
 
         // 发起者状态冲突
         if (isKidnappingActive(actionEntity)
+                || isDoingAction(actionEntity)
+                || isSelfBondaging(actionEntity)
                 || getIsStruggling(actionEntity)
                 || isChangingPosition(actionEntity)
                 || (actionEntity instanceof Player actionPlayer && isPlayerRestraintMoving(actionPlayer))) {
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.cant_releasing_state").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.cant_releasing_state").withStyle(ChatFormatting.RED));
         }
 
         // 执行部位与具体物品检查
@@ -170,7 +187,7 @@ public class ReleaseUtils {
         // 获取该部位所有拘束具
         List<ItemStack> restraints = getAllPartRestraint(target, part);
         if (restraints.isEmpty()) {
-            return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.no_restraint").withStyle(ChatFormatting.RED));
+            return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.no_restraint").withStyle(ChatFormatting.RED));
         }
 
 
@@ -180,13 +197,13 @@ public class ReleaseUtils {
         if (stack.getItem() instanceof RestraintItem ri) {
             // 锁定检查
             if (!ri.getLockType(target,stack).isEmpty()) {
-                return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.has_been_locked").withStyle(ChatFormatting.RED));
+                return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.has_been_locked").withStyle(ChatFormatting.RED));
             }
 
             // 距离检查
             double dist = actionEntity.distanceTo(target);
             if (dist > ri.getReleaseDistance(actionEntity, target, stack, part)) {
-                return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.too_far").withStyle(ChatFormatting.RED));
+                return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.too_far").withStyle(ChatFormatting.RED));
             }
 
             // 特殊逻辑：连接类拘束具
@@ -200,7 +217,7 @@ public class ReleaseUtils {
             return canReleaseMsg == null ? ReleaseResult.SUCCESS : ReleaseResult.fail(canReleaseMsg);
         }
 
-        return ReleaseResult.fail(Component.translatable("event.restraint_dungeon.release.no_restraint").withStyle(ChatFormatting.RED));
+        return ReleaseResult.fail(Component.translatable("event." + MODID + ".release.no_restraint").withStyle(ChatFormatting.RED));
     }
 
 
@@ -226,10 +243,10 @@ public class ReleaseUtils {
 
                 // 发送反馈消息
                 if (actionEntity instanceof Player actionPlayer) {
-                    actionPlayer.displayClientMessage(Component.translatable("event.restraint_dungeon.release.done").withStyle(ChatFormatting.GREEN), true);
+                    actionPlayer.displayClientMessage(Component.translatable("event." + MODID + ".release.done").withStyle(ChatFormatting.GREEN), true);
                 }
                 if (target instanceof Player targetPlayer) {
-                    targetPlayer.displayClientMessage(Component.translatable("event.restraint_dungeon.release.released").withStyle(ChatFormatting.GREEN), true);
+                    targetPlayer.displayClientMessage(Component.translatable("event." + MODID + ".release.released").withStyle(ChatFormatting.GREEN), true);
                 }
 
                 ri.onReleaseOff(actionEntity, target, stack, part, slotIndex);

@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
@@ -74,9 +75,9 @@ public class RestraintServerHandler {
         setChangingPosition(entity, true);
         SERVER_TIMERS.put(entity.getUUID(), new PendingChange(ANIMATION_TICKS, nextPos));
 
-        NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(entity,prevPos, nextPos));
+        NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(entity,prevPos, nextPos,ItemStack.EMPTY));
         updateRestraintPosition(entity,nextPos);
-        NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(entity,prevPos, nextPos));
+        NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(entity,prevPos, nextPos,ItemStack.EMPTY));
 
     }
 

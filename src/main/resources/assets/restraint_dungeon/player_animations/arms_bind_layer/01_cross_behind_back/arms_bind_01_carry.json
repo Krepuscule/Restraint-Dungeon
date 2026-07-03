@@ -124,6 +124,68 @@
 					}
 				}
 			}
+		},
+		"arms_bind_01_carry_rope_connection_target": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [92, 60, 65]
+						},
+						"4.0": {
+							"vector": [92, 60, 65]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [1, 0, 1]
+						},
+						"4.0": {
+							"vector": [1, 0, 1]
+						}
+					}
+				},
+				"left_arm": {
+					"rotation": {
+						"0.0": {
+							"vector": [92, -60, -65]
+						},
+						"4.0": {
+							"vector": [92, -60, -65]
+						}
+					},
+					"position": {
+						"0.0": {
+							"vector": [-1, 0, 1]
+						},
+						"4.0": {
+							"vector": [-1, 0, 1]
+						}
+					}
+				},
+				"left_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-15, 0, 0]
+						},
+						"4.0": {
+							"vector": [-15, 0, 0]
+						}
+					}
+				},
+				"right_arm_bend": {
+					"rotation": {
+						"0.0": {
+							"vector": [-15, 0, 0]
+						},
+						"4.0": {
+							"vector": [-15, 0, 0]
+						}
+					}
+				}
+			}
 		}
 	}
 }

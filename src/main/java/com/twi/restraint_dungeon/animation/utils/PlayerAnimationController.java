@@ -7,12 +7,19 @@ import com.twi.restraint_dungeon.action.type.CarryingAction;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.ArmsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.LegsPose;
+import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
+import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.HitResult;
 
 import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDevice;
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDeviceContext;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
@@ -25,6 +32,19 @@ public class PlayerAnimationController {
         ArmsPose armsPose = getArmsPose(player);
         RestraintPosition position = getRestraintPosition(player);
 
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindAnimation(player) + "_arms";
+            }
+        }else if(position == RestraintPosition.RIDING){
+            Block block = getRestraintDevice(player);
+            RestraintDeviceUtils.DeviceContext context = getRestraintDeviceContext(player);
+            if (context != null && block instanceof RestraintDevice device && device.canBindArms(context.state(), context.pos())) {
+                return device.getID().toLowerCase() + "_arms";
+            }
+        }
+
         if(armsPose == ArmsPose.NONE){
             return "arms_none_" + position.toString().toLowerCase();
         }else {
@@ -35,6 +55,19 @@ public class PlayerAnimationController {
     public static String getPlayerLegsPoseAnimation(ServerPlayer player) {
         LegsPose legsPose = getLegsPose(player);
         RestraintPosition position = getRestraintPosition(player);
+
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindAnimation(player) + "_legs";
+            }
+        }else if(position == RestraintPosition.RIDING){
+            Block block = getRestraintDevice(player);
+            RestraintDeviceUtils.DeviceContext context = getRestraintDeviceContext(player);
+            if (context != null && block instanceof RestraintDevice device && device.canBindLegs(context.state(), context.pos())) {
+                return device.getID().toLowerCase() + "_legs";
+            }
+        }
 
         if(legsPose == LegsPose.NONE){
             return "legs_none_" + position.toString().toLowerCase();
@@ -47,8 +80,49 @@ public class PlayerAnimationController {
 
         RestraintPosition position = getRestraintPosition(player);
 
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindAnimation(player) + "_body";
+            }
+        }else if(position == RestraintPosition.RIDING){
+            Block block = getRestraintDevice(player);
+            if(block instanceof RestraintDevice device){
+                return device.getID().toLowerCase() + "_body";
+            }
+        }
         return "body_" + position.toString().toLowerCase();
     }
+
+    // --------------------------------------- 连接拘束具动画 ---------------------------------------------------
+    public static String getPlayerConnectionArmsPoseTransitionAnimation(ServerPlayer player,RestraintItem ri){
+        return ri.getConnectBindTranslateAnimation(player) + "_arms";
+    }
+
+    public static String getPlayerConnectionLegsPoseTransitionAnimation(ServerPlayer player,RestraintItem ri){
+
+        return ri.getConnectBindTranslateAnimation(player) + "_legs";
+    }
+
+    public static String getPlayerConnectionBodyTransitionAnimation(ServerPlayer player,RestraintItem ri){
+
+        return ri.getConnectBindTranslateAnimation(player) + "_body";
+
+    }
+
+    public static String getPlayerConnectionArmsPoseReleaseAnimation(ServerPlayer player,RestraintItem ri){
+        return ri.getConnectBindReleaseAnimation(player) + "_arms";
+    }
+
+    public static String getPlayerConnectionLegsPoseReleaseAnimation(ServerPlayer player,RestraintItem ri){
+        return ri.getConnectBindReleaseAnimation(player) + "_legs";
+    }
+
+    public static String getPlayerConnectionBodyReleaseAnimation(ServerPlayer player,RestraintItem ri){
+
+        return ri.getConnectBindReleaseAnimation(player) + "_body";
+    }
+
     // ----------------------------------------- 潜行切换动画 ---------------------------------------------------
     public static String getPlayerCrouchingAnimation(ServerPlayer player) {
         ArmsPose armsPose = getArmsPose(player);
@@ -133,6 +207,14 @@ public class PlayerAnimationController {
     public static String getStrugglingArmsPoseAnimation(ServerPlayer player, PlayerRestraintPart part) {
         ArmsPose armsPose = getArmsPose(player);
         RestraintPosition position = getRestraintPosition(player);
+
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindStrugglingAnimation(player) + "_arms";
+            }
+        }
+
         if(armsPose == ArmsPose.NONE && !isBeenBindArms(player)){
             if(part != PlayerRestraintPart.restraint_connection && part != PlayerRestraintPart.restraint_legs_bind){
                 return "arms_none_struggle_" + part.toString().toLowerCase();
@@ -156,6 +238,14 @@ public class PlayerAnimationController {
     public static String getStrugglingLegsPoseAnimation(ServerPlayer player,PlayerRestraintPart part) {
         LegsPose legsPose = getLegsPose(player);
         RestraintPosition position = getRestraintPosition(player);
+
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindStrugglingAnimation(player) + "_legs";
+            }
+        }
+
         if(legsPose == LegsPose.NONE){
             if(isBeenBindArms(player) && part != PlayerRestraintPart.restraint_connection){
                 return "legs_none_struggle_" + position.toString().toLowerCase();
@@ -182,6 +272,14 @@ public class PlayerAnimationController {
 
     public static String getStrugglingBodyAnimation(ServerPlayer player,PlayerRestraintPart part) {
         RestraintPosition position = getRestraintPosition(player);
+
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(player);
+            if(stack.getItem() instanceof RestraintItem restraintItem){
+                return restraintItem.getConnectBindStrugglingAnimation(player) + "_body";
+            }
+        }
+
         if(!isBeenBindArms(player) && part != PlayerRestraintPart.restraint_legs_bind){
             return "body_" + position.toString().toLowerCase();
         }else{
@@ -223,23 +321,25 @@ public class PlayerAnimationController {
 
     // --------------------------------------- 动作相关动画 ---------------------------------------------------
 
-    public static String getActionFullBodyAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+    public static String  getActionFullBodyAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
 
         if(player == null || action == null || action.getActionId().equals("NONE")) return null;
 
-        if(action instanceof AnimAction animAction){
-            if(isTarget){
-                return "action_anim_" + animAction.getActionId().toLowerCase() + "_target";
-            }else{
-                return "action_anim_" + animAction.getActionId().toLowerCase() + "_action";
-            }
-        }else if(action instanceof CarryAction carryAction){
-            if(isTarget){
-                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_target";
-            }else{
-                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_action";
-            }
-        }else if(action instanceof CarryingAction carryingAction){
+//        if(action instanceof AnimAction animAction){
+//            if(isTarget){
+//                return "action_anim_" + animAction.getActionId().toLowerCase() + "_target";
+//            }else{
+//                return "action_anim_" + animAction.getActionId().toLowerCase() + "_action";
+//            }
+//        }else if(action instanceof CarryAction carryAction){
+//            if(isTarget){
+//                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_target";
+//            }else{
+//                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_action";
+//            }
+//        }else
+
+            if(action instanceof CarryingAction carryingAction){
             CarryType type = getCurrentCarryType(player);
             if(type == null || type.getID().equals("NONE")) return null;
 

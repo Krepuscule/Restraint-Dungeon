@@ -3,6 +3,8 @@ package com.twi.restraint_dungeon.item.restraint_item.restraints;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -20,8 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class ArmBinderItem extends RestraintItem {
 
@@ -40,7 +44,7 @@ public class ArmBinderItem extends RestraintItem {
         boundMap.put(PlayerRestraintPart.restraint_arms_bind, List.of(PlayerRestraintPart.restraint_hands_bind));
         this.setBoundPartMap(boundMap);
 
-        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_arms_bind.toString()));
+        this.setCanEquipPartList(List.of(PlayerRestraintPart.restraint_arms_bind));
 
         Map<String, List<String>> connectMap = new HashMap<>();
         connectMap.put(PlayerRestraintPart.restraint_arms_bind.toString(), List.of(PlayerRestraintPart.restraint_hands_bind.toString()));
@@ -50,34 +54,77 @@ public class ArmBinderItem extends RestraintItem {
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> void applyRestraintVisibility(
-            M child, M parent,PlayerRestraintPart part, T player) {
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
+    }
+
+    @Override
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity){
 
         child.body.visible = parent.body.visible;
         child.leftArm.visible = parent.leftArm.visible;
         child.rightArm.visible = parent.rightArm.visible;
 
-        if(shouldRenderSencondLayer(child,parent,part,player)){
-            setSecondLayerVisibility(child,parent,part,player);
+        if(shouldRenderSecondLayer(child,parent,part,entity)){
+            setSecondLayerVisibility(child,parent,part,entity);
         }
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> boolean shouldRenderSencondLayer(M child, M parent,PlayerRestraintPart part, T player){
+    public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
+            M child, M parent, PlayerRestraintPart part, T entity) {
         return false;
     }
 
     @Override
-    public <T extends Player, M extends PlayerModel<T>> void setSecondLayerVisibility(
-            M child, M parent,PlayerRestraintPart part, T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity){
 
-        child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-        child.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-        child.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+        if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
+            if(entity instanceof Player player){
+                playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+            }else{
+                playerChild.jacket.visible = true;
+                playerChild.leftSleeve.visible = true;
+                playerChild.rightSleeve.visible = true;
+            }
 
-        child.jacket.copyFrom(parent.body);
-        child.leftSleeve.copyFrom(parent.leftArm);
-        child.rightSleeve.copyFrom(parent.rightArm);
+            playerChild.jacket.copyFrom(playerParent.body);
+            playerChild.leftSleeve.copyFrom(playerParent.leftArm);
+            playerChild.rightSleeve.copyFrom(playerParent.rightArm);
+        }
     }
 
     @Override

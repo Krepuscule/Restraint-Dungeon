@@ -26,8 +26,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getTargetPart;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.canBeLock;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.restraintCanBeLock;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getPartLastRestraint;
 
 public class RestraintLockItem extends Item {
@@ -43,6 +44,42 @@ public class RestraintLockItem extends Item {
 
     public void setPairingID(ItemStack stack, UUID id) {
         stack.set(ModDataComponents.LOCK_PAIRING_ID, id);
+    }
+
+    public boolean shouldReduceStackWhenUse(Player player,ItemStack stack){
+        return !player.isCreative();
+    }
+
+    public boolean shouldDropLockStackWhenUnlock(Player player,ItemStack lockStack,ItemStack keyStack){
+        return true;
+    }
+
+    public String getShowPairingPrefixOnDevice(ItemStack stack){
+        if(getPairingID(stack) != null){
+            return Component.translatable("item." + MODID + ".lock.info_show_on_device").getString();
+        }else{
+            return null;
+        }
+    }
+
+    public boolean shouldPairingIDUseMagicFont(ItemStack stack){
+        return true;
+    }
+
+    public String getShowPairingInfoOnDevice(ItemStack stack){
+        if(getPairingID(stack) != null){
+            UUID id = getPairingID(stack);
+            String rawSig = id.toString().substring(0, 8).toUpperCase();
+            StringBuilder magicSig = new StringBuilder();
+            for (char c : rawSig.toCharArray()) {
+                if (Character.isDigit(c)) magicSig.append((char) ('G' + (c - '0')));
+                else magicSig.append(c);
+            }
+
+            return Component.literal(magicSig.toString()).getString();
+        }else{
+            return null;
+        }
     }
 
     @Override
@@ -74,10 +111,8 @@ public class RestraintLockItem extends Item {
     private void handlePairing(Player player, ItemStack lockStack, ItemStack keyStack, RestraintLockItem lockItem, RestraintKeyItem keyItem) {
         if (lockItem.getPairingID(lockStack) != null) {
             player.displayClientMessage(Component.translatable("item.restraint_dungeon.message.lock.has_been_paired").withStyle(ChatFormatting.RED), true);
-            return;
         } else if (keyItem.getPairingID(keyStack) != null) {
             player.displayClientMessage(Component.translatable("item.restraint_dungeon.message.key.has_been_paired").withStyle(ChatFormatting.RED), true);
-            return;
         }else{
             UUID newID = UUID.randomUUID();
             lockItem.setPairingID(lockStack, newID);
@@ -103,12 +138,15 @@ public class RestraintLockItem extends Item {
 
         ItemStack targetRestraint = getPartLastRestraint(target,bodyPart);
 
-        if (canBeLock(target,bodyPart,targetRestraint) != null) {
-            operator.displayClientMessage(Objects.requireNonNull(canBeLock(target, bodyPart, targetRestraint)), true);
+        if (restraintCanBeLock(target,bodyPart,targetRestraint) != null) {
+            operator.displayClientMessage(Objects.requireNonNull(restraintCanBeLock(target, bodyPart, targetRestraint)), true);
         }else{
             if(targetRestraint.getItem() instanceof RestraintItem restraintItem){
-                restraintItem.setLockType(target,targetRestraint, stack);
-                stack.shrink(1);
+
+                restraintItem.setLockType(target,targetRestraint, stack.copy());
+                if(shouldReduceStackWhenUse(operator,stack)){
+                    stack.shrink(1);
+                }
 
 
                 Component targetName = (operator == target) ? Component.translatable("item.restraint_dungeon.message.lock.target_self") : target.getName();

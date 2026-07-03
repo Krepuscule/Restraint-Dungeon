@@ -4,13 +4,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -40,12 +43,31 @@ public class WoodenCrossBlock extends RestraintDevice {
     }
 
     @Override
+    public String getID(){
+        return "WOODEN_CROSS";
+    }
+
+    @Override
     protected List<BBCube> getBBCubes() {
         return List.of(
-                new BBCube(-8, 0, -8, 16, 2, 16),
                 new BBCube(-6, 2, -1, 12, 48, 2),
-                new BBCube(-18, 29, -1, 12, 8, 2),
-                new BBCube(6, 29, -1, 12, 8, 2)
+
+                new BBCube(-5,14,-6,1,2,5),
+                new BBCube(-4,14,-6,8,2,1),
+                new BBCube( 4,14,-6,1,2,5),
+
+                new BBCube(-18,29,-1,12,8,2),
+                new BBCube(-11,35,-6,2,1,5),
+                new BBCube(-11,31,-6,2,4,1),
+                new BBCube(-11,30,-6,2,1,5),
+
+                new BBCube(6,29,-1,12,8,2),
+                new BBCube(9,35,-6,2,1,5),
+                new BBCube(9,31,-6,2,4,1),
+                new BBCube(9,30,-6,2,1,5),
+
+                new BBCube(-8, 0, -8, 16, 2, 16)
+
         );
     }
 
@@ -60,8 +82,18 @@ public class WoodenCrossBlock extends RestraintDevice {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    @Override protected double getBaseOffsetY() { return 1.0; }
-    @Override protected double getBaseOffsetX() { return 0.5; }
-    @Override protected double getBaseOffsetZ() { return 0.5; }
-    @Override protected double getPushBack() { return 0.1; }
+    @Override
+    public double getBaseOffsetY() { return 1.35; }
+    @Override
+    public double getBaseOffsetZ() { return -0.15; }
+
+    @Override
+    public Vector3f getRiderFirstCameraOffset(){
+        return new Vector3f(0.0f,0.3f,0.35f);
+    }
+
+    @Override
+    public boolean canBindHands(@NotNull BlockState state, @NotNull BlockPos pos){
+        return false;
+    }
 }

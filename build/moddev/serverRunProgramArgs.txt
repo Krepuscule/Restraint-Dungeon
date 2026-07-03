@@ -11,7 +11,7 @@ forgeserverdev
 --fml.mcVersion
 1.21.1
 --fml.neoForgeVersion
-21.1.227
+21.1.233
 --fml.neoFormVersion
 20240808.144430
 

@@ -86,7 +86,7 @@ public abstract class BaseAction {
      * @param CarryingState 被携带的状态ID
      * @param isCarryTarget 是否是正在被携带的目标(默认为false，即使ID为“NONE”)
      */
-    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,String CarryingState,Boolean isCarryTarget) {
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result,String CarryingState,Boolean isCarryTarget) {
         if(!actionPlayer.isAlive() || (target != null && !target.isAlive()) || target == null){
             return false;
         }
@@ -110,7 +110,7 @@ public abstract class BaseAction {
     /** 
      * Action 开始时执行 (仅服务端)
      */
-    public void onStart(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
 
     }
 
@@ -118,14 +118,14 @@ public abstract class BaseAction {
      * 每 Tick 执行 (仅服务端)
      * @param ticksRemaining 距离结束还剩多少 Tick
      */
-    public void onTick(ServerPlayer actionPlayer, LivingEntity target, int ticksRemaining) {
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target,HitResult result, int ticksRemaining) {
 
     }
 
     /** 
      * Action 正常播放结束时执行 (仅服务端)
      */
-    public void onFinish(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onFinish(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
 
     }
 
@@ -133,7 +133,7 @@ public abstract class BaseAction {
      * 当 canContinueUse 不满足或外部强行中断时调用
      * 此时应清理所有 Action 状态，确保玩家不会卡在固定状态
      */
-    public void onAbort(ServerPlayer actionPlayer, LivingEntity target) {
+    public void onAbort(ServerPlayer actionPlayer, LivingEntity target,HitResult result) {
 
     }
 }

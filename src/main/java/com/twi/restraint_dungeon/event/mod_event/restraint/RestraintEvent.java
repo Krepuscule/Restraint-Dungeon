@@ -1,15 +1,23 @@
 package com.twi.restraint_dungeon.event.mod_event.restraint;
 
+import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.StruggleCapability.StruggleMode;
+import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.client.gui.RestraintInfoMenu;
+import com.twi.restraint_dungeon.client.hud.struggle_hud.StruggleHUDManager;
 import com.twi.restraint_dungeon.client.keybind.ModKeyBinds;
-import com.twi.restraint_dungeon.event.custom_event.RestraintChangeEvent;
-import com.twi.restraint_dungeon.event.custom_event.RestraintEquipEvent;
+import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
+import com.twi.restraint_dungeon.event.custom_event.RestraintUpdateEvent;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
+import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils;
+import com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
@@ -24,18 +32,22 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.clearCarryData;
 import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.clearKidnapData;
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.ThrillUtils.calPlayerThrillLevel;
@@ -62,29 +74,40 @@ public class RestraintEvent {
     /**
      * 监听玩家的拘束具变化并更新属性值
      */
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onRestraintEquip(RestraintEquipEvent event) {
-        LivingEntity entity = event.getEntity();
-
-        if (!(entity instanceof ServerPlayer player)) return;
-
-        PlayerRestraintPart part = event.getPart();
-        ItemStack stack = event.getStack();
-
-        updateThrillValue(player);
-
-        updatePoseByRestraint(player);
-
-        refreshPlayerNameTag(player);
-
-    }
-
-
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onRestraintChange(RestraintChangeEvent event) {
+    public static void onRestraintChange(RestraintUpdateEvent event) {
 
         LivingEntity entity = event.getEntity();
+        PlayerRestraintPart part = event.getPart();
+        ItemStack oldStack = event.getOldStack();
+        ItemStack newStack = event.getNewStack();
         if (!(entity instanceof ServerPlayer player)) return;
+
+        if(getIsStruggling(entity)) {
+            PacketDistributor.sendToPlayer(player, new InterruptStrugglePayload());
+        }
+
+        if(part == PlayerRestraintPart.restraint_connection
+                && newStack.getItem() instanceof RestraintItem restraintItem && oldStack.isEmpty()
+                && restraintItem.getConnectBindPreviousPosition(entity) != null
+                && !getFirstConnectBind(entity).isEmpty()){
+
+            RestraintPosition pos = getRestraintPosition(entity);
+
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(entity,pos, RestraintPosition.CONNECTING,newStack));
+            updateRestraintPosition(entity,RestraintPosition.CONNECTING);
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(entity,pos, RestraintPosition.CONNECTING,newStack));
+        }else if(part == PlayerRestraintPart.restraint_connection
+                && oldStack.getItem() instanceof RestraintItem restraintItem && newStack.isEmpty()
+                && restraintItem.getConnectBindPreviousPosition(entity) != null
+                && getFirstConnectBind(entity).isEmpty()){
+
+            RestraintPosition pos = restraintItem.getConnectBindPreviousPosition(entity);
+
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(entity,RestraintPosition.CONNECTING,pos,oldStack));
+            updateRestraintPosition(entity,restraintItem.getConnectBindPreviousPosition(entity));
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(entity,RestraintPosition.CONNECTING,pos,oldStack));
+        }
 
         updateThrillValue(player);
 
@@ -120,7 +143,7 @@ public class RestraintEvent {
     /**
      * 拘束状态下禁用攻击能力
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRestraint_DisableAttack(AttackEntityEvent event) {
         Player player = event.getEntity();
         if (isBeenBindArms(player) || isBeenBindHands(player)) {
@@ -148,6 +171,15 @@ public class RestraintEvent {
     public static void onBlindfoldOverlay(RenderGuiEvent.Pre event) {
         Player player = Minecraft.getInstance().player;
         if (isBeenBlindfold(player)) {
+            if(isRidingRestraintDevice(player)){
+                if(getRestraintDevice(player) instanceof RestraintDevice device){
+                    RestraintDeviceUtils.DeviceContext context = getRestraintDeviceContext(player);
+
+                    if(context != null && device.canBlindfold(context.state(),context.pos())){
+                        device.renderDeviceBlindfold(player,device,context.state(),context.pos(),event.getGuiGraphics());
+                    }
+                }
+            }
             renderFullScreenOverlay(player, event.getGuiGraphics());
         }
     }
@@ -241,7 +273,6 @@ public class RestraintEvent {
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         Player player = event.getPlayer();
         if (isBeenBindArms(player) || isBeenBindHands(player)) {
-            // 服务端逻辑拦截
             event.setCanceled(true);
         }
     }
@@ -266,7 +297,6 @@ public class RestraintEvent {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         Player player = event.getEntity();
-        // 检查束缚状态
         if (isBeenBindArms(player) || isBeenBindHands(player)) {
             event.setCanceled(true);
         }
@@ -291,23 +321,38 @@ public class RestraintEvent {
         if (mc.player == null || mc.screen != null) return;
 
         if (ModKeyBinds.RESTRAINT_MENU.consumeClick()) {
-            LivingEntity target = mc.player; // 默认目标是自己
+            LivingEntity target = mc.player;
 
-            // 如果按住 Shift 且指向了实体
             if (mc.player.isShiftKeyDown() && mc.hitResult instanceof EntityHitResult entityHit) {
                 if (entityHit.getEntity() instanceof LivingEntity living) {
                     target = living;
                 }
             }
 
-            mc.setScreen(new RestraintInfoMenu(target));
+            if(target == mc.player){
+                mc.setScreen(new RestraintInfoMenu(target,true,false));
+            }else if(target instanceof Player player){
+                mc.setScreen(new RestraintInfoMenu(target,false,false));
+            }
+
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event){
+        Player player = event.getEntity();
+
+        if (!player.level().isClientSide) {
+            clearRestraintAttachments(player);
+            var cap = player.getData(ModAttachments.RESTRAINT_STACK);
+            player.setData(ModAttachments.RESTRAINT_STACK, cap);
         }
     }
 
     /**
      * 玩家离线时，清除相关中间状态信息
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         Player player = event.getEntity();
 
@@ -316,7 +361,7 @@ public class RestraintEvent {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerDeath(LivingDeathEvent event) {
         if(event.getEntity() instanceof Player player){
             clearRestraintAttachments(player);
@@ -338,14 +383,19 @@ public class RestraintEvent {
     private static void clearRestraintAttachments(Player player) {
         // 拘束属性相关
         setChangingPosition(player, false);
+        if(getRestraintPosition(player) == RestraintPosition.CARRIED
+                || getRestraintPosition(player) == RestraintPosition.RIDING){
+            updateRestraintPosition(player,RestraintPosition.STANDING);
+        }
 
         // 挣扎属性相关
         updateStruggleMode(player, StruggleMode.NONE);
         updateIsStruggling(player, false);
         updateStruggleProgress(player,0.0f);
 
-        // 拘束属性相关
+        // 绑架属性相关
         clearKidnapData(player);
+        SelfBondageUtils.clearData(player);
 
         // 释放属性相关
         clearReleaseData(player);

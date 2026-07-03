@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_restraint.PlayerSetTargetPositionPayload;
@@ -13,6 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -28,8 +30,10 @@ import org.lwjgl.glfw.GLFW;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.client.keybind.ModKeyBinds.CHANGE_POSITION;
+import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDevice;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.getCarrier;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 
@@ -45,7 +49,8 @@ public class RestraintPositionEvent {
         LYING_LEFT,
         LYING_RIGHT,
         CONNECTING,
-        CARRIED
+        CARRIED,
+        RIDING
     }
 
     // --- 追踪变量 ---
@@ -86,6 +91,8 @@ public class RestraintPositionEvent {
             case LYING_RIGHT -> LYING_RIGHT_OFFSET;
             case LYING_DOWN -> LYING_DOWN_OFFSET;
             case CONNECTING -> getConnectingPositionOffset();
+            case CARRIED -> getCarriedPositionOffset();
+            case RIDING -> getRidingRestraintBlockOffset();
             default -> STANDING_OFFSET;
         };
     }
@@ -100,6 +107,8 @@ public class RestraintPositionEvent {
             case LYING_RIGHT -> LYING_RIGHT_ROT;
             case LYING_DOWN -> LYING_DOWN_ROT;
             case CONNECTING -> getConnectingPositionRotation();
+            case CARRIED -> getCarriedPositionRotation();
+            case RIDING -> getRidingRestraintBlcokRotation();
             default -> new Vector3f(0, 0,0);
         };
     }
@@ -123,6 +132,56 @@ public class RestraintPositionEvent {
             Vector3f rot = restraintItem.getConnectBindViewRotation(player, connectBind);
             if (rot != null) return rot;
         }
+        return new Vector3f(0, 0,0);
+    }
+
+    private static Vector3f getCarriedPositionOffset(){
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !isBeingCarried(player)) return new Vector3f(0, 0,0);
+
+        CarryType type = PlayerCarryUtils.getCurrentCarryType(player);
+        Player carrier = getCarrier(player);
+        if (type != null && carrier != null) {
+            return type.getPassengerFirstPersonCameraOffset(carrier, player);
+        }
+
+        return new Vector3f(0, 0,0);
+    }
+
+    private static Vector3f getCarriedPositionRotation(){
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !isBeingCarried(player)) return new Vector3f(0, 0,0);
+
+        CarryType type = PlayerCarryUtils.getCurrentCarryType(player);
+        Player carrier = getCarrier(player);
+        if (type != null && carrier != null) {
+            return type.getPassengerFirstPersonCameraRotation(carrier, player);
+        }
+
+        return new Vector3f(0, 0,0);
+    }
+
+    private static Vector3f getRidingRestraintBlockOffset(){
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !isRidingRestraintDevice(player)) return new Vector3f(0, 0,0);
+
+        Block block = getRestraintDevice(player);
+        if(block instanceof RestraintDevice device){
+            return device.getRiderFirstCameraOffset();
+        }
+
+        return new Vector3f(0, 0,0);
+    }
+
+    private static Vector3f getRidingRestraintBlcokRotation(){
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !isRidingRestraintDevice(player)) return new Vector3f(0, 0,0);
+
+        Block block = getRestraintDevice(player);
+        if(block instanceof RestraintDevice device){
+            return device.getRiderFirstCameraRotation();
+        }
+
         return new Vector3f(0, 0,0);
     }
 
@@ -171,27 +230,15 @@ public class RestraintPositionEvent {
     public static float getCurrentRollOffset() { return currentRotOffset.z; }
 
     @SubscribeEvent
-    public static void onRenderFramePre(RenderFrameEvent.Pre event) { // 较新NeoForge通常为 RenderFrameEvent.Pre
+    public static void onRenderFramePre(RenderFrameEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.isPaused()) return;
 
         RestraintPosition pos = getRestraintPosition(mc.player);
         if (pos == null) return;
 
-        Vector3f targetOffset = new Vector3f(0.0f, 0.0f, 0.0f);
-        Vector3f targetRot = new Vector3f(0.0f, 0.0f, 0.0f);
-
-        if (pos == RestraintPosition.CARRIED) {
-            CarryType type = PlayerCarryUtils.getCurrentCarryType(mc.player);
-            Player carrier = getCarrier(mc.player);
-            if (type != null && carrier != null) {
-                targetOffset = type.getPassengerFirstPersonCameraOffset(carrier, mc.player);
-                targetRot = type.getPassengerFirstPersonCameraRotation(carrier, mc.player);
-            }
-        } else {
-            targetOffset = getTargetOffset(pos);
-            targetRot = getTargetRotation(pos);
-        }
+        Vector3f targetOffset = getTargetOffset(pos);
+        Vector3f targetRot = getTargetRotation(pos);
 
         currentCameraOffset = currentCameraOffset.lerp(targetOffset, LERP_OFFSET);
         currentRotOffset = currentRotOffset.lerp(targetRot, LERP_ROT);

@@ -56,6 +56,7 @@ public class PlayerReleaseClientEvent {
     public static void onMouseInput(InputEvent.MouseButton.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || event.getButton() != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+        if(mc.screen != null) return;
 
         if(!mc.player.getMainHandItem().isEmpty()) return;
         // TODO:完成释放工具后修改

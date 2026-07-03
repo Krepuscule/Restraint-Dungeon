@@ -4,15 +4,20 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -35,6 +40,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 
 public class CageBlock extends RestraintDevice {
     public static final MapCodec<CageBlock> CODEC = RecordCodecBuilder.mapCodec(inst ->
@@ -147,12 +154,34 @@ public class CageBlock extends RestraintDevice {
 //        }
 
         if (!level.isClientSide) {
-            boolean nextState = !state.getValue(OPEN);
-            level.setBlock(pos, state.setValue(OPEN, nextState), 3);
-            float pitch = nextState ? 1.0f : 0.8f;
-            level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, pitch);
+            if(getLockType(level, pos).isEmpty()){
+                boolean nextState = !state.getValue(OPEN);
+                level.setBlock(pos, state.setValue(OPEN, nextState), 3);
+                float pitch = nextState ? 1.0f : 0.8f;
+                level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, pitch);
+            }else{
+               player.displayClientMessage(Component.translatable("block." + MODID + ".cage.is_locked")
+                       .withStyle(ChatFormatting.DARK_RED),true);
+            }
+
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    @Override
+    @NotNull
+    public ItemInteractionResult useItemOn(@NotNull ItemStack heldItem,
+                                           @NotNull BlockState state,
+                                           @NotNull Level level,
+                                           @NotNull BlockPos pos,
+                                           @NotNull Player player,
+                                           @NotNull InteractionHand hand,
+                                           @NotNull BlockHitResult hit) {
+        if(!state.getValue(OPEN)){
+            return super.useItemOn(heldItem, state, level, pos, player, hand, hit);
+        }else{
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
     }
 
     public List<LivingEntity> getEntitiesInside(Level level, BlockPos pos) {
@@ -188,12 +217,7 @@ public class CageBlock extends RestraintDevice {
     }
 
     @Override
-    public boolean canMount(Level level, BlockPos pos, Entity target) {
-        return false;
-    }
-
-    @Override
-    public boolean canDismount(Level level, BlockPos pos, Entity target) {
+    public boolean isMountableDevice(Level level,BlockPos pos){
         return false;
     }
 

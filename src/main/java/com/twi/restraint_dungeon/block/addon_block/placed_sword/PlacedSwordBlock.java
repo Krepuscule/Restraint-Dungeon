@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.block.addon_block.placed_sword;
 
 import com.mojang.serialization.MapCodec;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -28,6 +29,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -40,7 +43,6 @@ public class PlacedSwordBlock extends BaseEntityBlock {
     public static final MapCodec<PlacedSwordBlock> CODEC = simpleCodec(PlacedSwordBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-    // 沿用你的 VoxelShape 定义
     private static final VoxelShape SHAPE_NORTH = Block.box(2, 6, 0, 14, 10, 16);
     private static final VoxelShape SHAPE_SOUTH = Block.box(2, 6, 0, 14, 10, 14);
     private static final VoxelShape SHAPE_WEST  = Block.box(0, 2, 7, 16, 14, 9);
@@ -48,7 +50,7 @@ public class PlacedSwordBlock extends BaseEntityBlock {
 
     private static final VoxelShape COLL_NORTH = Block.box(2, 6, 0, 13, 9, 15);
     private static final VoxelShape COLL_SOUTH = Block.box(2, 6, 0, 13, 9, 13);
-    private static final VoxelShape COLL_WEST  = Block.box(0, 2, 7, 15, 13, 7);
+    private static final VoxelShape COLL_WEST  = Block.box(0, 2, 7, 15, 13, 8);
     private static final VoxelShape COLL_EAST  = Block.box(0, 2, 7, 13, 13, 8);
 
     public PlacedSwordBlock(Properties properties) {
@@ -134,7 +136,6 @@ public class PlacedSwordBlock extends BaseEntityBlock {
 
             entity.hurt(source, dmg);
 
-            // 修正后的击退等级获取
             Holder<Enchantment> knockbackEnchant = level.registryAccess()
                     .lookupOrThrow(Registries.ENCHANTMENT)
                     .getOrThrow(Enchantments.KNOCKBACK);
@@ -176,7 +177,8 @@ public class PlacedSwordBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
     @Override
-    public @NotNull RenderShape getRenderShape(@NotNull BlockState state) { return RenderShape.ENTITYBLOCK_ANIMATED; }
+    public @NotNull RenderShape getRenderShape(@NotNull BlockState state) { return RenderShape.INVISIBLE; }
     @Nullable
     @Override public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) { return new PlacedSwordBlockEntity(pos, state); }
+
 }

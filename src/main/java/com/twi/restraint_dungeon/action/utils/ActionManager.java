@@ -52,7 +52,9 @@ public class ActionManager {
 
         if (PlayerActionUtils.isDoingAction(actionPlayer)) return;
 
+
         LivingEntity target = null;
+
         if (action instanceof CarryingAction carryingAction && carryingAction.requiresCarrying()) {
             Entity passenger = actionPlayer.getPassengers().isEmpty() ? null : actionPlayer.getPassengers().get(0);
             if (passenger instanceof LivingEntity living) {
@@ -63,14 +65,20 @@ public class ActionManager {
             target = living;
         }
 
+
         if (target != null) {
+
             PlayerActionUtils.linkAction(actionPlayer, target, actionId);
-            ActionTask task = new ActionTask(actionPlayer, target, action);
-            ACTIVE_TASKS.add(task);
+        } else {
+
+            PlayerActionUtils.boundSingleAction(actionPlayer, actionId);
         }
 
-        action.onStart(actionPlayer, target);
-        NeoForge.EVENT_BUS.post(new PlayerActionEvent.Start(actionPlayer,action,hitResult));
+        ActionTask task = new ActionTask(actionPlayer, target, action, hitResult);
+        ACTIVE_TASKS.add(task);
+
+        action.onStart(actionPlayer, target, hitResult);
+        NeoForge.EVENT_BUS.post(new PlayerActionEvent.Start(actionPlayer, action, hitResult));
     }
 
     @SubscribeEvent

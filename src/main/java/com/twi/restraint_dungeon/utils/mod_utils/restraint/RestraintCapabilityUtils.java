@@ -6,11 +6,13 @@ import com.twi.restraint_dungeon.attachment.capability.common_capability.Restrai
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.ArmsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.LegsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
-import com.twi.restraint_dungeon.attachment.capability.player_capability.RestraintRenderOffsets;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerRestraintOptions;
+import com.twi.restraint_dungeon.event.custom_event.PoseChangeEvent;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.NeoForge;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstArmsBind;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstLegsBind;
@@ -71,7 +73,9 @@ public class RestraintCapabilityUtils {
     public static void updateRestraintPosition(LivingEntity entity, RestraintPosition newPos) {
         var cap = getCap(entity);
         if (cap.getRestraintPosition() != newPos) {
-            cap.setPreviousPosition(cap.getRestraintPosition());
+            if(cap.getRestraintPosition() != RestraintPosition.CARRIED && cap.getRestraintPosition() != RestraintPosition.RIDING){
+                cap.setPreviousPosition(cap.getRestraintPosition());
+            }
             cap.setRestraintPosition(newPos);
             sync(entity, cap);
             entity.refreshDimensions();
@@ -102,24 +106,38 @@ public class RestraintCapabilityUtils {
 
     public static void updatePoseByRestraint(LivingEntity entity) {
 
+        ArmsPose prev_ArmsPose = getArmsPose(entity);
+        ArmsPose curr_ArmsPose = null;
+
         if (getFirstArmsBind(entity).getItem() instanceof RestraintItem ri) {
+            curr_ArmsPose = ri.setBindArmsPose(entity);
             setArmsPose(entity, ri.setBindArmsPose(entity));
         } else {
+            curr_ArmsPose = ArmsPose.NONE;
             setArmsPose(entity, ArmsPose.NONE);
         }
 
+        LegsPose prev_LegsPose = getLegsPose(entity);
+        LegsPose curr_LegsPose = null;
+
         if (getFirstLegsBind(entity).getItem() instanceof RestraintItem ri) {
+            curr_LegsPose = ri.setBindLegsPose(entity);
             setLegsPose(entity, ri.setBindLegsPose(entity));
         } else {
+            curr_LegsPose = LegsPose.NONE;
             setLegsPose(entity, LegsPose.NONE);
         }
 
+        if(prev_ArmsPose != curr_ArmsPose
+                || prev_LegsPose != curr_LegsPose){
+            NeoForge.EVENT_BUS.post(new PoseChangeEvent(entity,prev_ArmsPose,curr_ArmsPose,prev_LegsPose,curr_LegsPose));
+        }
     }
 
     public static float getRenderOffset(Player player, PlayerRestraintPart part) {
         if (player == null || part == null) return 0.0F;
 
-        RestraintRenderOffsets offsets = player.getData(ModAttachments.RENDER_OFFSETS);
+        PlayerRestraintOptions offsets = player.getData(ModAttachments.PLAYER_OPTION);
         if (part == PlayerRestraintPart.restraint_blindfold) {
             return offsets.getBlindfoldOffset();
         } else if (part == PlayerRestraintPart.restraint_gag) {
@@ -132,7 +150,7 @@ public class RestraintCapabilityUtils {
     public static boolean setRenderOffset(Player player, PlayerRestraintPart part, float value) {
         if (player == null || part == null) return false;
 
-        RestraintRenderOffsets offsets = player.getData(ModAttachments.RENDER_OFFSETS);
+        PlayerRestraintOptions offsets = player.getData(ModAttachments.PLAYER_OPTION);
         boolean changed = false;
 
         if (part == PlayerRestraintPart.restraint_blindfold) {
@@ -148,7 +166,31 @@ public class RestraintCapabilityUtils {
         }
 
         if (changed) {
-            player.setData(ModAttachments.RENDER_OFFSETS, offsets);
+            player.setData(ModAttachments.PLAYER_OPTION, offsets);
+        }
+        return changed;
+    }
+
+
+    public static boolean canOpenTargetInventory(Player player){
+        if(player == null) return false;
+
+        PlayerRestraintOptions options = player.getData(ModAttachments.PLAYER_OPTION);
+
+        return options.canOpenInventory();
+    }
+
+    public static boolean setCanOpenTargetInventory(Player player,boolean canOpenInventory){
+        if(player == null) return false;
+
+        PlayerRestraintOptions options = player.getData(ModAttachments.PLAYER_OPTION);
+        boolean changed = false;
+        if(options.canOpenInventory() != canOpenInventory){
+            options.setCanOpenInventory(canOpenInventory);
+            changed = true;
+        }
+        if(changed){
+            player.setData(ModAttachments.PLAYER_OPTION,options);
         }
         return changed;
     }

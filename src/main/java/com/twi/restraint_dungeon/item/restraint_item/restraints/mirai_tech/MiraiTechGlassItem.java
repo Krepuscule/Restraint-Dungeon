@@ -23,6 +23,7 @@ import java.util.UUID;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getAllPartRestraint;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.hasRestraint;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class MiraiTechGlassItem extends RestraintItem {
 
@@ -34,8 +35,8 @@ public class MiraiTechGlassItem extends RestraintItem {
             0.25    // lockIndex
     );
 
-    private final List<String> canEquipPartList = List.of(
-            PlayerRestraintPart.restraint_blindfold.toString()
+    private final List<PlayerRestraintPart> canEquipPartList = List.of(
+            PlayerRestraintPart.restraint_blindfold
     );
 
     public MiraiTechGlassItem(Properties properties) {
@@ -72,7 +73,41 @@ public class MiraiTechGlassItem extends RestraintItem {
     }
 
     @Override
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
+    }
+
+    @Override
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,int index,boolean isSlim) {
         ItemStack suitStack = getMiRaiTechSuit(entity);
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 

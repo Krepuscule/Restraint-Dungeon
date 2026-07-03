@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +28,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getTargetPart;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.canBeUnlock;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.restraintCanBeUnlock;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getPartLastRestraint;
 
 public class RestraintKeyItem extends Item {
@@ -94,8 +95,8 @@ public class RestraintKeyItem extends Item {
 
         ItemStack targetRestraint = getPartLastRestraint(target,bodyPart);
 
-        if (canBeUnlock(target,stack, bodyPart,targetRestraint) != null) {
-            operator.displayClientMessage(Objects.requireNonNull(canBeUnlock(target,stack, bodyPart,targetRestraint)), true);
+        if (restraintCanBeUnlock(target,stack, bodyPart,targetRestraint) != null) {
+            operator.displayClientMessage(Objects.requireNonNull(restraintCanBeUnlock(target,stack, bodyPart,targetRestraint)), true);
         } else {
             if(targetRestraint.getItem() instanceof RestraintItem restraintItem){
                 ItemStack lockStack = restraintItem.getLockType(target,targetRestraint);
@@ -107,6 +108,18 @@ public class RestraintKeyItem extends Item {
 
                 if (keyID != null && keyID.equals(lockID)) {
                     restraintItem.setLockType(target,targetRestraint, ItemStack.EMPTY);
+                    if(lockStack.getItem() instanceof RestraintLockItem lock
+                            && lock.shouldDropLockStackWhenUnlock(operator,lockStack,stack)){
+                        if(operator instanceof Player actionPlayer){
+                            int selectedSlot = actionPlayer.getInventory().selected;
+                            ItemStack currentInHand = actionPlayer.getInventory().getItem(selectedSlot);
+                            if (currentInHand.isEmpty()){
+                                actionPlayer.getInventory().setItem(selectedSlot, lockStack.copy());
+                            }else if(!actionPlayer.getInventory().add(lockStack.copy())){
+                                actionPlayer.drop(lockStack.copy(), false);
+                            }
+                        }
+                    }
 
                     operator.displayClientMessage(Component.translatable("item.restraint_dungeon.message.key.success.pre").withStyle(ChatFormatting.GREEN)
                             .append(target.getName())
@@ -128,7 +141,6 @@ public class RestraintKeyItem extends Item {
                                 @NotNull TooltipContext context,
                                 @NotNull List<Component> tooltip,
                                 @NotNull TooltipFlag flag) {
-        // 复用 LockItem 的渲染逻辑，或调用公共工具类
         UUID id = getPairingID(stack);
         if (id != null) {
 

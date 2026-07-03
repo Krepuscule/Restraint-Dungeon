@@ -3,8 +3,9 @@ package com.twi.restraint_dungeon.utils.mod_utils.carry;
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerCarryCapability;
 import com.twi.restraint_dungeon.event.custom_event.PlayerCarryStateEvent;
+import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
-import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.updateRestraintPosition;
 
 public class PlayerCarryUtils {
@@ -191,13 +194,16 @@ public class PlayerCarryUtils {
 
     public static void startCarrying(Player carrier, LivingEntity passenger, String typeId) {
         CarryType type = getCarryType(typeId);
+        RestraintPosition pos = getRestraintPosition(passenger);
 
         if(type.canUse(carrier, passenger) == null){
             setCarryData(carrier, typeId, passenger.getUUID(), false);
 
             setCarryData(passenger, typeId, carrier.getUUID(), true);
 
-            updateRestraintPosition(passenger, RestraintPositionEvent.RestraintPosition.CARRIED);
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(passenger,pos,RestraintPosition.CARRIED, ItemStack.EMPTY));
+            updateRestraintPosition(passenger, RestraintPosition.CARRIED);
+            NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(passenger,pos,RestraintPosition.CARRIED, ItemStack.EMPTY));
 
             if (passenger.startRiding(carrier, true)) {
                 if (!carrier.level().isClientSide && carrier instanceof ServerPlayer serverCarrier) {
@@ -234,7 +240,7 @@ public class PlayerCarryUtils {
                 mob.setNoAi(false);
             }
 
-            updateRestraintPosition(passenger, RestraintPositionEvent.RestraintPosition.STANDING);
+            updateRestraintPosition(passenger, RestraintPosition.STANDING);
 
             if (type != null) {
                 type.onRelease(carrier, passenger);

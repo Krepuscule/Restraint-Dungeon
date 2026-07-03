@@ -1,9 +1,12 @@
 package com.twi.restraint_dungeon.item.restraint_item.restraints;
 
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.*;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +20,11 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearCutStrugglingState;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class RopeItem extends RestraintItem {
 
@@ -24,17 +32,17 @@ public class RopeItem extends RestraintItem {
             100,
             30.0,
             0.5,
-            1.25,
-            0.75
+            1.0,
+            0.5
     );
 
     // 允许装备的部位列表
-    private final List<String> canEquipPartList = List.of(
-            PlayerRestraintPart.restraint_gag.toString(),
-            PlayerRestraintPart.restraint_body_bind.toString(),
-            PlayerRestraintPart.restraint_arms_bind.toString(),
-            PlayerRestraintPart.restraint_legs_bind.toString(),
-            PlayerRestraintPart.restraint_connection.toString()
+    private final List<PlayerRestraintPart> canEquipPartList = List.of(
+            PlayerRestraintPart.restraint_gag,
+            PlayerRestraintPart.restraint_body_bind,
+            PlayerRestraintPart.restraint_arms_bind,
+            PlayerRestraintPart.restraint_legs_bind,
+            PlayerRestraintPart.restraint_connection
     );
 
     public RopeItem(Properties properties) {
@@ -116,9 +124,9 @@ public class RopeItem extends RestraintItem {
         }
 
 
-//        if(RestraintUtils.getPlayerRestraintPosition(target) != PlayerPosition.LYING){
-//            return Component.translatable("item.restraint.rope.connect_bind.need_lying").withStyle(ChatFormatting.RED);
-//        }
+        if(getRestraintPosition(target) != RestraintPosition.LYING_DOWN){
+            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_lying").withStyle(ChatFormatting.RED);
+        }
 
 
         if(!hasRopeOnArms){
@@ -128,32 +136,82 @@ public class RopeItem extends RestraintItem {
             return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_rope_bind_legs").withStyle(ChatFormatting.RED);
         }
 
+        if(getArmsPose(target) != ArmsPose.CROSS_BEHIND_BACK){
+            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_correct_arms_pose").withStyle(ChatFormatting.RED);
+        }
+
+        if(getLegsPose(target) != LegsPose.LEGS_TOGETHER){
+            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_correct_legs_pose").withStyle(ChatFormatting.RED);
+        }
+
         return null;
+    }
+
+    /**
+     * 当该拘束具为最下层的连接拘束具时，玩家在切换到连接状态前所需要的姿势,若为Null则该连接拘束具不会限制姿势切换
+     * @param entity 当前实体
+     */
+    public RestraintPosition getConnectBindPreviousPosition(LivingEntity entity){
+        return RestraintPosition.LYING_DOWN;
     }
 
     @Override
     public String getConnectBindAnimation(LivingEntity entity){
-        return "player_connect_rope_common";
+        return "connection_rope";
     }
 
     @Override
     public String getConnectBindTranslateAnimation(LivingEntity entity){
-        return "player_connect_rope_bind";
+        return "connection_rope_to";
     }
 
     @Override
     public String getConnectBindReleaseAnimation(LivingEntity entity){
-        return "player_connect_rope_release";
+        return "connection_rope_back";
     }
 
     @Override
     public String getConnectBindStrugglingAnimation(LivingEntity entity){
-        return "player_connect_rope_struggle";
+        return "connection_rope_struggle";
     }
 
     @Override
     public Vector3f getConnectBindViewOffset(Player player, ItemStack stack){
-        return new Vector3f(0.05f, -1.2f, -0.25f);
+        return new Vector3f(0.0f, -1.25f, -1.0f);
+    }
+
+    @Override
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearCutStrugglingState(player)) {
+                return ItemStrengthIndex * 2.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearCutStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearHookStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
     }
 
     @Override

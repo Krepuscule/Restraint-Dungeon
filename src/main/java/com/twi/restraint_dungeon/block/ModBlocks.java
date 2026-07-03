@@ -42,7 +42,6 @@ public class ModBlocks {
 
     /* -------------------------------- 拘束架方块 -------------------------------------------------- */
 
-    // 存储木十字架 Block 的映射表
     public static final Map<String, DeferredHolder<Block, WoodenCrossBlock>> CROSS_MAP = new HashMap<>();
     public static final Map<String, DeferredHolder<Block, WoodenReverseCrossBlock>> REVERSE_CROSS_MAP = new HashMap<>();
     public static final Map<String, DeferredHolder<Block, WoodenTriangleHorseBlock>> TRIANGLE_HORSE_MAP = new HashMap<>();
@@ -51,13 +50,16 @@ public class ModBlocks {
     public static final Map<String, DeferredHolder<Block, DollStandBlock>> DOLL_STAND_MAP = new HashMap<>();
 
     static {
-        List<String> woods = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry");
+        List<String> woods = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry","crimson","warped");
 
         for(String wood : woods) {
             // 注册方块
             DeferredHolder<Block, WoodenCrossBlock> block = BLOCKS.register(wood + "_wooden_cross",
                     () -> new WoodenCrossBlock(
-                            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.WOOD)
+                                    .strength(2.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.CROSS_BE_MAP.get(wood).get(),
                             wood
                     ));
@@ -71,7 +73,10 @@ public class ModBlocks {
         for (String wood : woods) {
             DeferredHolder<Block, WoodenReverseCrossBlock> block = BLOCKS.register(wood + "_wooden_reverse_cross",
                     () -> new WoodenReverseCrossBlock(
-                            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.WOOD)
+                                    .strength(2.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.REVERSE_CROSS_BE_MAP.get(wood).get(),
                             wood
                     ));
@@ -82,7 +87,10 @@ public class ModBlocks {
         for (String wood : woods) {
             DeferredHolder<Block, WoodenTriangleHorseBlock> block = BLOCKS.register(wood + "_wooden_triangle_horse",
                     () -> new WoodenTriangleHorseBlock(
-                            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.WOOD)
+                                    .strength(2.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.TRIANGLE_HORSE_BE_MAP.get(wood).get(),
                             wood
                     ));
@@ -93,7 +101,10 @@ public class ModBlocks {
         for (String wood : woods) {
             DeferredHolder<Block, WoodenXCrossBlock> block = BLOCKS.register(wood + "_wooden_x_cross",
                     () -> new WoodenXCrossBlock(
-                            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.WOOD)
+                                    .strength(2.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.X_CROSS_BE_MAP.get(wood).get(),
                             wood
                     ));
@@ -106,7 +117,10 @@ public class ModBlocks {
         for (String mat : materials) {
             DeferredHolder<Block, CageBlock> block = BLOCKS.register(mat + "_cage",
                     () -> new CageBlock(
-                            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(5.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(5.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.CAGE_BE_MAP.get(mat).get(),
                             mat
                     ));
@@ -117,7 +131,9 @@ public class ModBlocks {
         for (String mat : materials) {
             DeferredHolder<Block, DollStandBlock> block = BLOCKS.register(mat + "_doll_stand",
                     () -> new DollStandBlock(
-                            BlockBehaviour.Properties.of().strength(2.0F).noOcclusion(),
+                            BlockBehaviour.Properties.of()
+                                    .strength(5.0F)
+                                    .noOcclusion(),
                             () -> ModBlockEntities.DOLL_STAND_BE_MAP.get(mat).get(),
                             mat
                     ));

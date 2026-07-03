@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -21,14 +22,16 @@ import java.util.UUID;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindArms;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindHands;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearCutStrugglingState;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
 
 public class LatexItem extends RestraintItem {
 
     public static final RestraintDefaults LATEX_DEFAULTS = new RestraintDefaults(
             400,
             20.0,
-            0.25,
-            0.25,
+            0.1,
+            0.1,
             0.1
     );
 
@@ -36,15 +39,15 @@ public class LatexItem extends RestraintItem {
         super(properties.stacksTo(1), LATEX_DEFAULTS);
 
         this.setCanEquipPartList(List.of(
-                PlayerRestraintPart.restraint_blindfold.toString(),
-                PlayerRestraintPart.restraint_gag.toString(),
-                PlayerRestraintPart.restraint_body_bind.toString(),
-                PlayerRestraintPart.restraint_arms_bind.toString(),
-                PlayerRestraintPart.restraint_hands_bind.toString(),
-                PlayerRestraintPart.restraint_legs_bind.toString()
+                PlayerRestraintPart.restraint_blindfold,
+                PlayerRestraintPart.restraint_gag,
+                PlayerRestraintPart.restraint_body_bind,
+                PlayerRestraintPart.restraint_arms_bind,
+                PlayerRestraintPart.restraint_hands_bind,
+                PlayerRestraintPart.restraint_legs_bind
         ));
 
-        // 默认连接逻辑
+
         Map<String, List<String>> connectMap = new HashMap<>();
         connectMap.put(PlayerRestraintPart.restraint_blindfold.toString(), List.of(PlayerRestraintPart.restraint_gag.toString()));
         connectMap.put(PlayerRestraintPart.restraint_gag.toString(), List.of(PlayerRestraintPart.restraint_body_bind.toString()));
@@ -52,6 +55,40 @@ public class LatexItem extends RestraintItem {
         this.setConnectPartMap(connectMap);
 
         this.setCanBeLocked(false);
+    }
+
+    @Override
+    public double onStrengthStruggle(UUID playerUUID, double ItemStrengthIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearCutStrugglingState(player)) {
+                return ItemStrengthIndex * 10.0;
+            }
+        }
+        return super.onStrengthStruggle(playerUUID, ItemStrengthIndex);
+    }
+    @Override
+    public double onLooseStruggle(UUID playerUUID,double ItemLooseIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearCutStrugglingState(player)) {
+                return ItemLooseIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLooseIndex);
+    }
+    @Override
+    public double onUnlockStruggle(UUID playerUUID,double ItemLockIndex){
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            Player player = mc.level.getPlayerByUUID(playerUUID);
+            if(isNearCutStrugglingState(player)) {
+                return ItemLockIndex * 2.0;
+            }
+        }
+        return super.onLooseStruggle(playerUUID, ItemLockIndex);
     }
 
     @Override
@@ -97,7 +134,7 @@ public class LatexItem extends RestraintItem {
     }
 
     @Override
-    public boolean shouldGagAndBlindfoldRenderOffset(){
+    public boolean shouldGagAndBlindfoldRenderOffset(PlayerRestraintPart part){
         return false;
     }
 }

@@ -67,6 +67,9 @@ public class StickyEffect extends MobEffect {
     }
 
     private boolean checkCanAdd(LivingEntity entity, PlayerRestraintPart part) {
+
+        if(!(entity instanceof Player)) return false;
+
         List<ItemStack> existing = getAllPartRestraint(entity, part);
         if (existing.isEmpty()) return true;
         for (ItemStack s : existing) {

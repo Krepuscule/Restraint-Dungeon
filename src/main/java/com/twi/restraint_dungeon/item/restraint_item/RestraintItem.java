@@ -8,6 +8,8 @@ import com.twi.restraint_dungeon.attachment.attributes.ModAttributes;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.ArmsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.LegsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.DataComponentsUtils;
 import com.twi.restraint_dungeon.item.ModDataComponents;
 import com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils.ReleaseDropType;
@@ -16,6 +18,7 @@ import com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.Struggle
 import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,25 +32,27 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoItem;
+import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.item.DataComponentsUtils.*;
@@ -79,7 +84,7 @@ public class RestraintItem extends Item implements GeoItem {
     private final double defaultLooseIndex;
     private final double defaultLockIndex;
 
-    private List<String> canEquipPartList;
+    private List<PlayerRestraintPart> canEquipPartList;
     private Map<PlayerRestraintPart, List<PlayerRestraintPart>> boundPartMap; // 记录装备在指定部位时同样会束缚的其他部位的List
     private Map<String, List<String>> connectPartMap; // 记录装备在指定部位时连接束缚的部位
     private boolean canBeLocked;
@@ -95,11 +100,32 @@ public class RestraintItem extends Item implements GeoItem {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {}
+//    @Override
+//    public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
+//        consumer.accept(new GeoRenderProvider() {
+//            private GeoArmorRenderer<?> renderer;
+//
+//            @Override
+//            public <T extends LivingEntity> HumanoidModel<?> getGeoArmorRenderer(@Nullable T livingEntity, ItemStack itemStack,
+//                                                                                 @Nullable EquipmentSlot equipmentSlot,
+//                                                                                 @Nullable HumanoidModel<T> original) {
+//                if (this.renderer == null) {
+//                    this.renderer = new RestraintArmorRenderer();
+//                }
+//                return this.renderer;
+//            }
+//        });
+//    }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() { return this.cache; }
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
 
 
     public int getMaxResistance(ItemStack stack) {
@@ -166,8 +192,8 @@ public class RestraintItem extends Item implements GeoItem {
     public void setCanBeLocked(boolean canBeLocked) { this.canBeLocked = canBeLocked; }
     public boolean isCanBeLocked() { return canBeLocked; }
 
-    public void setCanEquipPartList(List<String> list) { this.canEquipPartList = list; }
-    public List<String> getCanEquipPartList() { return canEquipPartList; }
+    public void setCanEquipPartList(List<PlayerRestraintPart> list) { this.canEquipPartList = list; }
+    public List<PlayerRestraintPart> getCanEquipPartList() { return canEquipPartList; }
 
     public void setBoundPartMap(Map<PlayerRestraintPart, List<PlayerRestraintPart>> map) { this.boundPartMap = map; }
     public Map<PlayerRestraintPart, List<PlayerRestraintPart>> getBoundPartMap() { return boundPartMap; }
@@ -189,7 +215,7 @@ public class RestraintItem extends Item implements GeoItem {
             MutableComponent partsComponent = Component.empty();
 
             for (int i = 0; i < this.canEquipPartList.size(); i++) {
-                String partName = this.canEquipPartList.get(i);
+                String partName = this.canEquipPartList.get(i).name();
 
                 String langKey = "part." + MODID + "." + partName;
 
@@ -452,6 +478,14 @@ public class RestraintItem extends Item implements GeoItem {
     }
 
     /* ---------------------------------------------- 连接拘束部位属性 --------------------------------------------------- */
+
+    /**
+     * 当该拘束具为最下层的连接拘束具时，玩家在切换到连接状态前所需要的姿势,若为Null则该连接拘束具不会限制姿势切换
+     * @param entity 当前实体
+     */
+    public RestraintPosition getConnectBindPreviousPosition(LivingEntity entity){
+        return null;
+    }
 
     /**
      * 当该拘束具为最下层的连接拘束具时，玩家的拘束动画名（返回动画.json文件的文件名）
@@ -834,12 +868,13 @@ public class RestraintItem extends Item implements GeoItem {
      * @param bodyPart 指定目标部位
      * @param stack 拘束具ItemStack
      */
-    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,boolean isSlim) {
+    public ResourceLocation getTextureResourceLocation(LivingEntity entity, String bodyPart, ItemStack stack,int index,boolean isSlim) {
 
         ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String itemName = itemKey.getPath();
 
-        if(Objects.equals(bodyPart, PlayerRestraintPart.restraint_arms_bind.toString())){
+        if(Objects.equals(bodyPart, PlayerRestraintPart.restraint_arms_bind.toString())
+            || Objects.equals(bodyPart, PlayerRestraintPart.restraint_hands_bind.toString())){
             if(isSlim){
                 return ResourceLocation.fromNamespaceAndPath(MODID,
                         "textures/models/restraints/" + itemName + "/" + bodyPart + "/slim/" + itemName + ".png");
@@ -857,24 +892,35 @@ public class RestraintItem extends Item implements GeoItem {
      * 拘束具渲染
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void renderRestraintLayer(
-            M innerModel, M parentModel, T player, PlayerRestraintPart part, int index, ItemStack stack,
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void renderRestraintLayer(
+            M innerModel, M parentModel, T entity, PlayerRestraintPart part, int index, ItemStack stack,
             PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+
+        //TODO:后续解决连接拘束具的渲染问题
+        if(part == PlayerRestraintPart.restraint_connection) return;
 
         boolean isSlim = false;
 
-        if(player instanceof AbstractClientPlayer clientPlayer){
+        if(entity instanceof AbstractClientPlayer clientPlayer){
             isSlim = clientPlayer.getSkin().model() == PlayerSkin.Model.SLIM;
+        }else if (entity instanceof BaseNPCEntity npc) {
+            isSlim = npc.isSlimModel();
         }
 
-        this.applyRestraintVisibility(innerModel, parentModel,part, player);
-        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
 
-        ResourceLocation texture = this.getTextureResourceLocation(player, part.toString(), stack,isSlim);
+        this.applyRestraintVisibility(innerModel, parentModel,part, entity);
+        int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
+
+        float inflation = 1.0F + (index * 0.005F);
+        setLayerInflation(innerModel, inflation);
+
+        ResourceLocation texture = this.getTextureResourceLocation(entity, part.toString(), stack,index,isSlim);
         VertexConsumer baseBuffer = bufferSource.getBuffer(RenderType.armorCutoutNoCull(texture));
 
 
-        if (shouldGagAndBlindfoldRenderOffset() && (part == PlayerRestraintPart.restraint_gag || part == PlayerRestraintPart.restraint_blindfold)) {
+        if (entity instanceof Player player && shouldGagAndBlindfoldRenderOffset(part)
+                && (part == PlayerRestraintPart.restraint_gag || part == PlayerRestraintPart.restraint_blindfold)) {
+
 
             float pixelAdjustment = getRenderOffset(player,part);
 
@@ -885,6 +931,24 @@ public class RestraintItem extends Item implements GeoItem {
         }
 
         innerModel.renderToBuffer(poseStack, baseBuffer, packedLight, overlay);
+    }
+
+    private <T extends LivingEntity> void setLayerInflation(HumanoidModel<T> model, float scale) {
+        model.head.xScale = scale; model.head.yScale = scale; model.head.zScale = scale;
+        model.body.xScale = scale; model.body.yScale = scale; model.body.zScale = scale;
+        model.rightArm.xScale = scale; model.rightArm.yScale = scale; model.rightArm.zScale = scale;
+        model.leftArm.xScale = scale; model.leftArm.yScale = scale; model.leftArm.zScale = scale;
+        model.rightLeg.xScale = scale; model.rightLeg.yScale = scale; model.rightLeg.zScale = scale;
+        model.leftLeg.xScale = scale; model.leftLeg.yScale = scale; model.leftLeg.zScale = scale;
+
+        if (model instanceof PlayerModel<T> playerModel) {
+            playerModel.hat.xScale = scale; playerModel.hat.yScale = scale; playerModel.hat.zScale = scale;
+            playerModel.jacket.xScale = scale; playerModel.jacket.yScale = scale; playerModel.jacket.zScale = scale;
+            playerModel.rightSleeve.xScale = scale; playerModel.rightSleeve.yScale = scale; playerModel.rightSleeve.zScale = scale;
+            playerModel.leftSleeve.xScale = scale; playerModel.leftSleeve.yScale = scale; playerModel.leftSleeve.zScale = scale;
+            playerModel.rightPants.xScale = scale; playerModel.rightPants.yScale = scale; playerModel.rightPants.zScale = scale;
+            playerModel.leftPants.xScale = scale; playerModel.leftPants.yScale = scale; playerModel.leftPants.zScale = scale;
+        }
     }
 
     /**
@@ -937,7 +1001,7 @@ public class RestraintItem extends Item implements GeoItem {
     /**
      * 控制该拘束具是否应该应用玩家自身定义的眼罩和口塞拘束具偏移
      */
-    public boolean shouldGagAndBlindfoldRenderOffset(){
+    public boolean shouldGagAndBlindfoldRenderOffset(PlayerRestraintPart part){
         return true;
     }
 
@@ -946,27 +1010,25 @@ public class RestraintItem extends Item implements GeoItem {
      * 子类可以重写此方法来实现特殊的渲染需求
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void applyRestraintVisibility(
-            M child, M parent,PlayerRestraintPart part, T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity) {
 
         child.setAllVisible(false);
 
-        if(part == PlayerRestraintPart.restraint_blindfold
-                || part == PlayerRestraintPart.restraint_gag){
+        if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
             child.head.visible = parent.head.visible;
-        } else if (part == PlayerRestraintPart.restraint_collar){
+        } else if (part == PlayerRestraintPart.restraint_collar) {
             child.head.visible = parent.head.visible;
             child.body.visible = parent.body.visible;
         } else if (part == PlayerRestraintPart.restraint_body_bind) {
             child.body.visible = parent.body.visible;
-        } else if (part == PlayerRestraintPart.restraint_arms_bind
-                || part == PlayerRestraintPart.restraint_hands_bind) {
+        } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
             child.leftArm.visible = parent.leftArm.visible;
             child.rightArm.visible = parent.rightArm.visible;
-        } else if (part == PlayerRestraintPart.restraint_legs_bind){
+        } else if (part == PlayerRestraintPart.restraint_legs_bind) {
             child.leftLeg.visible = parent.leftLeg.visible;
             child.rightLeg.visible = parent.rightLeg.visible;
-        }else{
+        } else {
             child.head.visible = parent.head.visible;
             child.body.visible = parent.body.visible;
             child.leftArm.visible = parent.leftArm.visible;
@@ -975,13 +1037,18 @@ public class RestraintItem extends Item implements GeoItem {
             child.rightLeg.visible = parent.rightLeg.visible;
         }
 
-        if(shouldRenderSencondLayer(child, parent,part, player)){
-            setSecondLayerVisibility(child, parent,part, player);
+        if (shouldRenderSecondLayer(child, parent, part, entity)) {
+            setSecondLayerVisibility(child, parent, part, entity);
         }
     }
 
+
+    /**
+     * 总体控制开关，判断其是否应该渲染二层皮肤部分
+     */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> boolean shouldRenderSencondLayer(M child, M parent,PlayerRestraintPart part, T player){
+    public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
+            M child, M parent, PlayerRestraintPart part, T entity) {
         return false;
     }
 
@@ -990,38 +1057,47 @@ public class RestraintItem extends Item implements GeoItem {
      * 子类可以重写此方法来实现特殊的渲染需求
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void setSecondLayerVisibility(
-            M child, M parent,PlayerRestraintPart part, T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
+            M child, M parent, PlayerRestraintPart part, T entity) {
 
-        // 同步二层皮肤的旋转与位置 (对齐骨骼)
-        child.jacket.copyFrom(parent.body);
-        child.leftSleeve.copyFrom(parent.leftArm);
-        child.rightSleeve.copyFrom(parent.rightArm);
-        child.leftPants.copyFrom(parent.leftLeg);
-        child.rightPants.copyFrom(parent.rightLeg);
+        if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
 
-        if(part == PlayerRestraintPart.restraint_blindfold
-                || part == PlayerRestraintPart.restraint_gag){
-            child.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-        } else if (part == PlayerRestraintPart.restraint_collar){
-            child.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-            child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-        } else if (part == PlayerRestraintPart.restraint_body_bind) {
-            child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-        } else if (part == PlayerRestraintPart.restraint_arms_bind
-                || part == PlayerRestraintPart.restraint_hands_bind) {
-            child.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-            child.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-        } else if (part == PlayerRestraintPart.restraint_legs_bind){
-            child.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
-            child.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
-        }else{
-            child.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-            child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-            child.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-            child.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-            child.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
-            child.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+            playerChild.jacket.copyFrom(playerParent.body);
+            playerChild.leftSleeve.copyFrom(playerParent.leftArm);
+            playerChild.rightSleeve.copyFrom(playerParent.rightArm);
+            playerChild.leftPants.copyFrom(playerParent.leftLeg);
+            playerChild.rightPants.copyFrom(playerParent.rightLeg);
+
+            if(entity instanceof Player player){
+                if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
+                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                } else if (part == PlayerRestraintPart.restraint_collar) {
+                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                } else if (part == PlayerRestraintPart.restraint_body_bind) {
+                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
+                    playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                    playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+                } else if (part == PlayerRestraintPart.restraint_legs_bind) {
+                    playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
+                    playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+                } else {
+                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                    playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                    playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+                    playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
+                    playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+                }
+            }else{
+                playerChild.hat.visible = true;
+                playerChild.jacket.visible = true;
+                playerChild.leftSleeve.visible = true;
+                playerChild.rightSleeve.visible = true;
+                playerChild.leftPants.visible = true;
+                playerChild.rightPants.visible = true;
+            }
         }
     }
 
