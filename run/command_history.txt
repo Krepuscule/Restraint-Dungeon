@@ -1,39 +1,17 @@
-/kill
-/gamerule keepInventory true
-/kill
-/time set day
-/kill
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_legs_bind
-/kill
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_legs_bind
-/kill
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_legs_bind
-/kill
-/time set day
-/setworldspawn
-/restraint equip Dev restraint_arms_bind
-/kill
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_legs_bind
-/kill
-/restraint equip Dev restraint_legs_bind
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_body_bind
-/kill
-/restraint equip Dev restraint_legs_bind
-/restraint equip Dev restraint_arms_bind
-/restraint equip Dev restraint_body_bind
-/kill
-/restraint equip Dev restraint_arms_bind
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/summon restraint_dungeon:test_npc
 /gamemode survival
 /gamemode creative
-/weather clear
-/kill
-/gamerule keepInventory true
-/kill
+/gamemode survival
+/gamemode creative
+/gamemode survival
 /gamemode creative
 /gamemode survival
 /gamemode creative
@@ -45,6 +23,28 @@
 /gamemode creative
 /gamemode survival
 /gamemode creative
-/summon restraint_dungeon:generic_npc
-/
-/summon restraint_dungeon:generic_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/gamemode creative
+/summon restraint_dungeon:test_npc
+/gamemode survival
+/gamemode creative
+/gamemode survival
+/gamemode creative
+/gamemode survival
+/gamemode creative
+/gamemode survival
+/gamemode creative
+/kill @e[type=restraint_dungeon:test_npc]
+/summon restraint_dungeon:test_npc
+/gamemode survival
+/gamemode creative
+/gamemode survival
+/gamemode creative
+/kill
+/summon restraint_dungeon:test_npc
+/kill
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]
+/kill
+/summon restraint_dungeon:test_npc
+/kill @e[type=restraint_dungeon:test_npc]

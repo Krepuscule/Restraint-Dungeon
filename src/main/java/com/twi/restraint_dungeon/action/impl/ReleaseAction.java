@@ -90,7 +90,6 @@ public class ReleaseAction extends CarryingAction {
         boolean handled = false;
         if (result != null && result.failureReason == null) {
             if (result.isRestraintDevice && result.blockPos != null) {
-
                 BlockPos DevicePos = result.blockPos;
 
                 if (carrier.level().getBlockEntity(result.blockPos) instanceof GhostBlockEntity ghostBE) {

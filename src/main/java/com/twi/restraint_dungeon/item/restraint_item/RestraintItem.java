@@ -23,8 +23,8 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -32,27 +32,27 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.renderer.GeoArmorRenderer;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.item.DataComponentsUtils.*;
@@ -116,6 +116,23 @@ public class RestraintItem extends Item implements GeoItem {
 //            }
 //        });
 //    }
+
+    /**
+     * 该拘束具是否可附魔
+     */
+    @Override
+    public boolean isEnchantable(@NotNull ItemStack stack) {
+        return true;
+    }
+
+    /**
+     * 返回该拘束具可用的附魔类型
+     */
+    @Override
+    public boolean supportsEnchantment(@NotNull ItemStack stack,
+                                       @NotNull Holder<Enchantment> enchantment) {
+        return enchantment.is(Enchantments.BINDING_CURSE) || enchantment.is(Enchantments.VANISHING_CURSE);
+    }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -323,43 +340,41 @@ public class RestraintItem extends Item implements GeoItem {
      */
     public Component translateGagMessage(LivingEntity entity, Component message){
 
-        String OriginMessage = message.getString();
-        String newMessage = "";
-        StringBuffer stringBuffer = new StringBuffer();
-        for(int i = 0 ; i < OriginMessage.length() ; i++){
+        String originMessage = message.getString();
+        MutableComponent resultComponent = Component.empty();
 
+        Random rand = new Random();
+        for(int i = 0; i < originMessage.length(); i++){
+            String sub = originMessage.substring(i, i + 1);
 
-
-            if(GagUtils.GAG_MESSAGE_IGNORE_LIST.contains(OriginMessage.substring(i,i+1))){
-                stringBuffer.append(OriginMessage.charAt(i));
+            if(GagUtils.GAG_MESSAGE_IGNORE_LIST.contains(sub)){
+                resultComponent.append(Component.literal(sub));
                 continue;
             }
 
-            Random rand = new Random();
             int num = rand.nextInt(10);
+            String translationKey;
 
             if(num < 3){
-                stringBuffer.append("呜");
+                translationKey = "item." + MODID + ".gag_message.00";
             }else if(num < 6){
-                stringBuffer.append("嗯");
+                translationKey = "item." + MODID + ".gag_message.01";
             }else if(num < 9){
-                stringBuffer.append("唔");
+                translationKey = "item." + MODID + ".gag_message.02";
             }else{
-                stringBuffer.append("咕");
+                translationKey = "item." + MODID + ".gag_message.03";
             }
 
+            resultComponent.append(Component.translatable(translationKey));
         }
+
         if(getPleasantValue(entity) >= 75){
-            stringBuffer.append("~ ♥♥♥");
+            resultComponent.append(Component.literal("~ ♥♥♥"));
         }else if(getPleasantValue(entity) >= 50){
-            stringBuffer.append("~ ♥");
+            resultComponent.append(Component.literal("~ ♥"));
         }
 
-        newMessage = stringBuffer.toString();
-
-
-        return Component.literal(newMessage)
-                .withStyle(ChatFormatting.WHITE);
+        return resultComponent.withStyle(ChatFormatting.WHITE);
     }
 
     /**
@@ -378,10 +393,10 @@ public class RestraintItem extends Item implements GeoItem {
 
     /**
      * 当该拘束具为最下层的项圈拘束具时，修改玩家在聊天栏/列表中的显示名称
-     * @param player 目标玩家
+     * @param entity 目标实体
      * @param collarStack 拘束具ItemStack
      */
-    public MutableComponent getAdditionCollarName(Player player, ItemStack collarStack) {
+    public MutableComponent getAdditionCollarName(LivingEntity entity, ItemStack collarStack) {
         if (collarStack.has(DataComponents.CUSTOM_NAME)) {
             Component titleName = collarStack.getHoverName();
 
@@ -392,19 +407,19 @@ public class RestraintItem extends Item implements GeoItem {
 
             return Component.empty()
                     .append(prefix)
-                    .append(player.getName())
+                    .append(entity.getName())
                     .append(Component.literal(" "));
         }
 
-        return player.getName().copy();
+        return entity.getName().copy();
     }
 
     /**
      * 当该拘束具为最下层的项圈拘束具时，修改玩家头顶的 NameTag
-     * @param player 目标玩家
+     * @param entity 目标玩家
      * @param collarStack 拘束具ItemStack
      */
-    public MutableComponent getAdditionCollarNameTag(Player player, ItemStack collarStack) {
+    public MutableComponent getAdditionCollarNameTag(LivingEntity entity, ItemStack collarStack) {
         if (collarStack.has(DataComponents.CUSTOM_NAME)) {
             MutableComponent prefix = Component.literal("* ")
                     .append(collarStack.getHoverName())
@@ -413,10 +428,10 @@ public class RestraintItem extends Item implements GeoItem {
 
             return Component.empty()
                     .append(prefix)
-                    .append(player.getName());
+                    .append(entity.getName());
         }
 
-        return player.getName().copy();
+        return entity.getName().copy();
     }
 
     /* ---------------------------------------------- 连接其它部位束缚部分 --------------------------------------------------- */
@@ -617,7 +632,7 @@ public class RestraintItem extends Item implements GeoItem {
      * @param index 物品所在栏位的索引
      */
     public boolean dropRestraintWhenStruggleOff(LivingEntity entity,ItemStack stack,PlayerRestraintPart bodyPart,int index){
-        return true;
+        return !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP);
     }
 
     /**
@@ -818,7 +833,7 @@ public class RestraintItem extends Item implements GeoItem {
      * @param index 物品所在部位的索引序号
      */
     public boolean dropRestraintWhenRelease(LivingEntity actionEntity,LivingEntity target,ItemStack stack,PlayerRestraintPart bodyPart,int index){
-        return true;
+        return !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP);
     }
 
     /**
@@ -888,16 +903,29 @@ public class RestraintItem extends Item implements GeoItem {
         }
     }
 
+    public boolean shouldRestraintDraw(ItemStack stack,PlayerRestraintPart part,int index){
+        return true;
+    }
+
+    public record restraintRenderData(
+            PoseStack stack,
+            RenderType renderType,
+            VertexConsumer baseBuffer,
+            int packedLight,
+            int packedOverlay
+    ){}
+
     /**
      * 拘束具渲染
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends LivingEntity, M extends HumanoidModel<T>> void renderRestraintLayer(
-            M innerModel, M parentModel, T entity, PlayerRestraintPart part, int index, ItemStack stack,
-            PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> restraintRenderData renderRestraintLayer( T entity, PlayerRestraintPart part, int index, ItemStack stack,
+            PoseStack poseStack, MultiBufferSource bufferSource, int packedLight,int packedOverlay) {
 
         //TODO:后续解决连接拘束具的渲染问题
-        if(part == PlayerRestraintPart.restraint_connection) return;
+        if(part == PlayerRestraintPart.restraint_connection) return null;
+
+        if(!shouldRestraintDraw(stack,part,index)) return null;
 
         boolean isSlim = false;
 
@@ -907,15 +935,9 @@ public class RestraintItem extends Item implements GeoItem {
             isSlim = npc.isSlimModel();
         }
 
-
-        this.applyRestraintVisibility(innerModel, parentModel,part, entity);
-        int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
-
-        float inflation = 1.0F + (index * 0.005F);
-        setLayerInflation(innerModel, inflation);
-
         ResourceLocation texture = this.getTextureResourceLocation(entity, part.toString(), stack,index,isSlim);
-        VertexConsumer baseBuffer = bufferSource.getBuffer(RenderType.armorCutoutNoCull(texture));
+        RenderType type = RenderType.armorCutoutNoCull(texture);
+        VertexConsumer baseBuffer = bufferSource.getBuffer(type);
 
 
         if (entity instanceof Player player && shouldGagAndBlindfoldRenderOffset(part)
@@ -928,26 +950,86 @@ public class RestraintItem extends Item implements GeoItem {
 
             baseBuffer = getRenderOffsetVertexConsumer(baseBuffer,vOffset);
 
+        }else if(entity instanceof BaseNPCEntity npc && shouldGagAndBlindfoldRenderOffset(part)
+                && (part == PlayerRestraintPart.restraint_gag || part == PlayerRestraintPart.restraint_blindfold)){
+
+            float vOffset;
+            if(part == PlayerRestraintPart.restraint_blindfold){
+                vOffset = npc.getNPCBlindfoldOffset();
+            }else{
+                vOffset = npc.getNPCGagOffset();
+            }
+
+            baseBuffer = getRenderOffsetVertexConsumer(baseBuffer,-vOffset / 64.0F);
         }
 
-        innerModel.renderToBuffer(poseStack, baseBuffer, packedLight, overlay);
+        return new restraintRenderData(poseStack,type,baseBuffer,packedLight,packedOverlay);
     }
 
-    private <T extends LivingEntity> void setLayerInflation(HumanoidModel<T> model, float scale) {
-        model.head.xScale = scale; model.head.yScale = scale; model.head.zScale = scale;
-        model.body.xScale = scale; model.body.yScale = scale; model.body.zScale = scale;
-        model.rightArm.xScale = scale; model.rightArm.yScale = scale; model.rightArm.zScale = scale;
-        model.leftArm.xScale = scale; model.leftArm.yScale = scale; model.leftArm.zScale = scale;
-        model.rightLeg.xScale = scale; model.rightLeg.yScale = scale; model.rightLeg.zScale = scale;
-        model.leftLeg.xScale = scale; model.leftLeg.yScale = scale; model.leftLeg.zScale = scale;
+    public <T extends LivingEntity> void setLayerInflation(HumanoidModel<T> model, BakedGeoModel geoModel,ItemStack stack,PlayerRestraintPart part,int index) {
+        float base = 1.0F;
+        if(model == null && geoModel != null){
+            base = 1.05F;
+        }
+        float scale = base + (index * 0.005F);
 
-        if (model instanceof PlayerModel<T> playerModel) {
-            playerModel.hat.xScale = scale; playerModel.hat.yScale = scale; playerModel.hat.zScale = scale;
-            playerModel.jacket.xScale = scale; playerModel.jacket.yScale = scale; playerModel.jacket.zScale = scale;
-            playerModel.rightSleeve.xScale = scale; playerModel.rightSleeve.yScale = scale; playerModel.rightSleeve.zScale = scale;
-            playerModel.leftSleeve.xScale = scale; playerModel.leftSleeve.yScale = scale; playerModel.leftSleeve.zScale = scale;
-            playerModel.rightPants.xScale = scale; playerModel.rightPants.yScale = scale; playerModel.rightPants.zScale = scale;
-            playerModel.leftPants.xScale = scale; playerModel.leftPants.yScale = scale; playerModel.leftPants.zScale = scale;
+        if (model == null && geoModel != null) {
+            geoModel.getBone("head").get().setScaleX(scale);
+            geoModel.getBone("head").get().setScaleY(scale);
+            geoModel.getBone("head").get().setScaleZ(scale);
+
+            geoModel.getBone("torso").get().setScaleX(scale);
+            geoModel.getBone("torso").get().setScaleY(scale);
+            geoModel.getBone("torso").get().setScaleZ(scale);
+
+            geoModel.getBone("left_arm").get().setScaleX(scale);
+            geoModel.getBone("left_arm").get().setScaleY(scale);
+            geoModel.getBone("left_arm").get().setScaleZ(scale);
+
+            geoModel.getBone("left_arm_bend").get().setScaleX(scale);
+            geoModel.getBone("left_arm_bend").get().setScaleY(scale);
+            geoModel.getBone("left_arm_bend").get().setScaleZ(scale);
+
+            geoModel.getBone("right_arm").get().setScaleX(scale);
+            geoModel.getBone("right_arm").get().setScaleY(scale);
+            geoModel.getBone("right_arm").get().setScaleZ(scale);
+
+            geoModel.getBone("right_arm_bend").get().setScaleX(scale);
+            geoModel.getBone("right_arm_bend").get().setScaleY(scale);
+            geoModel.getBone("right_arm_bend").get().setScaleZ(scale);
+
+            geoModel.getBone("left_leg").get().setScaleX(scale);
+            geoModel.getBone("left_leg").get().setScaleY(scale);
+            geoModel.getBone("left_leg").get().setScaleZ(scale);
+
+            geoModel.getBone("left_leg_bend").get().setScaleX(scale);
+            geoModel.getBone("left_leg_bend").get().setScaleY(scale);
+            geoModel.getBone("left_leg_bend").get().setScaleZ(scale);
+
+            geoModel.getBone("right_leg").get().setScaleX(scale);
+            geoModel.getBone("right_leg").get().setScaleY(scale);
+            geoModel.getBone("right_leg").get().setScaleZ(scale);
+
+            geoModel.getBone("right_leg_bend").get().setScaleX(scale);
+            geoModel.getBone("right_leg_bend").get().setScaleY(scale);
+            geoModel.getBone("right_leg_bend").get().setScaleZ(scale);
+
+        }else if(model != null && geoModel == null){
+            model.head.xScale = scale; model.head.yScale = scale; model.head.zScale = scale;
+            model.body.xScale = scale; model.body.yScale = scale; model.body.zScale = scale;
+            model.rightArm.xScale = scale; model.rightArm.yScale = scale; model.rightArm.zScale = scale;
+            model.leftArm.xScale = scale; model.leftArm.yScale = scale; model.leftArm.zScale = scale;
+            model.rightLeg.xScale = scale; model.rightLeg.yScale = scale; model.rightLeg.zScale = scale;
+            model.leftLeg.xScale = scale; model.leftLeg.yScale = scale; model.leftLeg.zScale = scale;
+
+            if (model instanceof PlayerModel<T> playerModel) {
+                playerModel.hat.xScale = scale; playerModel.hat.yScale = scale; playerModel.hat.zScale = scale;
+                playerModel.jacket.xScale = scale; playerModel.jacket.yScale = scale; playerModel.jacket.zScale = scale;
+                playerModel.rightSleeve.xScale = scale; playerModel.rightSleeve.yScale = scale; playerModel.rightSleeve.zScale = scale;
+                playerModel.leftSleeve.xScale = scale; playerModel.leftSleeve.yScale = scale; playerModel.leftSleeve.zScale = scale;
+                playerModel.rightPants.xScale = scale; playerModel.rightPants.yScale = scale; playerModel.rightPants.zScale = scale;
+                playerModel.leftPants.xScale = scale; playerModel.leftPants.yScale = scale; playerModel.leftPants.zScale = scale;
+            }
         }
     }
 
@@ -974,7 +1056,7 @@ public class RestraintItem extends Item implements GeoItem {
 
             @Override
             public @NotNull VertexConsumer setUv(float u, float v) {
-                baseBuffer.setUv(u, v + vOffset); // 在 V 轴注入偏移
+                baseBuffer.setUv(u, v + vOffset);
                 return this;
             }
 
@@ -1011,35 +1093,70 @@ public class RestraintItem extends Item implements GeoItem {
      */
     @OnlyIn(Dist.CLIENT)
     public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity) {
+            M child, M parent,BakedGeoModel geoModel,ItemStack stack, PlayerRestraintPart part,int index, T entity) {
 
-        child.setAllVisible(false);
 
-        if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
-            child.head.visible = parent.head.visible;
-        } else if (part == PlayerRestraintPart.restraint_collar) {
-            child.head.visible = parent.head.visible;
-            child.body.visible = parent.body.visible;
-        } else if (part == PlayerRestraintPart.restraint_body_bind) {
-            child.body.visible = parent.body.visible;
-        } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
-            child.leftArm.visible = parent.leftArm.visible;
-            child.rightArm.visible = parent.rightArm.visible;
-        } else if (part == PlayerRestraintPart.restraint_legs_bind) {
-            child.leftLeg.visible = parent.leftLeg.visible;
-            child.rightLeg.visible = parent.rightLeg.visible;
-        } else {
-            child.head.visible = parent.head.visible;
-            child.body.visible = parent.body.visible;
-            child.leftArm.visible = parent.leftArm.visible;
-            child.rightArm.visible = parent.rightArm.visible;
-            child.leftLeg.visible = parent.leftLeg.visible;
-            child.rightLeg.visible = parent.rightLeg.visible;
+        if(child == null && parent == null && geoModel != null){
+
+            if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
+                geoModel.getBone("head").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_collar) {
+                geoModel.getBone("head").get().setHidden(false);
+                geoModel.getBone("torso").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_body_bind) {
+                geoModel.getBone("torso").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
+                geoModel.getBone("left_arm").get().setHidden(false);
+                geoModel.getBone("right_arm").get().setHidden(false);
+                geoModel.getBone("left_arm_bend").get().setHidden(false);
+                geoModel.getBone("right_arm_bend").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_legs_bind) {
+                geoModel.getBone("left_leg").get().setHidden(false);
+                geoModel.getBone("right_leg").get().setHidden(false);
+                geoModel.getBone("left_leg_bend").get().setHidden(false);
+                geoModel.getBone("right_leg_bend").get().setHidden(false);
+            } else {
+                geoModel.getBone("head").get().setHidden(false);
+                geoModel.getBone("torso").get().setHidden(false);
+                geoModel.getBone("left_arm").get().setHidden(false);
+                geoModel.getBone("right_arm").get().setHidden(false);
+                geoModel.getBone("left_leg").get().setHidden(false);
+                geoModel.getBone("right_leg").get().setHidden(false);
+            }
+            if (shouldRenderSecondLayer(child, parent,geoModel, part, entity)) {
+                setSecondLayerVisibility(child, parent,geoModel, part, entity);
+            }
+        }else if (child != null && parent != null && geoModel == null){
+            child.setAllVisible(false);
+
+            if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
+                child.head.visible = parent.head.visible;
+            } else if (part == PlayerRestraintPart.restraint_collar) {
+                child.head.visible = parent.head.visible;
+                child.body.visible = parent.body.visible;
+            } else if (part == PlayerRestraintPart.restraint_body_bind) {
+                child.body.visible = parent.body.visible;
+            } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
+                child.leftArm.visible = parent.leftArm.visible;
+                child.rightArm.visible = parent.rightArm.visible;
+            } else if (part == PlayerRestraintPart.restraint_legs_bind) {
+                child.leftLeg.visible = parent.leftLeg.visible;
+                child.rightLeg.visible = parent.rightLeg.visible;
+            } else {
+                child.head.visible = parent.head.visible;
+                child.body.visible = parent.body.visible;
+                child.leftArm.visible = parent.leftArm.visible;
+                child.rightArm.visible = parent.rightArm.visible;
+                child.leftLeg.visible = parent.leftLeg.visible;
+                child.rightLeg.visible = parent.rightLeg.visible;
+            }
+
+            if (shouldRenderSecondLayer(child, parent,geoModel, part, entity)) {
+                setSecondLayerVisibility(child, parent,geoModel, part, entity);
+            }
         }
 
-        if (shouldRenderSecondLayer(child, parent, part, entity)) {
-            setSecondLayerVisibility(child, parent, part, entity);
-        }
+
     }
 
 
@@ -1048,7 +1165,7 @@ public class RestraintItem extends Item implements GeoItem {
      */
     @OnlyIn(Dist.CLIENT)
     public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
-            M child, M parent, PlayerRestraintPart part, T entity) {
+            M child, M parent,BakedGeoModel geoModel, PlayerRestraintPart part, T entity) {
         return false;
     }
 
@@ -1058,45 +1175,78 @@ public class RestraintItem extends Item implements GeoItem {
      */
     @OnlyIn(Dist.CLIENT)
     public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity) {
+            M child, M parent,BakedGeoModel geoModel, PlayerRestraintPart part, T entity) {
 
-        if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
+        if(child == null && parent == null && geoModel != null){
+            if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
+                geoModel.getBone("headwear").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_collar) {
+                geoModel.getBone("headwear").get().setHidden(false);
+                geoModel.getBone("jacket").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_body_bind) {
+                geoModel.getBone("jacket").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
+                geoModel.getBone("left_arm_layer").get().setHidden(false);
+                geoModel.getBone("left_arm_bend_layer").get().setHidden(false);
+                geoModel.getBone("right_arm_layer").get().setHidden(false);
+                geoModel.getBone("right_arm_bend_layer").get().setHidden(false);
+            } else if (part == PlayerRestraintPart.restraint_legs_bind) {
+                geoModel.getBone("left_leg_layer").get().setHidden(false);
+                geoModel.getBone("left_leg_bend_layer").get().setHidden(false);
+                geoModel.getBone("right_leg_layer").get().setHidden(false);
+                geoModel.getBone("right_leg_bend_layer").get().setHidden(false);
+            } else {
+                geoModel.getBone("headwear").get().setHidden(false);
+                geoModel.getBone("jacket").get().setHidden(false);
+                geoModel.getBone("left_arm_layer").get().setHidden(false);
+                geoModel.getBone("left_arm_bend_layer").get().setHidden(false);
+                geoModel.getBone("right_arm_layer").get().setHidden(false);
+                geoModel.getBone("right_arm_bend_layer").get().setHidden(false);
+                geoModel.getBone("left_leg_layer").get().setHidden(false);
+                geoModel.getBone("left_leg_bend_layer").get().setHidden(false);
+                geoModel.getBone("right_leg_layer").get().setHidden(false);
+                geoModel.getBone("right_leg_bend_layer").get().setHidden(false);
+            }
 
-            playerChild.jacket.copyFrom(playerParent.body);
-            playerChild.leftSleeve.copyFrom(playerParent.leftArm);
-            playerChild.rightSleeve.copyFrom(playerParent.rightArm);
-            playerChild.leftPants.copyFrom(playerParent.leftLeg);
-            playerChild.rightPants.copyFrom(playerParent.rightLeg);
+        } else if (child != null && parent != null && geoModel == null) {
+            if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
 
-            if(entity instanceof Player player){
-                if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
-                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-                } else if (part == PlayerRestraintPart.restraint_collar) {
-                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-                } else if (part == PlayerRestraintPart.restraint_body_bind) {
-                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-                } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
-                    playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-                    playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-                } else if (part == PlayerRestraintPart.restraint_legs_bind) {
-                    playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
-                    playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
-                } else {
-                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-                    playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-                    playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-                    playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
-                    playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+                playerChild.jacket.copyFrom(playerParent.body);
+                playerChild.leftSleeve.copyFrom(playerParent.leftArm);
+                playerChild.rightSleeve.copyFrom(playerParent.rightArm);
+                playerChild.leftPants.copyFrom(playerParent.leftLeg);
+                playerChild.rightPants.copyFrom(playerParent.rightLeg);
+
+                if(entity instanceof Player player){
+                    if (part == PlayerRestraintPart.restraint_blindfold || part == PlayerRestraintPart.restraint_gag) {
+                        playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                    } else if (part == PlayerRestraintPart.restraint_collar) {
+                        playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                        playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                    } else if (part == PlayerRestraintPart.restraint_body_bind) {
+                        playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                    } else if (part == PlayerRestraintPart.restraint_arms_bind || part == PlayerRestraintPart.restraint_hands_bind) {
+                        playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                        playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+                    } else if (part == PlayerRestraintPart.restraint_legs_bind) {
+                        playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
+                        playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+                    } else {
+                        playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                        playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                        playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                        playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+                        playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
+                        playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+                    }
+                }else{
+                    playerChild.hat.visible = true;
+                    playerChild.jacket.visible = true;
+                    playerChild.leftSleeve.visible = true;
+                    playerChild.rightSleeve.visible = true;
+                    playerChild.leftPants.visible = true;
+                    playerChild.rightPants.visible = true;
                 }
-            }else{
-                playerChild.hat.visible = true;
-                playerChild.jacket.visible = true;
-                playerChild.leftSleeve.visible = true;
-                playerChild.rightSleeve.visible = true;
-                playerChild.leftPants.visible = true;
-                playerChild.rightPants.visible = true;
             }
         }
     }

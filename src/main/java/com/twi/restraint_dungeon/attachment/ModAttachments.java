@@ -1,12 +1,11 @@
 package com.twi.restraint_dungeon.attachment;
 
-import com.twi.restraint_dungeon.attachment.capability.NPCCapability.NPCData;
+import com.twi.restraint_dungeon.attachment.capability.npc_capability.NPCData;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.*;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.*;
 import com.twi.restraint_dungeon.attachment.restraint_stack.RestraintStack;
 import com.twi.restraint_dungeon.attachment.restraint_stack.RestraintTools;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 

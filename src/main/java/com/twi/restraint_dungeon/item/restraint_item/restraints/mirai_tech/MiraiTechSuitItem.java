@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -238,38 +239,6 @@ public class MiraiTechSuitItem extends RestraintItem {
 
         return ResourceLocation.fromNamespaceAndPath(MODID, 
             "textures/models/restraints/mirai_tech/" + itemName + "/" + bodyPart + "/" + itemName + mode + lock + ".png");
-    }
-
-    @Override
-    public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity)  {
-
-        child.setAllVisible(false);
-
-        child.body.visible = true;
-
-        if(shouldRenderSecondLayer(child,parent,part,entity)){
-            setSecondLayerVisibility(child,parent,part,entity);
-        }
-    }
-
-    @Override
-    public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
-            M child, M parent, PlayerRestraintPart part, T entity) {
-        return false;
-    }
-
-    @Override
-    public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity){
-        if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent){
-            if(entity instanceof Player player){
-                playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-            }else{
-                playerChild.jacket.visible = true;
-            }
-            playerChild.jacket.copyFrom(playerParent.body);
-        }
     }
 
     public ItemStack getMiRaiTechPartItem(LivingEntity entity, String bodyPart) {

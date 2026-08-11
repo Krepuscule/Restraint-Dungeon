@@ -16,6 +16,5 @@ public class SeatEntities {
             SEAT_ENTITIES.register("seat", () -> EntityType.Builder.<SeatEntity>of(SeatEntity::new, MobCategory.MISC)
                     .sized(0.25f, 0.25f)
                     .noSummon()
-                    .noSave()
                     .build("seat"));
 }

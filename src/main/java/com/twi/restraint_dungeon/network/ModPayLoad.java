@@ -1,7 +1,9 @@
 package com.twi.restraint_dungeon.network;
 
+import com.twi.restraint_dungeon.network.payload.npc.conversation.*;
 import com.twi.restraint_dungeon.network.payload.player_action.ActionExecutePayload;
 import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePayload;
+import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePopPayload;
 import com.twi.restraint_dungeon.network.payload.player_self_bondage.SelfBondageActionPayload;
 import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.network.payload.player_kidnap.PlayerKidnapActionPayload;
@@ -127,6 +129,12 @@ public class ModPayLoad {
         );
 
         registrar.playToServer(
+                PlayerReleaseSelfPayload.TYPE,
+                PlayerReleaseSelfPayload.STREAM_CODEC,
+                PlayerReleaseSelfPayload::handle
+        );
+
+        registrar.playToServer(
                 StruggleOutOfIndexRestraintPayload.TYPE,
                 StruggleOutOfIndexRestraintPayload.STREAM_CODEC,
                 StruggleOutOfIndexRestraintPayload::handle
@@ -183,6 +191,39 @@ public class ModPayLoad {
                 PlayerAnimationSequencePayload.STREAM_CODEC,
                 PlayerAnimationSequencePayload::handle
         );
+
+        registrar.playToServer(
+                PlayerAnimationSequencePopPayload.TYPE,
+                PlayerAnimationSequencePopPayload.STREAM_CODEC,
+                PlayerAnimationSequencePopPayload::handle
+        );
+
+        /* ----------------------------------------- NPC相关 --------------------------------------------*/
+
+        registrar.playToServer(
+                ClickOptionPayload.TYPE,
+                ClickOptionPayload.STREAM_CODEC,
+                ClickOptionPayload::handle
+        );
+
+        registrar.playToServer(
+                RequestStartConversationPayload.TYPE,
+                RequestStartConversationPayload.STREAM_CODEC,
+                RequestStartConversationPayload::handle
+        );
+
+        registrar.playToServer(
+                StopTalkingPayload.TYPE,
+                StopTalkingPayload.STREAM_CODEC,
+                StopTalkingPayload::handle
+        );
+
+        registrar.playToClient(
+                OpenNodeGuiPayload.TYPE,
+                OpenNodeGuiPayload.STREAM_CODEC,
+                OpenNodeGuiPayload::handle
+        );
+
 
         /* ----------------------------------------- 拘束具实现相关 ---------------------------------------*/
 

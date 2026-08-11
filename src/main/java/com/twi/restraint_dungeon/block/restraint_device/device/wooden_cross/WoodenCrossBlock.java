@@ -4,9 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -83,9 +85,14 @@ public class WoodenCrossBlock extends RestraintDevice {
     }
 
     @Override
-    public double getBaseOffsetY() { return 1.35; }
+    public double getBaseOffsetY(Entity passenger) {
+        if(passenger instanceof BaseNPCEntity npc){
+            return 0.65;
+        }
+        return 1.35;
+    }
     @Override
-    public double getBaseOffsetZ() { return -0.15; }
+    public double getBaseOffsetZ(Entity passenger) { return -0.15; }
 
     @Override
     public Vector3f getRiderFirstCameraOffset(){

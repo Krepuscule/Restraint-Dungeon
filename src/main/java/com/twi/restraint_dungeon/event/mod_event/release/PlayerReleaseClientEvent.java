@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.event.mod_event.release;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_release.PlayerReleaseActionPayload;
 import com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils;
@@ -66,9 +67,8 @@ public class PlayerReleaseClientEvent {
         if (event.getAction() == GLFW.GLFW_PRESS) {
             if (mc.hitResult instanceof EntityHitResult ehr && ehr.getEntity() instanceof LivingEntity target) {
 
-                // TODO:完成NPC系统后修改
-                if(!(target instanceof Player)) return;
-//                if(!(target instanceof Player) || !(target instanceof BaseNPCEntity)) return;
+
+                if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)) return;
 
                 PacketDistributor.sendToServer(new PlayerReleaseActionPayload(target.getId(), true));
             }

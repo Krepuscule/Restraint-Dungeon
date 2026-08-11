@@ -11,11 +11,11 @@ import net.minecraft.network.codec.StreamCodec;
 public class RestraintCapability {
 
     public enum ArmsPose {
-        NONE, CROSS_BEHIND_BACK
+        NONE, CROSS_BEHIND_BACK, CROSS_UP,BEND_ARMS
     }
 
     public enum LegsPose {
-        NONE, LEGS_TOGETHER
+        NONE, LEGS_TOGETHER,SPLITED_LEGS
     }
 
     public enum PlayerRestraintPart {
@@ -49,6 +49,7 @@ public class RestraintCapability {
 
     private PlayerRestraintPart targetPart = PlayerRestraintPart.restraint_blindfold;
 
+    private int isChangingRestraint = 0;
     private boolean isChangingPosition = false;
 
     public RestraintCapability() {}
@@ -74,23 +75,31 @@ public class RestraintCapability {
     public void setRestraintPosition(RestraintPositionEvent.RestraintPosition pos) { this.restraintPosition = pos; }
 
     public boolean isChangingPosition() { return isChangingPosition; }
-    public void setChangingPosition(boolean changingPosition) { isChangingPosition = changingPosition; }
+    public void setChangingPosition(boolean changingPosition) { this.isChangingPosition = changingPosition; }
+    public int isChangingRestraint(){return isChangingRestraint;}
+    public void setChangingRestraint(int changingRestraint){this.isChangingRestraint = changingRestraint;}
 
     public static final Codec<RestraintCapability> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("target_part").forGetter(c -> c.targetPart.name()),
             Codec.STRING.fieldOf("prev_pos").forGetter(c -> c.previousPosition.name()),
             Codec.STRING.fieldOf("curr_pos").forGetter(c -> c.restraintPosition.name()),
+            Codec.STRING.fieldOf("prev_arms_pose").forGetter(c -> c.prevArmsPose.name()),
             Codec.STRING.fieldOf("arms_pose").forGetter(c -> c.armsPose.name()),
+            Codec.STRING.fieldOf("prev_legs_pose").forGetter(c -> c.prevLegsPose.name()),
             Codec.STRING.fieldOf("legs_pose").forGetter(c -> c.legsPose.name()),
-            Codec.BOOL.fieldOf("is_changing").forGetter(c -> c.isChangingPosition)
-    ).apply(instance, (sel, prev, curr, arms, legs, changing) -> {
+            Codec.BOOL.fieldOf("is_changing_position").forGetter(c -> c.isChangingPosition),
+            Codec.INT.fieldOf("is_changing_restraint").forGetter(c -> c.isChangingRestraint)
+    ).apply(instance, (sel, prev, curr, prev_arms,arms,prev_legs, legs, changingPosition,changingRestraint) -> {
         RestraintCapability cap = new RestraintCapability();
         cap.targetPart = PlayerRestraintPart.valueOf(sel);
         cap.previousPosition = RestraintPositionEvent.RestraintPosition.valueOf(prev);
         cap.restraintPosition = RestraintPositionEvent.RestraintPosition.valueOf(curr);
+        cap.prevArmsPose = ArmsPose.valueOf(prev_arms);
         cap.armsPose = ArmsPose.valueOf(arms);
+        cap.prevLegsPose = LegsPose.valueOf(prev_legs);
         cap.legsPose = LegsPose.valueOf(legs);
-        cap.isChangingPosition = changing;
+        cap.isChangingPosition = changingPosition;
+        cap.isChangingRestraint = changingRestraint;
         return cap;
     }));
 

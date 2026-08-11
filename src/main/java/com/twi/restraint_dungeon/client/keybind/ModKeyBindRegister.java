@@ -19,5 +19,6 @@ public class ModKeyBindRegister {
         event.register(ModKeyBinds.OPEN_ACTION_MENU);
         event.register(ModKeyBinds.RESTRAINT_MENU);
         event.register(ModKeyBinds.STRUGGLE_MODE_SELECT_MENU);
+        event.register(ModKeyBinds.NPC_CONVERSATION);
     }
 }

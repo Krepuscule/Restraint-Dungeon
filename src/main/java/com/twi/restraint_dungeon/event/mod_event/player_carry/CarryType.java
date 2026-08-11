@@ -50,7 +50,8 @@ public abstract class CarryType {
     public boolean canContinue(Player carrier, LivingEntity passenger) {
         return carrier.isAlive() && passenger.isAlive()
                 && carrier.level() == passenger.level()
-                && isBeenFullyBind(passenger);
+                && isBeenFullyBind(passenger)
+                && (!isBeenBindArms(carrier) && !isBeenBindHands(carrier) && !isBeenBindLegs(carrier));
     }
 
 

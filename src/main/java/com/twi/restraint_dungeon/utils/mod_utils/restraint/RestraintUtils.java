@@ -218,7 +218,6 @@ public class RestraintUtils {
         List<ItemStack> list = getAllRestraintsByPart(entity, bodyPart);
 
         if (index >= 0 && index < list.size()) {
-            // 调用工具类的 replace 方法，会自动触发 Unequipped(旧) -> Equipped(新)
             replaceRestraintByIndex(entity, bodyPart, index, stack);
             return true;
         } else if (index == list.size()) {
@@ -295,6 +294,10 @@ public class RestraintUtils {
             }
         }
 
+//        if((isChangingRestraint(entity) == 1 && bodyPart == PlayerRestraintPart.restraint_arms_bind)
+//                || (isChangingRestraint(entity) == 2 && bodyPart == PlayerRestraintPart.restraint_legs_bind)){
+//            return true;
+//        }
 
         List<ItemStack> restraints = getAllPartRestraint(entity, bodyPart);
         for(ItemStack restraint : restraints) {
@@ -434,6 +437,7 @@ public class RestraintUtils {
     public static boolean isBusyState(LivingEntity entity) {
 
         return isSelfBondaging(entity)
+                || isChangingRestraint(entity) != 0
                 || isChangingPosition(entity)
                 || getIsStruggling(entity)
                 || isDoingAction(entity)
@@ -514,28 +518,10 @@ public class RestraintUtils {
     public static boolean isBeenHeavyGag(LivingEntity entity) {
 
         if(entity == null) return false;
-        boolean isStuffedGag = false;
-        boolean isBlockedGag = false;
+        boolean isStuffedGag = isBeenStuffedGag(entity);
+        boolean isBlockedGag = isBeenBlockedGag(entity);
 
-        List<ItemStack> gags = getAllGag(entity);
-        if(!gags.isEmpty()){
-            for(ItemStack stack : gags) {
-                if (stack.getItem() instanceof RestraintItem restraintItem && restraintItem.canBindCurrentPart(entity)) {
-                    if(restraintItem.canStuffedGag(entity, stack)) {
-                        isStuffedGag = true;
-                    }
-
-                    if(restraintItem.canBlockedGag(entity, stack)) {
-                        isBlockedGag = true;
-                    }
-
-                    if(isStuffedGag && isBlockedGag){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return isStuffedGag && isBlockedGag;
 
     }
 
@@ -828,10 +814,13 @@ public class RestraintUtils {
      * @param guiGraphics 渲染用GuiGraphics
      */
     public static void renderFullScreenOverlay(Player player, GuiGraphics guiGraphics) {
+        List<ItemStack> restraints = getAllBlindfold(player);
 
-        for (ItemStack restraint : getAllBlindfold(player)) {
-            if(restraint.getItem() instanceof RestraintItem restraintItem){
-                restraintItem.renderBlindfoldOverlay(player.getUUID(),guiGraphics,restraint);
+        for (int i = restraints.size() - 1; i >= 0; i--) {
+            ItemStack restraint = restraints.get(i);
+
+            if (restraint.getItem() instanceof RestraintItem restraintItem) {
+                restraintItem.renderBlindfoldOverlay(player.getUUID(), guiGraphics, restraint);
             }
         }
     }
@@ -884,9 +873,9 @@ public class RestraintUtils {
     }
 
     /**
-     * 检查玩家指定的拘束架是否可以上锁
+     * 检查玩家指定的拘束装置是否可以上锁
      * @param entity 目标实体,
-     * @param device 目标拘束设施，
+     * @param device 目标拘束装置，
      * @param pos 方块位置,
      * @param lockStack 锁具ItemStack
      */
@@ -939,9 +928,9 @@ public class RestraintUtils {
     }
 
     /**
-     * 检查玩家指定的拘束架是否可以解锁
+     * 检查玩家指定的拘束装置是否可以解锁
      * @param entity 目标实体,
-     * @param device 目标拘束设施，
+     * @param device 目标拘束装置，
      * @param pos 方块位置,
      * @param keyStack 钥匙ItemStack
      */

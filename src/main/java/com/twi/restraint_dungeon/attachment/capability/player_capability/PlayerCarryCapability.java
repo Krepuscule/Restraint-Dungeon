@@ -53,7 +53,6 @@ public class PlayerCarryCapability {
         isTarget = target;
     }
 
-    // --- 数据同步与序列化 ---
 
     public static final Codec<PlayerCarryCapability> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
@@ -69,4 +68,10 @@ public class PlayerCarryCapability {
             ByteBufCodecs.BOOL, PlayerCarryCapability::isTarget, // 添加到 StreamCodec
             (state, uuidOpt, target) -> new PlayerCarryCapability(state, uuidOpt.orElse(null), target)
     );
+
+    public void copyFrom(PlayerCarryCapability other) {
+        this.carryingState = other.getCarryingState();
+        this.partnerUUID = other.getPartnerUUID();
+        this.isTarget = other.isTarget();
+    }
 }

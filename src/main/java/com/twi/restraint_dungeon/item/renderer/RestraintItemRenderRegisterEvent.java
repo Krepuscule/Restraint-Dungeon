@@ -34,7 +34,7 @@ public class RestraintItemRenderRegisterEvent {
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 
-        CubeDeformation restraintDeformation = new CubeDeformation(0.1F);
+        CubeDeformation restraintDeformation = new CubeDeformation(0.05F);
 
         LayerDefinition wideLayer = LayerDefinition.create(PlayerModel.createMesh(restraintDeformation, false), 64, 64);
         LayerDefinition slimLayer = LayerDefinition.create(PlayerModel.createMesh(restraintDeformation, true), 64, 64);
@@ -49,8 +49,6 @@ public class RestraintItemRenderRegisterEvent {
         addCustomLayer(event, PlayerSkin.Model.WIDE, false);
         addCustomLayer(event, PlayerSkin.Model.SLIM, true);
 
-        addCustomLayer(event, ModNPCs.GENERIC_NPC.get());
-
     }
 
     private static void addCustomLayer(EntityRenderersEvent.AddLayers event, PlayerSkin.Model modelType, boolean slim) {
@@ -62,46 +60,6 @@ public class RestraintItemRenderRegisterEvent {
             );
 
             renderer.addLayer(new RestraintItemLayer<>(renderer, model));
-        }
-    }
-
-    private static <E extends BaseNPCEntity> void addCustomLayer(EntityRenderersEvent.AddLayers event, EntityType<E> entityType) {
-        var renderer = event.getRenderer(entityType);
-
-        if (renderer instanceof LivingEntityRenderer) {
-            var livingRenderer = (LivingEntityRenderer<E, HumanoidModel<E>>) renderer;
-
-
-            PlayerModel<E> wideInnerModel = new PlayerModel<>(
-                    event.getEntityModels().bakeLayer(RESTRAINT_PLAYER_MODEL), false
-            );
-            PlayerModel<E> slimInnerModel = new PlayerModel<>(
-                    event.getEntityModels().bakeLayer(RESTRAINT_PLAYER_SLIM_MODEL), true
-            );
-
-            livingRenderer.addLayer(new RestraintItemLayer<>(livingRenderer, wideInnerModel) {
-                @Override
-                public void render(@NotNull PoseStack poseStack,
-                                   @NotNull MultiBufferSource bufferSource,
-                                   int packedLight, @NotNull E entity,
-                                   float limbSwing, float limbSwingAmount, float partialTicks,
-                                   float ageInTicks, float netHeadYaw, float headPitch) {
-                    if (entity.isSlimModel()) return;
-                    super.render(poseStack, bufferSource, packedLight, entity, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
-                }
-            });
-
-            livingRenderer.addLayer(new RestraintItemLayer<>(livingRenderer, slimInnerModel) {
-                @Override
-                public void render(@NotNull PoseStack poseStack,
-                                   @NotNull MultiBufferSource bufferSource,
-                                   int packedLight, @NotNull E entity,
-                                   float limbSwing, float limbSwingAmount, float partialTicks,
-                                   float ageInTicks, float netHeadYaw, float headPitch) {
-                    if (!entity.isSlimModel()) return;
-                    super.render(poseStack, bufferSource, packedLight, entity, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch);
-                }
-            });
         }
     }
 }

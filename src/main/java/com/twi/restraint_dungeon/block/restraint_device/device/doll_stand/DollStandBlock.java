@@ -4,9 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -101,7 +103,10 @@ public class DollStandBlock extends RestraintDevice {
 
 
     @Override
-    public double getBaseOffsetY() {
+    public double getBaseOffsetY(Entity passenger) {
+        if(passenger instanceof BaseNPCEntity npc){
+            return 0.1;
+        }
         return 0.8;
     }
 

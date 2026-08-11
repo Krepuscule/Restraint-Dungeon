@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.network.payload.player_restraint;
 
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintServerHandler;
 import net.minecraft.core.UUIDUtil;
@@ -42,7 +43,8 @@ public record PlayerSetTargetPositionPayload(UUID targetUUID, String direction) 
             Player sender = context.player();
             if (sender.level() instanceof ServerLevel level) {
                 Entity target = level.getEntity(this.targetUUID);
-                if (target instanceof LivingEntity living && !isChangingPosition(living)) {
+                if(!(target instanceof LivingEntity living)) return;
+                if ((living instanceof Player || living instanceof BaseNPCEntity) && !isChangingPosition(living)) {
                     RestraintPosition next = getNextPosition(living, getRestraintPosition(living), this.direction);
                     if (next != null) {
                         RestraintServerHandler.startTransition(living,getRestraintPosition(living), next);

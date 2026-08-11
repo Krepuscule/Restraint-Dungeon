@@ -10,6 +10,7 @@ import com.twi.restraint_dungeon.network.payload.player_struggle.StruggleOutOfIn
 import com.twi.restraint_dungeon.network.payload.player_struggle.StruggleOutOfRestraintPayload;
 import com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,17 +23,24 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
 import static com.twi.restraint_dungeon.utils.block_utils.BlockUtils.isNearPlacedSword;
 import static com.twi.restraint_dungeon.utils.block_utils.BlockUtils.isNearTripwireHook;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getTargetPart;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
+import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.isKidnappingActive;
+import static com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils.isReleaseActive;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils.isSelfBondaging;
 import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils.*;
 
 public class StruggleUtils {
 
     private static final float DEFAULT_STRENGTH_DECAY_RATE = 0.01f;
     private static final float DEFAULT_STRENGTH_INCREMENT_RATE = 0.05f;
-    private static final int DEFAULT_LOOSE_ARROW_LENGTH = 2;
+    private static final int DEFAULT_LOOSE_ARROW_LENGTH = 5;
     private static final float DEFAULT_LOOSE_INCREMENT_PROGRESS = 0.05f;
     private static final float DEFAULT_LOOSE_DECAY_PROGRESS = 0.05f;
     private static final float DEFAULT_UNLOCK_POINTER_SPEED = 0.01f;
@@ -163,12 +171,112 @@ public class StruggleUtils {
     /* ----------------------------------------------------- 玩家挣脱的服务端逻辑  ----------------------------------------------------- */
 
     /**
+     * 判断玩家当前是否可挣脱（服务端）
+     * @param player 目标玩家
+     */
+    public static Component canBeStruggle(Player player) {
+
+        if(player == null){
+            return Component.translatable("hud." + MODID + ".struggle.invalid_target");
+        }
+
+        PlayerRestraintPart currentPart = getTargetPart(player);
+        ItemStack strugglingItem = getPlayerStrugglingItem(player);
+        int itemIndex = getPlayerStrugglingItemIndex(player);
+
+        if (getAllRestraintsByPart(player, currentPart).isEmpty()) {
+            return Component.translatable("hud." + MODID + ".struggle.no_restraint_on_part").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if (!(strugglingItem.getItem() instanceof RestraintItem restraintItem)) {
+            return Component.translatable("hud." + MODID + ".struggle.item_not_restraint").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if(currentPart == PlayerRestraintPart.restraint_connection && restraintItem.canConnectStruggle(player,strugglingItem) != null){
+            return restraintItem.canConnectStruggle(player,strugglingItem);
+        }
+
+        if(restraintItem.canBeStruggle(player,strugglingItem,currentPart,itemIndex) != null){
+            return restraintItem.canBeStruggle(player,strugglingItem,currentPart,itemIndex);
+        }
+
+        if (partHasBeenBlocked(player, currentPart, itemIndex)) {
+            return Component.translatable("hud." + MODID + ".struggle.restraint_has_been_block").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if(isSelfBondaging(player)
+                || isChangingRestraint(player) != 0
+                || isChangingPosition(player)
+                || isDoingAction(player)
+                || isPlayerRestraintMoving(player)
+                || isCarrier(player)
+                || isKidnappingActive(player)
+                || isReleaseActive(player)){
+            return Component.translatable("hud." + MODID + ".struggle.cant_struggle").withStyle(ChatFormatting.YELLOW);
+        }
+
+        return null;
+    }
+
+    /**
+     * 判断玩家当前是否可自行释放（服务端）
+     * @param player 目标玩家
+     */
+    public static Component canBeReleaseBySelf(Player player) {
+
+        if(player == null){
+            return Component.translatable("hud." + MODID + ".struggle.invalid_target");
+        }
+
+        PlayerRestraintPart currentPart = getTargetPart(player);
+        ItemStack strugglingItem = getPlayerStrugglingItem(player);
+        int itemIndex = getPlayerStrugglingItemIndex(player);
+
+        if (getAllRestraintsByPart(player, currentPart).isEmpty()) {
+            return Component.translatable("hud." + MODID + ".struggle.no_restraint_on_part").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if (!(strugglingItem.getItem() instanceof RestraintItem restraintItem)) {
+            return Component.translatable("hud." + MODID + ".struggle.item_not_restraint").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if (!restraintItem.getLockType(player,strugglingItem).isEmpty()) {
+            return Component.translatable("hud." + MODID + ".struggle.restraint_has_been_lock").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if(currentPart == PlayerRestraintPart.restraint_connection && restraintItem.canConnectReleaseBySelf(player,strugglingItem) != null){
+            return restraintItem.canConnectReleaseBySelf(player,strugglingItem);
+        }
+
+        if(restraintItem.canBeReleaseBySelf(player,strugglingItem,currentPart,itemIndex) != null){
+            return restraintItem.canBeReleaseBySelf(player,strugglingItem,currentPart,itemIndex);
+        }
+
+        if (partHasBeenBlocked(player, currentPart, itemIndex)) {
+            return Component.translatable("hud." + MODID + ".struggle.restraint_has_been_block").withStyle(ChatFormatting.YELLOW);
+        }
+
+        if(isSelfBondaging(player)
+                || isChangingRestraint(player) != 0
+                || isChangingPosition(player)
+                || isDoingAction(player)
+                || isPlayerRestraintMoving(player)
+                || isCarrier(player)
+                || isKidnappingActive(player)
+                || isReleaseActive(player)){
+            return Component.translatable("hud." + MODID + ".struggle.cant_struggle").withStyle(ChatFormatting.YELLOW);
+        }
+
+        return null;
+    }
+
+
+    /**
      * 服务端执行玩家挣脱该部位顶部束缚
      * @param player 目标玩家
      */
     public static void playerOutOfRestraint(Player player) {
         if (player == null) return;
-
         PlayerRestraintPart part = getTargetPart(player);
         PacketDistributor.sendToServer(new StruggleOutOfRestraintPayload(String.valueOf(part)));
     }
@@ -249,26 +357,6 @@ public class StruggleUtils {
                     player.level().addFreshEntity(itemEntity);
                 }
             }
-            // TODO: 完成NPC系统后补充
-//            else if(entity instanceof LivingEntity npc){
-//                // LivingEntity没有Inventory功能，需要修改
-//                if (restraintItem.dropStruggleItemDirection(entity, stack, part, index) == StruggleDropType.DROP_TO_ENTITY) {
-//                    if (!npc.getInventory().add(stack)) {
-//                        npc.drop(stack, false);
-//                    }
-//                } else {
-//                    ItemEntity itemEntity = new ItemEntity(
-//                            npc.level(), npc.getX(), npc.getY(), npc.getZ(),
-//                            stack.copy()
-//                    );
-//                    itemEntity.setDeltaMovement(
-//                            (npc.getRandom().nextDouble() - 0.5) * 1.5,
-//                            npc.getRandom().nextDouble() * 1.5 + 0.1,
-//                            (npc.getRandom().nextDouble() - 0.5) * 1.5
-//                    );
-//                    npc.level().addFreshEntity(itemEntity);
-//                }
-//            }
         }
 
         removeRestraint(entity, part, index);
@@ -306,24 +394,28 @@ public class StruggleUtils {
 
             if (restraintItem.getLockType(player,itemStack) != ItemStack.EMPTY
                     && restraintItem.getLockType(player,itemStack).getItem() instanceof RestraintLockItem lock) {
-                itemStrengthIndex = lock.onStrengthStruggle(player, lock, itemStrengthIndex);
+                itemStrengthIndex = itemStrengthIndex * (lock.onStrengthStruggle(player, lock, itemStrengthIndex));
             }
 
             // 处理连接拘束具的影响
             if (!connectingRestraintsInfo.isEmpty()) {
+                double reduceIndex = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemStrengthIndex -= restraint.getStrengthIndex(connectingStack) / 10.0;
+                        reduceIndex += (restraint.getStrengthIndex(connectingStack) / 10.0);
                     }
                 }
+                itemStrengthIndex = Math.max(itemStrengthIndex / 10,itemStrengthIndex - reduceIndex);
             }
 
             if (!isBeenBindArms(player) && !isBeenBindHands(player)) {
-                playerStruggleStrengthIndex += 10;
+                playerStruggleStrengthIndex = playerStruggleStrengthIndex * 10;
             }
 
-            return (float) (DEFAULT_STRENGTH_DECAY_RATE / (playerStruggleStrengthIndex * itemStrengthIndex));
+            return Mth.clamp((float) (DEFAULT_STRENGTH_DECAY_RATE / (itemStrengthIndex * playerStruggleStrengthIndex)),
+                    DEFAULT_STRENGTH_DECAY_RATE / 10,
+                    DEFAULT_STRENGTH_DECAY_RATE * 10);
         }
         return DEFAULT_STRENGTH_DECAY_RATE;
     }
@@ -341,16 +433,18 @@ public class StruggleUtils {
                 getPlayerStrugglingItemIndex(player));
 
         if (itemStack.getItem() instanceof RestraintItem restraintItem) {
-            float itemResistance = (float) restraintItem.getMaxResistance(itemStack);
+            double itemResistance = restraintItem.getMaxResistance(itemStack);
             if (!connectingRestraintsInfo.isEmpty()) {
+                double increaseResistance = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemResistance += (float) (restraint.getMaxResistance(connectingStack) / 10.0);
+                        increaseResistance =  restraint.getMaxResistance(connectingStack) / 10.0;
                     }
                 }
+                itemResistance = Mth.clamp(itemResistance + increaseResistance,itemResistance,itemResistance * 10);
             }
-            return DEFAULT_STRENGTH_INCREMENT_RATE / (itemResistance / 100.0f);
+            return (float) (DEFAULT_STRENGTH_INCREMENT_RATE / (itemResistance / 100.0));
         }
         return DEFAULT_STRENGTH_INCREMENT_RATE;
     }
@@ -368,16 +462,18 @@ public class StruggleUtils {
                 getPlayerStrugglingItemIndex(player));
 
         if (itemStack.getItem() instanceof RestraintItem restraintItem) {
-            float itemResistance = (float) restraintItem.getMaxResistance(itemStack);
+            double itemResistance =  restraintItem.getMaxResistance(itemStack);
             if (!connectingRestraintsInfo.isEmpty()) {
+                double increaseResistance = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemResistance += (float) (restraint.getMaxResistance(connectingStack) / 10.0);
+                        increaseResistance =  restraint.getMaxResistance(connectingStack) / 10.0;
                     }
                 }
+                itemResistance = Mth.clamp(itemResistance + increaseResistance,itemResistance,itemResistance * 10);
             }
-            return (int) (DEFAULT_LOOSE_ARROW_LENGTH * (itemResistance / 100.0f));
+            return Mth.clamp((int) (DEFAULT_LOOSE_ARROW_LENGTH * (itemResistance / 100.0f)),5,12);
         }
         return DEFAULT_LOOSE_ARROW_LENGTH;
     }
@@ -405,22 +501,28 @@ public class StruggleUtils {
 
             if (restraintItem.getLockType(player,itemStack) != ItemStack.EMPTY
                     && restraintItem.getLockType(player,itemStack).getItem() instanceof RestraintLockItem lock) {
-                itemLooseIndex = lock.onLooseStruggle(player, lock, itemLooseIndex);
+                itemLooseIndex = (itemLooseIndex * lock.onLooseStruggle(player, lock, itemLooseIndex));
             }
 
             if (!connectingRestraintsInfo.isEmpty()) {
+                double reduceIndex = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemLooseIndex -= restraint.getLooseIndex(connectingStack) / 10.0;
+                        reduceIndex += (restraint.getLooseIndex(connectingStack) / 10.0);
                     }
                 }
+                itemLooseIndex = Math.max(itemLooseIndex / 10,itemLooseIndex - reduceIndex);
             }
 
             if (!isBeenBindArms(player) && !isBeenBindHands(player)) {
-                playerStruggleSpeedIndex += 10;
+                playerStruggleSpeedIndex = playerStruggleSpeedIndex * 10;
             }
-            return (float) (DEFAULT_LOOSE_INCREMENT_PROGRESS * (playerStruggleSpeedIndex * itemLooseIndex));
+            return Mth.clamp(
+                    (float) (DEFAULT_LOOSE_INCREMENT_PROGRESS * (playerStruggleSpeedIndex * itemLooseIndex)),
+                    DEFAULT_LOOSE_INCREMENT_PROGRESS / 10,
+                    DEFAULT_LOOSE_INCREMENT_PROGRESS * 10
+            ) ;
         }
         return DEFAULT_LOOSE_INCREMENT_PROGRESS;
     }
@@ -448,49 +550,51 @@ public class StruggleUtils {
 
             if (restraintItem.getLockType(player,itemStack) != ItemStack.EMPTY
                     && restraintItem.getLockType(player,itemStack).getItem() instanceof RestraintLockItem lock) {
-                itemLooseIndex = lock.onLooseStruggle(player, lock, itemLooseIndex);
+                itemLooseIndex = (itemLooseIndex * lock.onLooseStruggle(player, lock, itemLooseIndex));
             }
 
             if (!connectingRestraintsInfo.isEmpty()) {
+                double reduceIndex = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemLooseIndex -= restraint.getLooseIndex(connectingStack) / 10.0;
+                        reduceIndex += (restraint.getLooseIndex(connectingStack) / 10.0);
                     }
                 }
+                itemLooseIndex = Math.max(itemLooseIndex / 10,itemLooseIndex - reduceIndex);
             }
 
             if (!isBeenBindArms(player) && !isBeenBindHands(player)) {
-                playerStruggleSpeedIndex += 10;
+                playerStruggleSpeedIndex = playerStruggleSpeedIndex * 10;
             }
-            return (float) (DEFAULT_LOOSE_DECAY_PROGRESS / (playerStruggleSpeedIndex * itemLooseIndex));
+            return Mth.clamp(
+                    (float) (DEFAULT_LOOSE_DECAY_PROGRESS / (playerStruggleSpeedIndex * itemLooseIndex)),
+                    DEFAULT_LOOSE_DECAY_PROGRESS / 10,
+                    DEFAULT_LOOSE_DECAY_PROGRESS * 10
+            ) ;
         }
         return DEFAULT_LOOSE_DECAY_PROGRESS;
     }
 
     /**
-     * 解开锁扣 属性值影响（指针移动速度，默认pointerSpeed = 0.01f,最大为0.05f,最小为0.005f）
+     * 解开锁扣 仅物品属性值影响（指针移动速度，默认pointerSpeed = 0.01f,最大为0.05f,最小为0.005f）
      * @param player 当前正在挣扎的玩家
      * @param itemStack 正在挣扎的拘束具ItemStack
      **/
     public static float unlockStruggle_PointerSpeed(Player player, ItemStack itemStack) {
         if (player == null) return 0;
         double itemLockIndex;
-        List<ConnectingRestraint> connectingRestraintsInfo = getConnectingRestraintsInfo(player,
-                getTargetPart(player),
-                getPlayerStrugglingItemIndex(player));
 
         if (itemStack.getItem() instanceof RestraintItem restraintItem) {
             itemLockIndex = restraintItem.getLockIndex(itemStack);
-            if (!connectingRestraintsInfo.isEmpty()) {
-                for (ConnectingRestraint info : connectingRestraintsInfo) {
-                    ItemStack connectingStack = info.stack();
-                    if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemLockIndex -= restraint.getLockIndex(connectingStack) / 10.0;
-                    }
-                }
-            }
-            return (float) (DEFAULT_UNLOCK_POINTER_SPEED / itemLockIndex);
+
+            itemLockIndex = restraintItem.onUnlockStruggle(player.getUUID(),itemLockIndex);
+
+            return Mth.clamp(
+                    (float) (DEFAULT_UNLOCK_POINTER_SPEED / itemLockIndex),
+                    DEFAULT_UNLOCK_POINTER_SPEED / 2,
+                    DEFAULT_UNLOCK_POINTER_SPEED * 5
+            ) ;
         }
         return DEFAULT_UNLOCK_POINTER_SPEED;
     }
@@ -507,16 +611,23 @@ public class StruggleUtils {
                 getPlayerStrugglingItemIndex(player));
 
         if (itemStack.getItem() instanceof RestraintItem restraintItem) {
-            float itemResistance = (float) restraintItem.getMaxResistance(itemStack);
+            double itemResistance = restraintItem.getMaxResistance(itemStack);
             if (!connectingRestraintsInfo.isEmpty()) {
+                double increaseResistance = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemResistance += (float) (restraint.getMaxResistance(connectingStack) / 10.0);
+                        increaseResistance =  restraint.getMaxResistance(connectingStack) / 10.0;
                     }
                 }
+                itemResistance = Mth.clamp(
+                        itemResistance + increaseResistance,
+                        itemResistance,
+                        itemResistance * 10);
             }
-            return DEFAULT_UNLOCK_PROGRESS_INCREMENT / (itemResistance / 100.0f);
+            return (float) Mth.clamp( DEFAULT_UNLOCK_PROGRESS_INCREMENT / (itemResistance / 100.0f),
+                    DEFAULT_UNLOCK_PROGRESS_INCREMENT / 10,
+                    DEFAULT_UNLOCK_PROGRESS_INCREMENT * 10);
         }
         return DEFAULT_UNLOCK_PROGRESS_INCREMENT;
     }
@@ -533,16 +644,23 @@ public class StruggleUtils {
                 getPlayerStrugglingItemIndex(player));
 
         if (itemStack.getItem() instanceof RestraintItem restraintItem) {
-            float itemResistance = (float) restraintItem.getMaxResistance(itemStack);
+            double itemResistance = restraintItem.getMaxResistance(itemStack);
             if (!connectingRestraintsInfo.isEmpty()) {
+                double increaseResistance = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemResistance += (float) (restraint.getMaxResistance(connectingStack) / 10.0);
+                        increaseResistance =  restraint.getMaxResistance(connectingStack) / 10.0;
                     }
                 }
+                itemResistance = Mth.clamp(
+                        itemResistance + increaseResistance,
+                        itemResistance,
+                        itemResistance * 10);
             }
-            return DEFAULT_UNLOCK_DECAY_PROGRESS * (itemResistance / 100.0f);
+            return (float) Mth.clamp( DEFAULT_UNLOCK_DECAY_PROGRESS / (itemResistance / 100.0f),
+                    DEFAULT_UNLOCK_DECAY_PROGRESS / 10,
+                    DEFAULT_UNLOCK_DECAY_PROGRESS * 10);
         }
         return DEFAULT_UNLOCK_DECAY_PROGRESS;
     }
@@ -570,22 +688,28 @@ public class StruggleUtils {
 
             if (restraintItem.getLockType(player,itemStack) != ItemStack.EMPTY
                     && restraintItem.getLockType(player,itemStack).getItem() instanceof RestraintLockItem lock) {
-                itemLockIndex = lock.onUnlockStruggle(player, lock, itemLockIndex);
+                itemLockIndex = (itemLockIndex * lock.onUnlockStruggle(player, lock, itemLockIndex));
             }
 
             if (!connectingRestraintsInfo.isEmpty()) {
+                double reduceIndex = 0.0;
                 for (ConnectingRestraint info : connectingRestraintsInfo) {
                     ItemStack connectingStack = info.stack();
                     if (connectingStack.getItem() instanceof RestraintItem restraint) {
-                        itemLockIndex -= restraint.getLockIndex(connectingStack) / 10.0;
+                        reduceIndex += (restraint.getLockIndex(connectingStack) / 10.0);
                     }
                 }
+                itemLockIndex = Math.max(itemLockIndex / 10,itemLockIndex - reduceIndex);
             }
 
             if (!isBeenBindArms(player) && !isBeenBindHands(player)) {
-                playerStruggleRangeIndex += 10;
+                playerStruggleRangeIndex = playerStruggleRangeIndex * 10;
             }
-            return (float) (DEFAULT_UNLOCK_TARGET_ZONE * (playerStruggleRangeIndex * itemLockIndex));
+            return Mth.clamp(
+                    (float) (DEFAULT_UNLOCK_TARGET_ZONE / (playerStruggleRangeIndex * itemLockIndex)),
+                    DEFAULT_UNLOCK_TARGET_ZONE / 2,
+                    DEFAULT_UNLOCK_TARGET_ZONE * 2
+            ) ;
         }
         return DEFAULT_UNLOCK_TARGET_ZONE;
     }

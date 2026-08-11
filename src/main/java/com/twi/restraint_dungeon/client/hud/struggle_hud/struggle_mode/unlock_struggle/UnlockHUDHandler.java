@@ -130,7 +130,6 @@ public class UnlockHUDHandler {
                 data.handleMiss();
             }
 
-            StruggleUtils.updateStruggleProgress(player, data.overallProgress);
             PacketDistributor.sendToServer(new PlayerStruggleProgressPayload(data.overallProgress));
             return true;
         }

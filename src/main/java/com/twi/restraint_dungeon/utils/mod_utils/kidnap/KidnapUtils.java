@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.kidnap;
 
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -203,10 +204,9 @@ public class KidnapUtils {
             return BindResult.fail(Component.translatable("event." + MODID + ".kidnap.cant_use_on_this_part").withStyle(ChatFormatting.DARK_RED));
         }
 
-        // TODO:完成NPC功能后启用
-//        if (target instanceof BaseNPCEntity npc && !npc.canBeKidnap()) {
-//            return BindResult.fail(Component.translatable("event.restraint_dungeon.kidnap.fail").withStyle(ChatFormatting.RED));
-//        }
+        if (target instanceof BaseNPCEntity npc && !npc.canBeKidnap()) {
+            return BindResult.fail(Component.translatable("event." + MODID +".kidnap.fail").withStyle(ChatFormatting.DARK_RED));
+        }
 
         // 槽位深度与阻塞判定逻辑
         return checkRestraintStack(stack, target, actionEntity, partSelect);

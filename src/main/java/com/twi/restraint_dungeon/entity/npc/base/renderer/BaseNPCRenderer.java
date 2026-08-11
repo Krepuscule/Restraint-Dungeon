@@ -3,19 +3,14 @@ package com.twi.restraint_dungeon.entity.npc.base.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
-import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
@@ -28,6 +23,8 @@ public class BaseNPCRenderer extends GeoEntityRenderer<BaseNPCEntity> {
     public BaseNPCRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new BaseNPCModel());
 
+        this.addRenderLayer(new GeoRestraintTextureLayer(this));
+
 
         this.addRenderLayer(new BlockAndItemGeoLayer<BaseNPCEntity>(this) {
             @Nullable
@@ -36,8 +33,7 @@ public class BaseNPCRenderer extends GeoEntityRenderer<BaseNPCEntity> {
                 if (isBeenBindArms(animatable) || isBeenBindHands(animatable)) {
                     return null;
                 }
-                
-                // 升级关键点 1：将骨骼名变更为 1.21 的小写蛇形命名
+
                 return switch (bone.getName()) {
                     case "right_arm_bend" -> animatable.getMainHandItem();
                     case "left_arm_bend" -> animatable.getOffhandItem();
@@ -83,7 +79,11 @@ public class BaseNPCRenderer extends GeoEntityRenderer<BaseNPCEntity> {
     }
 
     @Override
-    public void render(BaseNPCEntity animatable, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public void render(@NotNull BaseNPCEntity animatable,
+                       float entityYaw,
+                       float partialTick,
+                       @NotNull PoseStack poseStack,
+                       @NotNull MultiBufferSource bufferSource,int packedLight) {
         super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
 
 

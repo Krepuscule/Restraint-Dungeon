@@ -9,6 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RestraintStackUtils {
@@ -103,18 +104,69 @@ public class RestraintStackUtils {
         return entity.getData(ModAttachments.RESTRAINT_STACK).getPartList(part);
     }
 
-    public static void dropAndClearRestraints(LivingEntity entity) {
+    public static void dropAndClearAllRestraints(LivingEntity entity) {
         if (entity == null) return;
         var cap = entity.getData(ModAttachments.RESTRAINT_STACK);
         for (PlayerRestraintPart part : PlayerRestraintPart.values()) {
             List<ItemStack> list = cap.getPartList(part);
             for (int i = list.size() - 1; i >= 0; i--) {
                 ItemStack item = list.get(i);
-                entity.spawnAtLocation(item);
+                if(item.getItem() instanceof RestraintItem ri && ri.dropRestraintWhenRelease(entity,entity,item,part,i)){
+                    entity.spawnAtLocation(item);
+                }
                 NeoForge.EVENT_BUS.post(new RestraintEquipEvent.Unequipped(entity, part, i, item));
             }
             cap.clear(part);
         }
         entity.setData(ModAttachments.RESTRAINT_STACK, cap);
+    }
+
+    public static void dropAndClearPartRestraints(LivingEntity entity,PlayerRestraintPart part) {
+        if (entity == null) return;
+        var cap = entity.getData(ModAttachments.RESTRAINT_STACK);
+        List<ItemStack> list = cap.getPartList(part);
+        for (int i = list.size() - 1; i >= 0; i--) {
+            ItemStack item = list.get(i);
+            if(item.getItem() instanceof RestraintItem ri && ri.dropRestraintWhenRelease(entity,entity,item,part,i)){
+                entity.spawnAtLocation(item);
+            }
+            NeoForge.EVENT_BUS.post(new RestraintEquipEvent.Unequipped(entity, part, i, item));
+        }
+        cap.clear(part);
+
+        entity.setData(ModAttachments.RESTRAINT_STACK, cap);
+    }
+
+
+    /**
+     * 玩家死亡后，重新排列所有部位中未掉落的拘束具
+     */
+    public static void rebalanceAllRestraintsAfterDeath(LivingEntity entity) {
+        if (entity == null) return;
+        for (PlayerRestraintPart part : PlayerRestraintPart.values()) {
+            rebalanceRestraintsAfterDeath(entity, part);
+        }
+    }
+
+    /**
+     * 玩家死亡后，重新排列某个部位中未掉落的拘束具
+     */
+    public static void rebalanceRestraintsAfterDeath(LivingEntity entity, PlayerRestraintPart part) {
+        if (entity == null) return;
+
+        List<ItemStack> poppedItems = new ArrayList<>();
+
+        while (true) {
+            ItemStack removed = removeRestraint(entity, part);
+            if (removed.isEmpty()) {
+                break;
+            }
+            poppedItems.add(removed);
+        }
+
+        for (int i = poppedItems.size() - 1; i >= 0; i--) {
+            ItemStack stackToInsert = poppedItems.get(i);
+            addRestraint(entity, part, stackToInsert);
+        }
     }
 }

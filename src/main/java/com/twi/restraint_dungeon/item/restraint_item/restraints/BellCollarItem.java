@@ -1,6 +1,8 @@
 package com.twi.restraint_dungeon.item.restraint_item.restraints;
 
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.client.sound.ModSounds;
+import com.twi.restraint_dungeon.item.ModDataComponents;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -25,15 +27,15 @@ import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 public class BellCollarItem extends RestraintItem {
 
     public static final RestraintDefaults BELL_COLLAR_DEFAULTS = new RestraintDefaults(
-            100,
+            500,
             50.0,
             0.1,
             0.1,
-            0.25
+            0.1
     );
 
     public BellCollarItem(Properties properties) {
-        super(properties.stacksTo(1),BELL_COLLAR_DEFAULTS);
+        super(properties.stacksTo(1), BELL_COLLAR_DEFAULTS);
         this.setCanEquipPartList(canEquipPartList);
         this.setConnectPartMap(new HashMap<>());
         this.setCanBeLocked(true);
@@ -44,8 +46,38 @@ public class BellCollarItem extends RestraintItem {
     );
 
     @Override
+    public void onEquip(LivingEntity entity, ItemStack stack, PlayerRestraintPart part, int index) {
+        if (!entity.level().isClientSide()) {
+            stack.set(ModDataComponents.ACTIVATE_TIME.get(), entity.level().getGameTime());
+            entity.level().playSound(
+                    null,
+                    entity.getX(), entity.getY(), entity.getZ(),
+                    ModSounds.BELL_SWING,
+                    SoundSource.PLAYERS,
+                    0.5F,
+                    1.0F + (entity.level().random.nextFloat() - entity.level().random.nextFloat()) * 0.2F
+            );
+        }
+    }
+
+    @Override
+    public void onUnequip(LivingEntity entity, ItemStack stack, PlayerRestraintPart part, int index) {
+        if (!entity.level().isClientSide()) {
+            stack.remove(ModDataComponents.ACTIVATE_TIME.get());
+            entity.level().playSound(
+                    null,
+                    entity.getX(), entity.getY(), entity.getZ(),
+                    ModSounds.BELL_SWING,
+                    SoundSource.PLAYERS,
+                    0.5F,
+                    1.0F + (entity.level().random.nextFloat() - entity.level().random.nextFloat()) * 0.2F
+            );
+        }
+    }
+
+    @Override
     public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add(Component.translatable("item."+ MODID + ".tooltips.describe.bell_collar").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item." + MODID + ".tooltips.describe.bell_collar").withStyle(ChatFormatting.GRAY));
     }
 }

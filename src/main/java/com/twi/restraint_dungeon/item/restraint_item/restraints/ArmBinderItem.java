@@ -18,6 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -89,26 +90,34 @@ public class ArmBinderItem extends RestraintItem {
 
     @Override
     public <T extends LivingEntity, M extends HumanoidModel<T>> void applyRestraintVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity){
+            M child, M parent, BakedGeoModel geoModel,ItemStack stack, PlayerRestraintPart part, int index, T entity){
 
-        child.body.visible = parent.body.visible;
-        child.leftArm.visible = parent.leftArm.visible;
-        child.rightArm.visible = parent.rightArm.visible;
+        if(child == null){
+            geoModel.getBone("torso").get().setHidden(false);
+            geoModel.getBone("right_arm").get().setHidden(false);
+            geoModel.getBone("right_arm_bend").get().setHidden(false);
+            geoModel.getBone("left_arm").get().setHidden(false);
+            geoModel.getBone("left_arm_bend").get().setHidden(false);
+        }else{
+            child.body.visible = parent.body.visible;
+            child.leftArm.visible = parent.leftArm.visible;
+            child.rightArm.visible = parent.rightArm.visible;
 
-        if(shouldRenderSecondLayer(child,parent,part,entity)){
-            setSecondLayerVisibility(child,parent,part,entity);
+            if(shouldRenderSecondLayer(child,parent,geoModel,part,entity)){
+                setSecondLayerVisibility(child,parent,geoModel,part,entity);
+            }
         }
     }
 
     @Override
     public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
-            M child, M parent, PlayerRestraintPart part, T entity) {
+            M child, M parent,BakedGeoModel geoModel, PlayerRestraintPart part, T entity) {
         return false;
     }
 
     @Override
     public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
-            M child, M parent, PlayerRestraintPart part, T entity){
+            M child, M parent,BakedGeoModel geoModel, PlayerRestraintPart part, T entity){
 
         if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
             if(entity instanceof Player player){

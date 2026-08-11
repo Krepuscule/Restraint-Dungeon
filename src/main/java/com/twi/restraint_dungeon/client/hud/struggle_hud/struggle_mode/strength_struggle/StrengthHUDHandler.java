@@ -147,8 +147,6 @@ public class StrengthHUDHandler {
                 data.lastKeyWasLeft = (keyCode == GLFW.GLFW_KEY_LEFT);
                 data.progress = Mth.clamp(data.progress, 0.0f, 1.1f); // 允许微弱溢出触发完成逻辑
 
-                // 同步进度到服务端
-                updateStruggleProgress(player, data.progress);
                 PacketDistributor.sendToServer(new PlayerStruggleProgressPayload(data.progress));
             }
             return true;

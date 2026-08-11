@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.twi.restraint_dungeon.block.ModBlocks;
 import com.twi.restraint_dungeon.block.restraint_device.ghost_block.GhostBlockEntity;
 import com.twi.restraint_dungeon.block.restraint_device.seat_entity.SeatEntity;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.RestraintDeviceDismountEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintDeviceMountEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
@@ -323,6 +324,8 @@ public class RestraintDevice extends BaseEntityBlock {
         if(!block.isMountableDevice(level,pos)) return false;
         if(!(target instanceof LivingEntity living)) return false;
 
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)) return false;
+
         if (block.canMount(level, pos, target) != null){
             if(target instanceof Player player){
                 player.displayClientMessage(block.canMount(level, pos, target),true);
@@ -347,7 +350,7 @@ public class RestraintDevice extends BaseEntityBlock {
         seat.setYRot(finalYaw);
         level.addFreshEntity(seat);
 
-        if (living.startRiding(seat)) {
+        if (living.startRiding(seat,true)) {
 
             RestraintPosition position = getRestraintPosition(living);
             NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(living, position, RestraintPosition.RIDING, ItemStack.EMPTY));
@@ -368,11 +371,16 @@ public class RestraintDevice extends BaseEntityBlock {
                         finalYaw, 0,
                         Collections.emptySet()
                 );
+            }else {
+                living.absMoveTo(living.getX(), living.getY(), living.getZ(), finalYaw, 0);
+                living.setYRot(finalYaw);
+                living.setXRot(0);
             }
 
             NeoForge.EVENT_BUS.post(new RestraintDeviceMountEvent.Post(living, block, level, pos));
             return true;
         }
+        seat.discard();
         return false;
     }
 
@@ -402,7 +410,12 @@ public class RestraintDevice extends BaseEntityBlock {
                     Collections.emptySet()
             );
         } else {
+            rider.setDeltaMovement(Vec3.ZERO);
             rider.teleportTo(safePos.x, safePos.y, safePos.z);
+            if (rider instanceof BaseNPCEntity npc) {
+                npc.getNavigation().moveTo(safePos.x, safePos.y, safePos.z, 1.0D);
+                npc.getNavigation().stop();
+            }
         }
 
         NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Pre(rider,RestraintPosition.RIDING,getDismountRestraintPosition(rider),ItemStack.EMPTY));
@@ -482,6 +495,12 @@ public class RestraintDevice extends BaseEntityBlock {
             return Component.translatable("block." + MODID + ".restraint_device.mount.fail.invalid_entity")
                     .withStyle(ChatFormatting.DARK_RED);
         }
+
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)){
+            return Component.translatable("block." + MODID + ".restraint_device.mount.fail.invalid_entity")
+                    .withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(!this.getLockType(level,pos).isEmpty()){
             return Component.translatable("block." + MODID + ".restraint_device.mount.fail.is_locked")
                     .withStyle(ChatFormatting.DARK_RED);
@@ -495,10 +514,22 @@ public class RestraintDevice extends BaseEntityBlock {
              return Component.translatable("block." + MODID + ".restraint_device.mount.fail.cant_connecting")
                     .withStyle(ChatFormatting.DARK_RED);
         }
+
         return null;
     }
 
     public Component canDismount(Level level, BlockPos pos, Entity rider) {
+
+        if(!(rider instanceof LivingEntity entity)){
+            return Component.translatable("block." + MODID + ".restraint_device.dismount.fail.invalid_target")
+                    .withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(!(rider instanceof Player) && !(rider instanceof BaseNPCEntity)){
+            return Component.translatable("block." + MODID + ".restraint_device.dismount.fail.invalid_target")
+                    .withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(!this.getLockType(level,pos).isEmpty()){
             return Component.translatable("block." + MODID + ".restraint_device.dismount.fail.is_locked")
                     .withStyle(ChatFormatting.DARK_RED);
@@ -664,9 +695,9 @@ public class RestraintDevice extends BaseEntityBlock {
 
     // --- 骑乘参数与逻辑 ---
 
-    public double getBaseOffsetY() { return 1.0; }
-    public double getBaseOffsetX() { return 0.0; }
-    public double getBaseOffsetZ() { return 0.0; }
+    public double getBaseOffsetY(Entity passenger) { return 1.0; }
+    public double getBaseOffsetX(Entity passenger) { return 0.0; }
+    public double getBaseOffsetZ(Entity passenger) { return 0.0; }
     public Vector3f getRiderFirstCameraOffset(){
         return new Vector3f(0.0f,0.0f,0.0f);
     }

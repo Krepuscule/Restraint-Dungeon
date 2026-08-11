@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.effect.ModEffect;
 
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.ModRestraintItems;
 import com.twi.restraint_dungeon.item.restraint_item.restraints.slime_item.LatexItem;
 import com.twi.restraint_dungeon.item.restraint_item.restraints.slime_item.MerchantSlimeItem;
@@ -13,9 +14,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.addRestraintItem;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getAllPartRestraint;
 
@@ -30,7 +33,7 @@ public class StickyEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(@NotNull LivingEntity entity, int amplifier) {
 
         PlayerRestraintPart targetPart = null;
         if (checkCanAdd(entity, PlayerRestraintPart.restraint_legs_bind)) targetPart = PlayerRestraintPart.restraint_legs_bind;
@@ -46,10 +49,10 @@ public class StickyEffect extends MobEffect {
 
             if (amplifier == 0) {
                 slimeStack = new ItemStack(ModRestraintItems.SLIME.get());
-                messageKey = "item.restraint_dungeon.slime.adding";
+                messageKey = "item." + MODID + ".slime.adding";
             } else {
                 slimeStack = new ItemStack(ModRestraintItems.MERCHANT_SLIME.get());
-                messageKey = "item.restraint_dungeon.merchant_slime.adding";
+                messageKey = "item." + MODID + ".merchant_slime.adding";
             }
 
 
@@ -68,7 +71,7 @@ public class StickyEffect extends MobEffect {
 
     private boolean checkCanAdd(LivingEntity entity, PlayerRestraintPart part) {
 
-        if(!(entity instanceof Player)) return false;
+        if(!(entity instanceof Player) && !(entity instanceof BaseNPCEntity)) return false;
 
         List<ItemStack> existing = getAllPartRestraint(entity, part);
         if (existing.isEmpty()) return true;

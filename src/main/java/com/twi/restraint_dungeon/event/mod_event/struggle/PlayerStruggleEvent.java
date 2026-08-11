@@ -79,7 +79,7 @@ public class PlayerStruggleEvent {
                                     .withStyle(ChatFormatting.YELLOW)
                             ,true);
                 }else{
-                    mc.player.displayClientMessage(Component.translatable("hud." + MODID + ".cant_struggle")
+                    mc.player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.cant_struggle")
                                     .withStyle(ChatFormatting.YELLOW)
                             ,true);
                 }

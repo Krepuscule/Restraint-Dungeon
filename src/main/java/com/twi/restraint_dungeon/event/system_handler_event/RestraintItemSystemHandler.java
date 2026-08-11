@@ -3,6 +3,7 @@ package com.twi.restraint_dungeon.event.system_handler_event;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.block.restraint_device.seat_entity.SeatEntity;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.RestraintToolUpdateEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintToolsEquipEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintUpdateEvent;
@@ -13,12 +14,15 @@ import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import com.twi.restraint_dungeon.utils.restraint_stack.RestraintToolsUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -162,19 +166,35 @@ public class RestraintItemSystemHandler {
 
                     switch (finalRule) {
                         case ALWAYS_DROP -> {
-                            ItemEntity itemEntity = entity.spawnAtLocation(stack.copy());
-                            if (itemEntity != null) {
-                                itemEntity.setPickUpDelay(40);
-                                event.getDrops().add(itemEntity);
+                            if(EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)){
+                                if(entity instanceof BaseNPCEntity npc){
+                                    ItemEntity itemEntity = entity.spawnAtLocation(stack.copy());
+                                    if (itemEntity != null) {
+                                        itemEntity.setPickUpDelay(40);
+                                        event.getDrops().add(itemEntity);
+                                    }
+                                }
+                            }else if(EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)){
+                                RestraintStackUtils.removeRestraint(entity, part, i);
+                            }else{
+                                ItemEntity itemEntity = entity.spawnAtLocation(stack.copy());
+                                if (itemEntity != null) {
+                                    itemEntity.setPickUpDelay(40);
+                                    event.getDrops().add(itemEntity);
+                                }
+                                RestraintStackUtils.removeRestraint(entity, part, i);
                             }
-                            RestraintStackUtils.removeRestraint(entity, part, i);
                         }
 
                         case ALWAYS_KEEP -> {
                         }
 
                         case DESTROY -> {
-                            RestraintStackUtils.removeRestraint(entity, part, i);
+                            if(EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)){
+
+                            }else{
+                                RestraintStackUtils.removeRestraint(entity, part, i);
+                            }
                         }
                     }
                 }
@@ -195,18 +215,34 @@ public class RestraintItemSystemHandler {
 
                 switch (finalToolRule) {
                     case ALWAYS_DROP -> {
-                        ItemEntity itemEntity = entity.spawnAtLocation(toolStack.copy());
-                        if (itemEntity != null) {
-                            itemEntity.setPickUpDelay(40);
-                            event.getDrops().add(itemEntity);
+                        if(EnchantmentHelper.has(toolStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)){
+                            if(entity instanceof BaseNPCEntity npc){
+                                ItemEntity itemEntity = entity.spawnAtLocation(toolStack.copy());
+                                if (itemEntity != null) {
+                                    itemEntity.setPickUpDelay(40);
+                                    event.getDrops().add(itemEntity);
+                                }
+                            }
+                        }else if(EnchantmentHelper.has(toolStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)){
+                            RestraintToolsUtils.removeRestraintTool(entity, i);
+                        }else{
+                            ItemEntity itemEntity = entity.spawnAtLocation(toolStack.copy());
+                            if (itemEntity != null) {
+                                itemEntity.setPickUpDelay(40);
+                                event.getDrops().add(itemEntity);
+                            }
+                            RestraintToolsUtils.removeRestraintTool(entity, i);
                         }
-                        RestraintToolsUtils.removeRestraintTool(entity, i);
                     }
                     case ALWAYS_KEEP -> {
 
                     }
                     case DESTROY -> {
-                        RestraintToolsUtils.removeRestraintTool(entity, i);
+                        if(EnchantmentHelper.has(toolStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)){
+
+                        }else{
+                            RestraintToolsUtils.removeRestraintTool(entity, i);
+                        }
                     }
                 }
             }

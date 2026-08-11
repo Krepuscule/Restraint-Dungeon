@@ -7,7 +7,9 @@ import com.twi.restraint_dungeon.attachment.capability.common_capability.Struggl
 import com.twi.restraint_dungeon.client.keybind.ModKeyBinds;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_restraint.PlayerRestraintPartPayload;
+import com.twi.restraint_dungeon.network.payload.player_struggle.PlayerReleaseSelfPayload;
 import com.twi.restraint_dungeon.network.payload.player_struggle.PlayerStruggleModePayload;
+import com.twi.restraint_dungeon.network.payload.player_struggle.StruggleOutOfRestraintPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,10 +29,13 @@ import java.util.List;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.RestraintMoveManager.isPlayerRestraintMoving;
 import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.isKidnappingActive;
 import static com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils.isReleaseActive;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils.isSelfBondaging;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.*;
 import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils.getAllRestraintsByPart;
 
@@ -173,72 +178,27 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         ItemStack strugglingItem = getPlayerStrugglingItem(player);
         int itemIndex = getPlayerStrugglingItemIndex(player);
 
-        if (getAllRestraintsByPart(player, currentPart).isEmpty()) {
-            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.no_restraint_on_part").withStyle(ChatFormatting.YELLOW),true);
-            this.onClose();
-            return;
-        }
-
-        if (!(strugglingItem.getItem() instanceof RestraintItem restraintItem)) {
-            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.item_not_restraint").withStyle(ChatFormatting.YELLOW),true);
-            this.onClose();
-            return;
-        }
-
-        if (partHasBeenBlocked(player, currentPart, itemIndex)) {
-            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.restraint_has_been_block").withStyle(ChatFormatting.YELLOW),true);
-            this.onClose();
-            return;
-        }
-
-        if(isKidnappingActive(player)
-                && isReleaseActive(player)
-                && isChangingPosition(player)
-                && isDoingAction(player)
-                && isPlayerRestraintMoving(player)){
-            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.cant_struggle").withStyle(ChatFormatting.YELLOW),true);
-            this.onClose();
-            return;
-        }
+        if(!(strugglingItem.getItem() instanceof RestraintItem)) return;
 
         if (entry.struggleMode == StruggleMode.RELEASE) {
-            handleSelfReleaseMode(restraintItem, strugglingItem, currentPart, itemIndex);
+            handleSelfReleaseMode(player, strugglingItem, currentPart, itemIndex);
         } else {
-            handleStruggleMode(entry, restraintItem, strugglingItem, currentPart, itemIndex);
+            handleStruggleMode(entry,player,strugglingItem, currentPart, itemIndex);
         }
     }
 
-    private void handleSelfReleaseMode(RestraintItem item, ItemStack stack, PlayerRestraintPart part, int index) {
-        if (!item.getLockType(Minecraft.getInstance().player,stack).isEmpty()) {
-            player.displayClientMessage(Component.translatable("hud." + MODID + ".struggle.restraint_has_been_lock").withStyle(ChatFormatting.YELLOW),true);
-        } else {
-            Component failReason = part == PlayerRestraintPart.restraint_connection ? 
-                item.canConnectReleaseBySelf(player, stack) : 
-                item.canBeReleaseBySelf(player, stack, part, index);
+    private void handleSelfReleaseMode(Player player,ItemStack stack, PlayerRestraintPart part, int index) {
 
-            if (failReason != null) {
-                player.displayClientMessage(failReason, true);
-            } else {
-                playerOutOfRestraint(player);
-            }
-        }
+        PacketDistributor.sendToServer(new PlayerReleaseSelfPayload(String.valueOf(part)));
         this.onClose();
     }
 
-    private void handleStruggleMode(MenuEntry entry, RestraintItem item, ItemStack stack, PlayerRestraintPart part, int index) {
-        Component failReason = part == PlayerRestraintPart.restraint_connection ?
-            item.canConnectStruggle(player, stack) :
-            item.canBeStruggle(player, stack, part, index);
+    private void handleStruggleMode(MenuEntry entry,Player player, ItemStack stack, PlayerRestraintPart part, int index) {
 
-        if (failReason != null) {
-            player.displayClientMessage(failReason, true);
-        } else {
-            updateStruggleMode(player, entry.struggleMode());
-            PacketDistributor.sendToServer(new PlayerStruggleModePayload(entry.struggleMode().name()));
+       PacketDistributor.sendToServer(new PlayerStruggleModePayload(entry.struggleMode().name()));
+       StruggleHUDManager.activate(entry.struggleMode());
 
-            StruggleHUDManager.activate(entry.struggleMode());
-        }
-        this.onClose();
+       this.onClose();
     }
 
     private void drawRadialSector(GuiGraphics graphics, float cx, float cy, float r1, float r2, float a1, float a2, int color) {

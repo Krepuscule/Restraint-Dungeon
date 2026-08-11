@@ -32,6 +32,7 @@ public class ModCreativeTabs {
                         output.accept(ModRestraintItems.TAPE.get());
                         output.accept(ModRestraintItems.SHACKLES.get());
                         output.accept(ModRestraintItems.BALL_GAG.get());
+                        output.accept(ModRestraintItems.RING_GAG.get());
                         output.accept(ModRestraintItems.BLINDFOLD_MASK.get());
                         output.accept(ModRestraintItems.LEATHER_COLLAR.get());
                         output.accept(ModRestraintItems.BELL_COLLAR.get());

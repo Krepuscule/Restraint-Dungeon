@@ -50,7 +50,7 @@ public class AnimationPlayerUtils {
         sendAnimationSequence(player, arms_animations,AnimationLayer.ARMS);
     }
 
-    public static void updateRestraintChangeAnimation(ServerPlayer player) {
+    public static void updateArmsPoseChangeAnimation(ServerPlayer player) {
 
         List<String> arms_animations = new ArrayList<>();
 
@@ -60,6 +60,9 @@ public class AnimationPlayerUtils {
         arms_animations.add(getPlayerArmsPoseAnimation(player));
 
         sendAnimationSequence(player, arms_animations,AnimationLayer.ARMS);
+    }
+
+    public static void updateLegsPoseChangeAnimation(ServerPlayer player) {
 
         List<String> legs_animations = new ArrayList<>();
         if(getPlayerLegsPoseTransitionAnimation(player) != null){
@@ -68,6 +71,14 @@ public class AnimationPlayerUtils {
         legs_animations.add(getPlayerLegsPoseAnimation(player));
 
         sendAnimationSequence(player, legs_animations,AnimationLayer.LEGS);
+    }
+
+
+    public static void updateRestraintChangeAnimation(ServerPlayer player) {
+
+        updateArmsPoseChangeAnimation(player);
+
+        updateLegsPoseChangeAnimation(player);
 
         List<String> body_animations = new ArrayList<>();
         body_animations.add(getPlayerBodyAnimation(player));
@@ -241,6 +252,7 @@ public class AnimationPlayerUtils {
         if(!anims.isEmpty()){
             PlayerAnimationData attachment = player.getData(ModAttachments.PLAYER_ANIMATION.get());
             attachment.setSequence(layer, anims);
+            player.setData(ModAttachments.PLAYER_ANIMATION,attachment);
 
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
                     new PlayerAnimationSequencePayload(player.getUUID(), anims, layer));

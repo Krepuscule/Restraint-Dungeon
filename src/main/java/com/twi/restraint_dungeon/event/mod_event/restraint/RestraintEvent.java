@@ -7,24 +7,31 @@ import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.client.gui.RestraintInfoMenu;
 import com.twi.restraint_dungeon.client.hud.struggle_hud.StruggleHUDManager;
 import com.twi.restraint_dungeon.client.keybind.ModKeyBinds;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintUpdateEvent;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
+import com.twi.restraint_dungeon.event.system_handler_event.LivingEntityServerTaskScheduler;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.self_bondage.SelfBondageUtils;
+import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -33,6 +40,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -81,10 +89,12 @@ public class RestraintEvent {
         PlayerRestraintPart part = event.getPart();
         ItemStack oldStack = event.getOldStack();
         ItemStack newStack = event.getNewStack();
-        if (!(entity instanceof ServerPlayer player)) return;
+        if (!(entity instanceof ServerPlayer) && !(entity instanceof BaseNPCEntity)) return;
 
         if(getIsStruggling(entity)) {
-            PacketDistributor.sendToPlayer(player, new InterruptStrugglePayload());
+            if(entity instanceof ServerPlayer player){
+                PacketDistributor.sendToPlayer(player, new InterruptStrugglePayload());
+            }
         }
 
         if(part == PlayerRestraintPart.restraint_connection
@@ -109,11 +119,13 @@ public class RestraintEvent {
             NeoForge.EVENT_BUS.post(new RestraintPositionChangeEvent.Post(entity,RestraintPosition.CONNECTING,pos,oldStack));
         }
 
-        updateThrillValue(player);
+        updateThrillValue(entity);
 
-        updatePoseByRestraint(player);
+        updatePoseByRestraint(entity);
 
-        refreshPlayerNameTag(player);
+        if(entity instanceof ServerPlayer player){
+            refreshPlayerNameTag(player);
+        }
 
 
     }
@@ -121,9 +133,9 @@ public class RestraintEvent {
     /**
      * 重新计算并更新敏感等级
      */
-    private static void updateThrillValue(ServerPlayer player) {
-        int newThrill = calPlayerThrillLevel(player);
-        updateThrillLevel(player, newThrill);
+    private static void updateThrillValue(LivingEntity entity) {
+        int newThrill = calPlayerThrillLevel(entity);
+        updateThrillLevel(entity, newThrill);
     }
 
     /**
@@ -331,8 +343,10 @@ public class RestraintEvent {
 
             if(target == mc.player){
                 mc.setScreen(new RestraintInfoMenu(target,true,false));
-            }else if(target instanceof Player player){
+            }else if(target instanceof Player player ){
                 mc.setScreen(new RestraintInfoMenu(target,false,false));
+            }else if(target instanceof BaseNPCEntity npc){
+                mc.setScreen(new RestraintInfoMenu(target,false,true));
             }
 
         }
@@ -365,6 +379,38 @@ public class RestraintEvent {
     public static void onPlayerDeath(LivingDeathEvent event) {
         if(event.getEntity() instanceof Player player){
             clearRestraintAttachments(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        var oldPlayer = event.getOriginal();
+        var newPlayer = event.getEntity();
+
+        if (event.isWasDeath()) {
+            var oldCap = oldPlayer.getData(ModAttachments.RESTRAINT_STACK);
+            newPlayer.setData(ModAttachments.RESTRAINT_STACK, oldCap);
+            if(getRestraintPosition(oldPlayer) == RestraintPosition.CONNECTING
+                    && !getFirstConnectBind(newPlayer).isEmpty()){
+                updateRestraintPosition(newPlayer,RestraintPosition.CONNECTING);
+            }
+        } else {
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        var player = event.getEntity();
+
+        if (!player.level().isClientSide()) {
+            RestraintStackUtils.rebalanceAllRestraintsAfterDeath(player);
+            updateThrillValue(player);
+
+            updatePoseByRestraint(player);
+
+
+            refreshPlayerNameTag((ServerPlayer) player);
+
         }
     }
 

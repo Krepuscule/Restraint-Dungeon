@@ -39,11 +39,15 @@ public class SlapAction extends CarryingAction {
 
         LivingEntity target = getCarriedPassenger(carrier);
 
+        if(!(target instanceof Player)){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(!isCarrier(carrier) || !isBeingCarried(target)){
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
-        if(target == null || !carrier.isAlive() || !target.isAlive()){
+        if(!carrier.isAlive() || !target.isAlive()){
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
@@ -72,16 +76,20 @@ public class SlapAction extends CarryingAction {
     }
 
     @Override
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result,String CarryingState,Boolean isCarryTarget) {
+        if(!(target instanceof Player)){
+            return false;
+        }
+
+        return super.shouldShowInMenu(actionPlayer, target, result, CarryingState, isCarryTarget);
+    }
+
+    @Override
     public void onStart(ServerPlayer carrier, LivingEntity target,HitResult hitResult) {
         carrier.level().playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(),
                 SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.2F);
 
         target.hurt(carrier.damageSources().playerAttack(carrier), 1.0F);
-        
-
-//        if (target instanceof ServerPlayer targetPlayer) {
-//
-//        }
     }
 
     @Override

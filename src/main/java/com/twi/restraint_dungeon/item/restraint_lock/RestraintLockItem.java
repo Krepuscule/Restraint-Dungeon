@@ -193,11 +193,11 @@ public class RestraintLockItem extends Item {
     }
 
     public double onStrengthStruggle(Player player, RestraintLockItem lock, double itemStrengthIndex) {
-        return itemStrengthIndex / 2.0;
+        return 0.5;
     }
 
     public double onLooseStruggle(Player player, RestraintLockItem lock, double itemLooseIndex) {
-        return itemLooseIndex / 2.0;
+        return 0.5;
     }
 
     public double onUnlockStruggle(Player player, RestraintLockItem lock, double itemLockIndex) {

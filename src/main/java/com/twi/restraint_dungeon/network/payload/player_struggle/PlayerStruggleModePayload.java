@@ -10,7 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
+import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.canBeStruggle;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.updateStruggleMode;
 
 public record PlayerStruggleModePayload(String modeName) implements CustomPacketPayload {
@@ -33,6 +36,10 @@ public record PlayerStruggleModePayload(String modeName) implements CustomPacket
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             var player = context.player();
+            if(!modeName.equals(StruggleMode.NONE.name()) && canBeStruggle(player) != null){
+                player.displayClientMessage(Objects.requireNonNull(canBeStruggle(player)),true);
+                return;
+            }
             try {
                 StruggleMode mode = StruggleMode.valueOf(this.modeName());
                 updateStruggleMode(player, mode);

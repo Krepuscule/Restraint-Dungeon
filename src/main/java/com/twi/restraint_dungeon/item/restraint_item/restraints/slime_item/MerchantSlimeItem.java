@@ -77,6 +77,7 @@ public class MerchantSlimeItem extends RestraintItem {
     public void onEquip(LivingEntity entity, ItemStack stack, PlayerRestraintPart part, int index) {
         if (!entity.level().isClientSide) {
             DataComponentsUtils.updateEquipTime(entity,stack,entity.level().getGameTime());
+            DataComponentsUtils.updateActivateTime(entity,stack,entity.level().getGameTime());
         }
     }
 
@@ -84,6 +85,7 @@ public class MerchantSlimeItem extends RestraintItem {
     public void onUnequip(LivingEntity entity, ItemStack stack, PlayerRestraintPart part, int index) {
         if (!entity.level().isClientSide) {
            DataComponentsUtils.removeEquipTime(entity,stack);
+           DataComponentsUtils.removeActivateTime(entity, stack);
         }
     }
 
@@ -93,10 +95,14 @@ public class MerchantSlimeItem extends RestraintItem {
 
         long currentTime = entity.level().getGameTime();
         long equipTime = DataComponentsUtils.getEquipTime(stack);
+        if(!entity.isInWaterRainOrBubble()){
+            DataComponentsUtils.updateActivateTime(entity,stack,DataComponentsUtils.getActivateTime(stack) + 1);
+        }
 
         long diff = currentTime - equipTime;
+        long activateTime = DataComponentsUtils.getActivateTime(stack);
 
-        if (diff > 0 && diff % slimeExpandTime(entity,stack,part,index) == 0) {
+        if (activateTime > 0 && activateTime % slimeExpandTime(entity,stack,part,index ) == 0 && !entity.isInWaterRainOrBubble()) {
             handleSlimeExpansion(entity,part);
         }
         if (diff > 0 && diff % growToLatexTime(entity,stack,part,index) == 0) {
@@ -211,7 +217,7 @@ public class MerchantSlimeItem extends RestraintItem {
     }
 
     private int slimeExpandTime(LivingEntity entity,ItemStack stack,PlayerRestraintPart bodyPart,int index) {
-        return 1200;
+        return 1800;
     }
 
     private int growToLatexTime(LivingEntity entity,ItemStack stack,PlayerRestraintPart bodyPart,int index) {

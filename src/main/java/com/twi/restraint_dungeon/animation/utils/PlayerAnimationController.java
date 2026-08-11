@@ -96,31 +96,47 @@ public class PlayerAnimationController {
 
     // --------------------------------------- 连接拘束具动画 ---------------------------------------------------
     public static String getPlayerConnectionArmsPoseTransitionAnimation(ServerPlayer player,RestraintItem ri){
-        return ri.getConnectBindTranslateAnimation(player) + "_arms";
+        if(ri.getConnectBindTranslateAnimation(player) != null){
+            return ri.getConnectBindTranslateAnimation(player) + "_arms";
+        }
+        return null;
     }
 
     public static String getPlayerConnectionLegsPoseTransitionAnimation(ServerPlayer player,RestraintItem ri){
-
-        return ri.getConnectBindTranslateAnimation(player) + "_legs";
+        if(ri.getConnectBindTranslateAnimation(player) != null){
+            return ri.getConnectBindTranslateAnimation(player) + "_legs";
+        }
+        return null;
     }
 
     public static String getPlayerConnectionBodyTransitionAnimation(ServerPlayer player,RestraintItem ri){
-
-        return ri.getConnectBindTranslateAnimation(player) + "_body";
+        if(ri.getConnectBindTranslateAnimation(player) != null){
+            return ri.getConnectBindTranslateAnimation(player) + "_body";
+        }
+        return null;
 
     }
 
     public static String getPlayerConnectionArmsPoseReleaseAnimation(ServerPlayer player,RestraintItem ri){
-        return ri.getConnectBindReleaseAnimation(player) + "_arms";
+        if(ri.getConnectBindReleaseAnimation(player) != null){
+            return ri.getConnectBindReleaseAnimation(player) + "_arms";
+        }
+        return null;
     }
 
     public static String getPlayerConnectionLegsPoseReleaseAnimation(ServerPlayer player,RestraintItem ri){
-        return ri.getConnectBindReleaseAnimation(player) + "_legs";
+        if(ri.getConnectBindReleaseAnimation(player) != null){
+            return ri.getConnectBindReleaseAnimation(player) + "_legs";
+        }
+        return null;
     }
 
     public static String getPlayerConnectionBodyReleaseAnimation(ServerPlayer player,RestraintItem ri){
 
-        return ri.getConnectBindReleaseAnimation(player) + "_body";
+        if(ri.getConnectBindReleaseAnimation(player) != null){
+            return ri.getConnectBindReleaseAnimation(player) + "_body";
+        }
+        return null;
     }
 
     // ----------------------------------------- 潜行切换动画 ---------------------------------------------------

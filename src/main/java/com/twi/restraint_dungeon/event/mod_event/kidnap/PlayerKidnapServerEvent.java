@@ -1,6 +1,8 @@
 package com.twi.restraint_dungeon.event.mod_event.kidnap;
 
+import com.twi.restraint_dungeon.action.BaseAction;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils;
@@ -37,11 +39,12 @@ public class PlayerKidnapServerEvent {
         ItemStack stack = actionPlayer.getMainHandItem();
         PlayerRestraintPart part = KidnapUtils.getKidnapPart(actionPlayer);
 
-        if (!(target instanceof LivingEntity livingTarget)) {
+        if (!(target instanceof Player) && !(target instanceof BaseNPCEntity)) {
             stopKidnapping(actionPlayer);
             return;
         }
 
+        LivingEntity livingTarget = (LivingEntity) target;
         // 判定条件检查
         KidnapUtils.BindResult result = KidnapUtils.targetCanBeBound(stack, livingTarget, actionPlayer,part);
         if (!result.canBind()) {
@@ -59,9 +62,8 @@ public class PlayerKidnapServerEvent {
 
 
             KidnapUtils.updateProgress(actionPlayer, progress);
-            if (livingTarget instanceof Player targetPlayer) {
-                KidnapUtils.updateProgress(targetPlayer, progress);
-            }
+                KidnapUtils.updateProgress(livingTarget, progress);
+
 
             if (progress >= 100f) {
                 KidnapUtils.executeBind(actionPlayer, livingTarget, stack);
@@ -80,6 +82,7 @@ public class PlayerKidnapServerEvent {
         }
 
         // 打断挣扎逻辑
+        //TODO:打断NPC挣扎逻辑
         if (target instanceof ServerPlayer targetPlayer) {
              if (getIsStruggling(targetPlayer)){
                  PacketDistributor.sendToPlayer(targetPlayer, new InterruptStrugglePayload());
@@ -101,8 +104,12 @@ public class PlayerKidnapServerEvent {
         START_TIME_MAP.remove(actionPlayer.getUUID());
         KidnapUtils.clearKidnapData(actionPlayer);
 
-        if (target instanceof Player targetPlayer) {
-            KidnapUtils.clearKidnapData(targetPlayer);
-        }
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)) return;
+
+        LivingEntity living = (LivingEntity) target;
+
+
+        KidnapUtils.clearKidnapData(living);
+
     }
 }

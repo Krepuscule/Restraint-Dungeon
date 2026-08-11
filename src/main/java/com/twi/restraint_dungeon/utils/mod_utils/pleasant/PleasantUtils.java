@@ -23,7 +23,6 @@ public class PleasantUtils {
         return entity.getData(ModAttachments.ENTITY_PLEASANT).getPleasantValue();
     }
 
-    // 更新高潮值
     public static void updatePleasantValue(LivingEntity entity, double pleasantValue) {
         if (entity == null) return;
         var data = entity.getData(ModAttachments.ENTITY_PLEASANT);

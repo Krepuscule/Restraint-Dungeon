@@ -79,6 +79,9 @@ public class ModRestraintItems {
     public static final DeferredHolder<Item, MiraiTechBootItem> MIRAI_TECH_BOOT = RESTRAINT_ITEMS.register("mirai_tech_boot",
             () -> new MiraiTechBootItem(new Item.Properties()));
 
+    public static final DeferredHolder<Item, RingGagItem> RING_GAG = RESTRAINT_ITEMS.register("ring_gag",
+            () -> new RingGagItem(new Item.Properties()));
+
     // --- 功能性道具 ---
     public static final DeferredHolder<Item, MiraiTechSuitRemote> MIRAI_TECH_SUIT_REMOTE = RESTRAINT_ITEMS.register("mirai_tech_suit_remote",
             () -> new MiraiTechSuitRemote(new Item.Properties().rarity(Rarity.COMMON)));

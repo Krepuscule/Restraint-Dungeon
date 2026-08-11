@@ -110,6 +110,17 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
                 .save(output);
 
+        // 圆环口塞
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.RING_GAG.get())
+                .pattern(" G ")
+                .pattern("LAL")
+                .pattern("   ")
+                .define('A',ModMaterials.RUBBER.get())
+                .define('L', Items.LEATHER)
+                .define('G',Items.GOLD_NUGGET)
+                .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
+                .save(output);
+
         // 单手套
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.ARM_BINDER.get())
                 .pattern("AGA")

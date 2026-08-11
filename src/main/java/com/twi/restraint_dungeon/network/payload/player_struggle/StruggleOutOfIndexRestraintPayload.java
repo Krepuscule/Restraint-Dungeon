@@ -12,13 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.handleStruggleResult;
 
-public record StruggleOutOfIndexRestraintPayload(String slotType, int slotIndex) implements CustomPacketPayload {
+public record StruggleOutOfIndexRestraintPayload(String part, int index) implements CustomPacketPayload {
 
     public static final Type<StruggleOutOfIndexRestraintPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(MODID, "struggle_out_restraint_by_index"));
 
     public static final StreamCodec<FriendlyByteBuf, StruggleOutOfIndexRestraintPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, StruggleOutOfIndexRestraintPayload::slotType,
-            ByteBufCodecs.VAR_INT, StruggleOutOfIndexRestraintPayload::slotIndex,
+            ByteBufCodecs.STRING_UTF8, StruggleOutOfIndexRestraintPayload::part,
+            ByteBufCodecs.VAR_INT, StruggleOutOfIndexRestraintPayload::index,
             StruggleOutOfIndexRestraintPayload::new
     );
 
@@ -27,10 +27,10 @@ public record StruggleOutOfIndexRestraintPayload(String slotType, int slotIndex)
         return TYPE;
     }
 
-    public static void handle(final StruggleOutOfIndexRestraintPayload payload, final IPayloadContext context) {
+    public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
-                handleStruggleResult(player, payload.slotType(), payload.slotIndex());
+                handleStruggleResult(player, this.part, this.index);
             }
         });
     }

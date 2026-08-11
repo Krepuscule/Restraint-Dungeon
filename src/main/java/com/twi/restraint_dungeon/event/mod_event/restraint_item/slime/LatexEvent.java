@@ -51,6 +51,7 @@ public class LatexEvent {
                                             PlayerInteractEvent.EntityInteractSpecific event) {
 
         if(getAllPartRestraint(target,bodyPart).isEmpty()) return false;
+        if(isBeenBindArms(actionPlayer) || isBeenBindHands(actionPlayer)) return false;
 
         List<ItemStack> stacks = getAllPartRestraint(target,bodyPart);
 

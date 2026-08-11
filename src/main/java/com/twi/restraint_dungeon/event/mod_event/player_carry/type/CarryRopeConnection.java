@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.event.mod_event.player_carry.type;
 
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.restraints.RopeItem;
@@ -54,6 +55,9 @@ public class CarryRopeConnection extends CarryType {
     @Override
     public Vec3 getPassengerRidingOffset(Player carrier, LivingEntity passenger) {
 
+        if(passenger instanceof BaseNPCEntity){
+            return new Vec3(-0.5F,0.25F,-0.15F);
+        }
         return new Vec3(-0.5F, 0.9F, -0.15F);
     }
 

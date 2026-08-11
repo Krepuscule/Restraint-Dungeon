@@ -1,4 +1,4 @@
-// 1.21.1	2026-06-29T21:33:32.7556096	Item Models: restraint_dungeon
+// 1.21.1	2026-07-15T02:46:10.5618939	Item Models: restraint_dungeon
 48254375d82203994ccc35d366e138b18fc54911 assets/restraint_dungeon/models/item/acacia_wooden_cross.json
 09697f1adac580a4eef09f1b76b807fc631361b9 assets/restraint_dungeon/models/item/acacia_wooden_reverse_cross.json
 20ce558de3646891861b9407ca91984e95a1fdcd assets/restraint_dungeon/models/item/acacia_wooden_triangle_horse.json
@@ -55,6 +55,7 @@ a6c6d46ff444cfef2643abe465ac4ddd7c93bbdc assets/restraint_dungeon/models/item/mi
 d7c7f20629abaeb973f324224a87c0650ac5d83c assets/restraint_dungeon/models/item/oak_wooden_x_cross.json
 d3886198a75bef82ff228f47073e08e0abf1e477 assets/restraint_dungeon/models/item/personal_common_key.json
 d1183a17b1605635a3ae9b4067f3224e1d8b9267 assets/restraint_dungeon/models/item/personal_common_lock.json
+be6b9c5f129fa19c4e8b84d61dfef947b27252b4 assets/restraint_dungeon/models/item/ring_gag.json
 e8f3f80f60ab07f802d396fc66ddde918790e933 assets/restraint_dungeon/models/item/rope.json
 35ca7822f0f38d7178369f1e2479b5c636b76bb1 assets/restraint_dungeon/models/item/rubber.json
 2bba99f280cb6cb0ba0cf78e61e1fad00f1601d8 assets/restraint_dungeon/models/item/shackles.json

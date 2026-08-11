@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.twi.restraint_dungeon.utils.restraint_stack.RestraintToolsUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -134,7 +135,7 @@ public class RestraintToolItem extends Item implements GeoItem {
             if (level.isClientSide()) {
                 Screen config = this.getConfigurationScreen(player, stack, -1);
                 if (config instanceof Screen screen) {
-                    net.minecraft.client.Minecraft.getInstance().setScreen(screen);
+                    Minecraft.getInstance().setScreen(screen);
                 }
             }
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());

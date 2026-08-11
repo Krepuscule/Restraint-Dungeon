@@ -147,7 +147,6 @@ public class LooseHUDHandler {
                 data.resetSequence();
             }
 
-            updateStruggleProgress(player, data.progress);
             PacketDistributor.sendToServer(new PlayerStruggleProgressPayload(data.progress));
             return true;
         }

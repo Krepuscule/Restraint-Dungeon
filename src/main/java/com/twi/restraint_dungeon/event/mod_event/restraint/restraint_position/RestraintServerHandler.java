@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position;
 
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import net.minecraft.server.level.ServerLevel;
@@ -40,7 +41,6 @@ public class RestraintServerHandler {
             PendingChange pending = entry.getValue();
 
             if (pending.ticks <= 1) {
-                // 寻找实体
                 LivingEntity entity = null;
 
                 if (ServerLifecycleHooks.getCurrentServer() != null) {
@@ -52,8 +52,8 @@ public class RestraintServerHandler {
                     } else {
                         for (ServerLevel level : server.getAllLevels()) {
                             Entity e = level.getEntity(uuid);
-                            if (e instanceof LivingEntity living) {
-                                entity = living;
+                            if (e instanceof BaseNPCEntity npc) {
+                                entity = npc;
                                 break;
                             }
                         }
@@ -61,7 +61,6 @@ public class RestraintServerHandler {
                 }
 
                 if (entity != null) {
-//                    updateRestraintPosition(entity, pending.targetPos);
                     setChangingPosition(entity, false);
                 }
                 it.remove();

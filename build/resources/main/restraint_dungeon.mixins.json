@@ -8,6 +8,7 @@
     "MixinSendChatMessage"
   ],
   "client": [
+    "client.EntityRendererMixin",
     "client.GuiMixin",
     "client.MixinItemInHandLayer",
     "client.PlayerCameraMixin"

@@ -1,12 +1,14 @@
 package com.twi.restraint_dungeon.item.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,17 +53,27 @@ public class RestraintItemLayer<T extends LivingEntity, M extends HumanoidModel<
                 ItemStack stack = list.get(index);
                 if (stack.getItem() instanceof RestraintItem item) {
 
-                    item.renderRestraintLayer(
-                            this.innerModel,
-                            parentModel,
+
+                    int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
+
+                    item.applyRestraintVisibility(innerModel, parentModel,null,stack,part,index, entity);
+
+                    item.setLayerInflation(innerModel,null,stack,part,index);
+
+                    RestraintItem.restraintRenderData renderData =  item.renderRestraintLayer(
                             entity,
                             part,
                             index,
                             stack,
                             poseStack,
                             bufferSource,
-                            packedLight
+                            packedLight,
+                            overlay
                     );
+
+                    if(renderData != null){
+                        innerModel.renderToBuffer(renderData.stack(), renderData.baseBuffer(), renderData.packedLight(),renderData.packedOverlay());
+                    }
                 }
             }
         }

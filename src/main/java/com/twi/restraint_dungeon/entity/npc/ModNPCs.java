@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.entity.npc;
 
+import com.twi.restraint_dungeon.entity.npc.test.TestNPCEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -14,11 +15,11 @@ public class ModNPCs {
     public static final DeferredRegister<EntityType<?>> ENTITIES = 
             DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, MODID);
 
-    public static final DeferredHolder<EntityType<?>, EntityType<GenericNPCEntity>> GENERIC_NPC =
-            ENTITIES.register("generic_npc", () -> EntityType.Builder.<GenericNPCEntity>of(GenericNPCEntity::new, MobCategory.MISC)
+    public static final DeferredHolder<EntityType<?>, EntityType<TestNPCEntity>> TEST_NPC =
+            ENTITIES.register("test_npc", () -> EntityType.Builder.<TestNPCEntity>of(TestNPCEntity::new, MobCategory.MISC)
                     .sized(0.6F, 1.8F)
                     .clientTrackingRange(10)
-                    .build("generic_npc")
+                    .build("test_npc")
             );
 
 

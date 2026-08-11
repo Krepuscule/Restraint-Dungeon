@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.action.type;
 
 import com.twi.restraint_dungeon.action.BaseAction;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -44,6 +45,10 @@ public abstract class CarryingAction extends BaseAction {
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(target.distanceToSqr(actionPlayer) >= getMaxDistance() * getMaxDistance()){
             return Component.translatable("action." + MODID + ".fail_common.too_far").withStyle(ChatFormatting.DARK_RED);
         }
@@ -56,13 +61,15 @@ public abstract class CarryingAction extends BaseAction {
             return Component.translatable("action." + MODID + ".fail_carry.need_bind").withStyle(ChatFormatting.DARK_RED);
         }
 
-        if(!target.isPassenger() || !(target.getVehicle() instanceof Player) || getPartnerUUID(target) != actionPlayer.getUUID()) {
+        if(!target.isPassenger()
+                || !(target.getVehicle() instanceof Player)
+                || getPartnerUUID(target) != actionPlayer.getUUID()) {
             return Component.translatable("action." + MODID + ".fail_carrying.not_carrying").withStyle(ChatFormatting.DARK_RED);
         }
 
         if(getIsStruggling(target)){
             return Component.translatable("action." + MODID + ".fail_carrying.target_is_struggling")
-                    .withStyle(ChatFormatting.RED);
+                    .withStyle(ChatFormatting.DARK_RED);
         }
 
         return null;
@@ -72,7 +79,8 @@ public abstract class CarryingAction extends BaseAction {
     public boolean canContinueUse(ServerPlayer actionPlayer, LivingEntity targetEntity) {
         return actionPlayer.isAlive() && targetEntity.isAlive()
                 && actionPlayer.getUUID().equals(getPartnerUUID(targetEntity))
-                && isBeenFullyBind(targetEntity);
+                && isBeenFullyBind(targetEntity)
+                && !isBeenBindArms(actionPlayer) && !isBeenBindHands(actionPlayer) && !isBeenBindLegs(actionPlayer);
     }
 
 
@@ -87,7 +95,11 @@ public abstract class CarryingAction extends BaseAction {
             return false;
         }
 
-        if(target == null || !actionPlayer.isAlive() || !target.isAlive()){
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)){
+            return false;
+        }
+
+        if(!actionPlayer.isAlive() || !target.isAlive()){
             return false;
         }
 

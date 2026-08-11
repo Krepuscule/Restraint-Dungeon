@@ -133,6 +133,7 @@ key_key.restraint_dungeon.change_position:key.keyboard.left.control
 key_key.restraint_dungeon.action_menu:key.keyboard.v
 key_key.restraint_dungeon.restraint_menu:key.keyboard.h
 key_key.restraint_dungeon.struggle_menu:key.keyboard.r
+key_key.restraint_dungeon.npc_conversation:key.keyboard.f
 soundCategory_master:1.0
 soundCategory_music:0.5066048635563379
 soundCategory_record:1.0

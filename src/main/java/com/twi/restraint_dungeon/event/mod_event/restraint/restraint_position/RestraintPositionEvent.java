@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_restraint.PlayerSetTargetPositionPayload;
@@ -201,7 +202,8 @@ public class RestraintPositionEvent {
         if (isBusyState(mc.player)) return;
 
         if (hit instanceof EntityHitResult eHit && eHit.getEntity() instanceof LivingEntity target && target.distanceToSqr(mc.player) <= 2 * 2) {
-            if (!isBusyState(target) && !isRidingRestraintDevice(target) && isBeenFullyBind(target)) {
+            if (!isBusyState(target) && !isRidingRestraintDevice(target) && isBeenFullyBind(target)
+                    && (target instanceof Player || target instanceof BaseNPCEntity)) {
                 PacketDistributor.sendToServer(new PlayerSetTargetPositionPayload(target.getUUID(), dir));
             }
         } else {

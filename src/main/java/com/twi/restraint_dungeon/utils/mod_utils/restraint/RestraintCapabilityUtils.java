@@ -7,8 +7,9 @@ import com.twi.restraint_dungeon.attachment.capability.common_capability.Restrai
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.LegsPose;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerRestraintOptions;
-import com.twi.restraint_dungeon.event.custom_event.PoseChangeEvent;
+import com.twi.restraint_dungeon.event.custom_event.PoseChangeEvent.*;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
+import com.twi.restraint_dungeon.event.system_handler_event.LivingEntityServerTaskScheduler;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -92,6 +93,14 @@ public class RestraintCapabilityUtils {
         sync(entity, cap);
     }
 
+    public static int isChangingRestraint(LivingEntity entity){return getCap(entity).isChangingRestraint();}
+
+    public static void setChangingRestraint(LivingEntity entity,int changing){
+        var cap = getCap(entity);
+        cap.setChangingRestraint(changing);
+        sync(entity,cap);
+    }
+
 
     public static PlayerRestraintPart getTargetPart(LivingEntity entity) {
         return getCap(entity).getTargetPart();
@@ -106,31 +115,44 @@ public class RestraintCapabilityUtils {
 
     public static void updatePoseByRestraint(LivingEntity entity) {
 
-        ArmsPose prev_ArmsPose = getArmsPose(entity);
-        ArmsPose curr_ArmsPose = null;
+        ArmsPose prev_ArmsPose;
+        ArmsPose curr_ArmsPose;
+
+        LegsPose prev_LegsPose;
+        LegsPose curr_LegsPose;
 
         if (getFirstArmsBind(entity).getItem() instanceof RestraintItem ri) {
             curr_ArmsPose = ri.setBindArmsPose(entity);
-            setArmsPose(entity, ri.setBindArmsPose(entity));
         } else {
             curr_ArmsPose = ArmsPose.NONE;
-            setArmsPose(entity, ArmsPose.NONE);
         }
-
-        LegsPose prev_LegsPose = getLegsPose(entity);
-        LegsPose curr_LegsPose = null;
 
         if (getFirstLegsBind(entity).getItem() instanceof RestraintItem ri) {
             curr_LegsPose = ri.setBindLegsPose(entity);
-            setLegsPose(entity, ri.setBindLegsPose(entity));
         } else {
             curr_LegsPose = LegsPose.NONE;
-            setLegsPose(entity, LegsPose.NONE);
         }
 
-        if(prev_ArmsPose != curr_ArmsPose
-                || prev_LegsPose != curr_LegsPose){
-            NeoForge.EVENT_BUS.post(new PoseChangeEvent(entity,prev_ArmsPose,curr_ArmsPose,prev_LegsPose,curr_LegsPose));
+        if(curr_ArmsPose != getArmsPose(entity)){
+            prev_ArmsPose = getArmsPose(entity);
+            setChangingRestraint(entity, 1);
+
+            LivingEntityServerTaskScheduler.runDelayed(entity, 20, () -> {
+                setChangingRestraint(entity, 0);
+            });
+            setArmsPose(entity, curr_ArmsPose);
+            NeoForge.EVENT_BUS.post(new ArmsPoseChangeEvent(entity,prev_ArmsPose,curr_ArmsPose));
+        }
+
+        if(curr_LegsPose != getLegsPose(entity)){
+            prev_LegsPose = getLegsPose(entity);
+            setChangingRestraint(entity, 2);
+
+            LivingEntityServerTaskScheduler.runDelayed(entity, 20, () -> {
+                setChangingRestraint(entity, 0);
+            });
+            setLegsPose(entity, curr_LegsPose);
+            NeoForge.EVENT_BUS.post(new LegsPoseChangeEvent(entity,prev_LegsPose,curr_LegsPose));
         }
     }
 

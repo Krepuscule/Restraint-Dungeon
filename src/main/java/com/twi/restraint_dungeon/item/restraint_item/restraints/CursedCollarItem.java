@@ -27,11 +27,11 @@ import static com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtil
 public class CursedCollarItem extends RestraintItem {
 
     public static final RestraintDefaults CURSED_COLLAR_DEFAULTS = new RestraintDefaults(
-            100,
+            500,
             50.0,
             0.1,
             0.1,
-            0.25
+            0.1
     );
 
     public CursedCollarItem(Properties properties) {

@@ -12,13 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.handleStruggleResult;
 
-public record StruggleOutOfRestraintPayload(String slotType) implements CustomPacketPayload {
+public record StruggleOutOfRestraintPayload(String part) implements CustomPacketPayload {
 
     public static final Type<StruggleOutOfRestraintPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(MODID, "struggle_out_restraint"));
 
 
     public static final StreamCodec<FriendlyByteBuf, StruggleOutOfRestraintPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, StruggleOutOfRestraintPayload::slotType,
+            ByteBufCodecs.STRING_UTF8, StruggleOutOfRestraintPayload::part,
             StruggleOutOfRestraintPayload::new
     );
 
@@ -30,10 +30,10 @@ public record StruggleOutOfRestraintPayload(String slotType) implements CustomPa
     /**
      * 服务端处理逻辑
      */
-    public static void handle(final StruggleOutOfRestraintPayload payload, final IPayloadContext context) {
+    public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
-                handleStruggleResult(player, payload.slotType());
+                handleStruggleResult(player, this.part);
             }
         });
     }

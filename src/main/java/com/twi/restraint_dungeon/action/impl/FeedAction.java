@@ -47,10 +47,17 @@ public class FeedAction extends CarryingAction {
             return super.canUse(carrier,result);
         }
 
+        LivingEntity target = getCarriedPassenger(carrier);
+
+        if(!(target instanceof Player)){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
         if(!(getCurrentCarryType(carrier) instanceof CarryHug || getCurrentCarryType(carrier) instanceof CarryShoulder)){
             return Component.translatable("action." + MODID + ".fail_feed.incorrect_carry_type")
                     .withStyle(ChatFormatting.RED);
         }
+
 
         if (!canBeFed(carrier.getMainHandItem())) {
             return Component.translatable("action." + MODID + ".fail_feed.food_not_in_main_hand")
@@ -58,6 +65,15 @@ public class FeedAction extends CarryingAction {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean shouldShowInMenu(Player actionPlayer, @Nullable LivingEntity target,HitResult result,String CarryingState,Boolean isCarryTarget) {
+        if(!(target instanceof Player)){
+            return false;
+        }
+
+        return super.shouldShowInMenu(actionPlayer, target, result, CarryingState, isCarryTarget);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.twi.restraint_dungeon.action.type;
 import com.twi.restraint_dungeon.action.BaseAction;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.block.restraint_device.seat_entity.SeatEntity;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,6 +32,14 @@ public abstract class CarryAction extends BaseAction {
     @Override
     public Component canUse(Player actionPlayer, @Nullable HitResult result) {
         if(!(result instanceof EntityHitResult) || !(((EntityHitResult) result).getEntity() instanceof LivingEntity living)) {
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(!(living instanceof Player) && !(living instanceof BaseNPCEntity npc)){
+            return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(living instanceof BaseNPCEntity npc && !npc.canBeLeashed()){
             return Component.translatable("action." + MODID + ".fail_common.no_target").withStyle(ChatFormatting.DARK_RED);
         }
 
@@ -73,7 +82,8 @@ public abstract class CarryAction extends BaseAction {
     public boolean canContinueUse(ServerPlayer actionPlayer, LivingEntity targetEntity) {
         return actionPlayer.isAlive() && targetEntity.isAlive()
                 && actionPlayer.distanceToSqr(targetEntity) < getMaxDistance() * getMaxDistance()
-                && isBeenFullyBind(targetEntity);
+                && isBeenFullyBind(targetEntity)
+                && (!isBeenBindArms(actionPlayer) && !isBeenBindHands(actionPlayer) && !isBeenBindLegs(actionPlayer));
     }
 
     @Override
@@ -88,6 +98,10 @@ public abstract class CarryAction extends BaseAction {
         }
 
         if(target.distanceToSqr(actionPlayer) >= getMaxDistance() * getMaxDistance()){
+            return false;
+        }
+
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)){
             return false;
         }
 
@@ -117,8 +131,6 @@ public abstract class CarryAction extends BaseAction {
 
         return true;
     }
-
-    // TODO:动画状态机重构为本地的纯动画播放
 
     @Override
     public void onStart(ServerPlayer actionPlayer, LivingEntity target,HitResult hitResult) {

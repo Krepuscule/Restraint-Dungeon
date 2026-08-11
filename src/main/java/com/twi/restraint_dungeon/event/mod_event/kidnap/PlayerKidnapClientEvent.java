@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.event.mod_event.kidnap;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_kidnap.PlayerKidnapActionPayload;
 import com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils;
@@ -60,9 +61,7 @@ public class PlayerKidnapClientEvent {
         if (event.getAction() == GLFW.GLFW_PRESS) {
             if (mc.hitResult instanceof EntityHitResult ehr && ehr.getEntity() instanceof LivingEntity target) {
 
-                // TODO:完成NPC系统后修改
-                if(!(target instanceof Player)) return;
-//                if(!(target instanceof Player) || !(target instanceof BaseNPCEntity)) return;
+                if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)) return;
 
                 PacketDistributor.sendToServer(new PlayerKidnapActionPayload(target.getId(), true));
             }
@@ -135,7 +134,6 @@ public class PlayerKidnapClientEvent {
             }
         }
 
-        // --- 4. 渲染部位角标组件 ---
         PlayerRestraintPart part = KidnapUtils.getKidnapPart(mc.player);
         renderIconBox(g, badgeX, badgeY, BADGE_BOX_SIZE, BORDER_SIZE);
 
@@ -149,7 +147,6 @@ public class PlayerKidnapClientEvent {
         g.blit(partTex, pX, pY, 0, 0, BADGE_SIZE, BADGE_SIZE, BADGE_SIZE, BADGE_SIZE);
         RenderSystem.disableBlend();
 
-        // --- 5. 渲染进度条纹理 ---
         g.blit(EMPTY_PROGRESS_BAR, barX, barY, 0, 0, BAR_WIDTH, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT);
 
         ResourceLocation fillTex = isBinder ? YELLOW_PROGRESS_BAR : RED_PROGRESS_BAR;
@@ -159,9 +156,6 @@ public class PlayerKidnapClientEvent {
         }
     }
 
-    /**
-     * 辅助方法：渲染带有灰色边框和深色背景的图标框
-     */
     private static void renderIconBox(GuiGraphics graphics, int x, int y, int size, int border) {
         // 灰色边框层
         graphics.fill(x - border, y - border, x + size + border, y + size + border, 0xFF888888);

@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.event.mod_event.player_carry.type;
 
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import dev.kosmx.playerAnim.core.util.Vec3f;
@@ -44,12 +45,10 @@ public class CarryHug extends CarryType {
     }
 
     @Override
-    public boolean canContinue(Player carrier, LivingEntity passenger) {
-        return super.canContinue(carrier,passenger);
-    }
-
-    @Override
     public Vec3 getPassengerRidingOffset(Player carrier, LivingEntity passenger) {
+        if(passenger instanceof BaseNPCEntity){
+            return new Vec3(0.2F,0.25F,-0.4F);
+        }
 
         return new Vec3(0.1F, 0.9F, -0.4F);
     }

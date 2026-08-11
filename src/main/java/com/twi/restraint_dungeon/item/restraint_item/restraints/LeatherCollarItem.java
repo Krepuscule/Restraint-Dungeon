@@ -20,11 +20,11 @@ import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.i
 public class LeatherCollarItem extends RestraintItem {
 
     public static final RestraintDefaults LEATHER_COLLAR_DEFAULTS = new RestraintDefaults(
-            100,
+            500,
             50.0,
             0.1,
             0.1,
-            0.25
+            0.1
     );
 
     private final List<PlayerRestraintPart> canEquipPartList = List.of(

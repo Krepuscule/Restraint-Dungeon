@@ -1,5 +1,8 @@
 package com.twi.restraint_dungeon.animation.utils;
 
+import com.twi.restraint_dungeon.attachment.ModAttachments;
+import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerAnimationData;
+import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePopPayload;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
@@ -10,6 +13,7 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -83,8 +87,10 @@ public class ClientAnimationSequencePlayer {
         if (currentSequence == null || currentIndex >= currentSequence.size()) return;
 
 
-
-        Player player = Minecraft.getInstance().level.getPlayerByUUID(playerUUID);
+        Player player = null;
+        if (Minecraft.getInstance().level != null) {
+            player = Minecraft.getInstance().level.getPlayerByUUID(playerUUID);
+        }
 
         if (!(player instanceof AbstractClientPlayer clientPlayer)) return;
 
@@ -99,6 +105,11 @@ public class ClientAnimationSequencePlayer {
 
 
         if (anim == null) {
+
+            if(Minecraft.getInstance().getConnection() != null
+                    && Minecraft.getInstance().player == Minecraft.getInstance().level.getPlayerByUUID(playerUUID)){
+                PacketDistributor.sendToServer(new PlayerAnimationSequencePopPayload(playerUUID,layer));
+            }
 
             currentIndex++;
 
@@ -122,6 +133,12 @@ public class ClientAnimationSequencePlayer {
 
             animLayer.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(0, Ease.LINEAR), currentPlayer);
 
+            if(!anim.isInfinite){
+                if(Minecraft.getInstance().getConnection() != null
+                        && Minecraft.getInstance().player == Minecraft.getInstance().level.getPlayerByUUID(playerUUID)){
+                    PacketDistributor.sendToServer(new PlayerAnimationSequencePopPayload(playerUUID,layer));
+                }
+            }
         }
 
     }
@@ -131,7 +148,6 @@ public class ClientAnimationSequencePlayer {
     public void tick() {
 
         if (currentPlayer != null && currentPlayer.getCurrentTick() >= currentPlayer.getStopTick() - 4) {
-
             currentIndex++;
 
             playNext();

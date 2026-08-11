@@ -275,6 +275,14 @@ public class ReleaseUtils {
                 if (!targetPlayer.getInventory().add(stack.copy())) {
                     targetPlayer.drop(stack.copy(), false);
                 }
+            }else{
+                ItemEntity itemEntity = new ItemEntity(target.level(), target.getX(), target.getY() + 0.5, target.getZ(), stack.copy());
+                itemEntity.setDeltaMovement(
+                        (target.getRandom().nextDouble() - 0.5) * 0.5,
+                        0.2,
+                        (target.getRandom().nextDouble() - 0.5) * 0.5
+                );
+                target.level().addFreshEntity(itemEntity);
             }
         } else {
             ItemEntity itemEntity = new ItemEntity(target.level(), target.getX(), target.getY() + 0.5, target.getZ(), stack.copy());

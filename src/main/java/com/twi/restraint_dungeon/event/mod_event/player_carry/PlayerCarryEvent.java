@@ -40,8 +40,8 @@ public class PlayerCarryEvent {
     @SubscribeEvent
     public static void onPlayerTick(EntityTickEvent.Post event) {
         if (event.getEntity().level().isClientSide) return;
-        if(event.getEntity() instanceof Player player && isCarrier(player)
-                || event.getEntity() instanceof LivingEntity living && isBeingCarried(living)) {
+        if((event.getEntity() instanceof Player player && isCarrier(player))
+                || (event.getEntity() instanceof LivingEntity living && isBeingCarried(living))) {
             PlayerCarryUtils.checkTicks((LivingEntity) event.getEntity());
         }
     }

@@ -16,16 +16,19 @@ import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.Player
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePayload;
+import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -38,11 +41,49 @@ import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.animation.utils.AnimationPlayerUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.getCarriedPassenger;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isTargetFlag;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstConnectBind;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getPlayerStrugglingItem;
 
 @EventBusSubscriber(modid = MODID)
 public class PlayerAnimationControllerEvent {
+
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        Player player = event.getEntity();
+        if(!(player instanceof ServerPlayer serverPlayer)
+                || !event.isWasDeath()) return;
+       RestraintPosition pos = getRestraintPosition(serverPlayer);
+
+       if(pos == RestraintPosition.CONNECTING){
+           ItemStack connectBind = getFirstConnectBind(player);
+           if(connectBind.getItem() instanceof RestraintItem ri){
+               updateConnectionRestraintEquipAnimation(serverPlayer,ri);
+           }
+       }else{
+           updateRestraintAnimation(serverPlayer);
+       }
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        Player player = event.getEntity();
+        var fromDim = event.getFrom();
+        var toDim = event.getTo();
+
+        if(!(player instanceof ServerPlayer serverPlayer)) return;
+        RestraintPosition pos = getRestraintPosition(serverPlayer);
+
+        if(pos == RestraintPosition.CONNECTING){
+            ItemStack connectBind = getFirstConnectBind(player);
+            if(connectBind.getItem() instanceof RestraintItem ri){
+                updateConnectionRestraintEquipAnimation(serverPlayer,ri);
+            }
+        }else{
+            updateRestraintAnimation(serverPlayer);
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onConnectionRestraintPosition(RestraintPositionChangeEvent.Post event){
@@ -63,17 +104,28 @@ public class PlayerAnimationControllerEvent {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onRestraintPoseChange(PoseChangeEvent event){
+    public static void onArmsPoseChange(PoseChangeEvent.ArmsPoseChangeEvent event){
         LivingEntity entity = event.getEntity();
         ArmsPose Prev_ArmsPose = event.getPrevArmsPose();
         ArmsPose Curr_ArmsPose = event.getCurrArmsPose();
+
+        if(!(entity instanceof ServerPlayer player)) return;
+
+        if(Prev_ArmsPose != Curr_ArmsPose){
+            updateArmsPoseChangeAnimation(player);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onLegsPoseChange(PoseChangeEvent.LegsPoseChangeEvent event){
+        LivingEntity entity = event.getEntity();
         LegsPose Prev_LegsPose = event.getPrevLegsPose();
         LegsPose Curr_LegsPose = event.getCurrLegsPose();
 
         if(!(entity instanceof ServerPlayer player)) return;
 
-        if(Prev_ArmsPose != Curr_ArmsPose || Prev_LegsPose != Curr_LegsPose){
-            updateRestraintChangeAnimation(player);
+        if(Prev_LegsPose != Curr_LegsPose){
+            updateLegsPoseChangeAnimation(player);
         }
     }
 
@@ -114,15 +166,6 @@ public class PlayerAnimationControllerEvent {
         if(device == null || !(entity instanceof ServerPlayer player)) return;
 
         updateRestraintAnimation(player);
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
-
-        if (!(player instanceof ServerPlayer serverPlayer)) return;
-
-        updateRestraintAnimation(serverPlayer);
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -309,5 +352,23 @@ public class PlayerAnimationControllerEvent {
                 }
             }
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+
+        updateRestraintAnimation(serverPlayer);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event){
+        Player player = event.getEntity();
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        PlayerAnimationData attachment = player.getData(ModAttachments.PLAYER_ANIMATION.get());
+        attachment.clearAllSequences();
+        player.setData(ModAttachments.PLAYER_ANIMATION,attachment);
     }
 }

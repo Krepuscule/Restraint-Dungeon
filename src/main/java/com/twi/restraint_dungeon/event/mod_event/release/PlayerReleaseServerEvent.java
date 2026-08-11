@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.event.mod_event.release;
 
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.utils.mod_utils.release.ReleaseUtils;
 import net.minecraft.ChatFormatting;
@@ -8,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -43,6 +45,8 @@ public class PlayerReleaseServerEvent {
             return;
         }
 
+        if(!(target instanceof Player) && !(target instanceof BaseNPCEntity)) return;
+
         if(getAllPartRestraint(target,getEntityTargetPart(sp)).isEmpty()){
             return;
         }
@@ -63,7 +67,7 @@ public class PlayerReleaseServerEvent {
         }
 
         if (!result.canRelease() || itemInvalid) {
-            Component msg = itemInvalid ? Component.translatable("event.restraint_dungeon.release.target_item_lost").withStyle(ChatFormatting.RED) : result.messageKey();
+            Component msg = itemInvalid ? Component.translatable("event." + MODID + ".release.target_item_lost").withStyle(ChatFormatting.RED) : result.messageKey();
             sp.displayClientMessage(msg, true);
             stop(sp);
             return;
@@ -122,8 +126,9 @@ public class PlayerReleaseServerEvent {
         INITIAL_INDEX.remove(sp.getUUID());
 
         ReleaseUtils.clearReleaseData(sp);
-        if (target instanceof LivingEntity le) {
-            ReleaseUtils.clearReleaseData(le);
+        if (target instanceof Player || target instanceof BaseNPCEntity) {
+            LivingEntity living = (LivingEntity) target;
+            ReleaseUtils.clearReleaseData(living);
         }
     }
 }

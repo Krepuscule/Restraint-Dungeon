@@ -54,9 +54,9 @@ public class SeatEntity extends Entity {
                 Direction facing = state.hasProperty(HorizontalDirectionalBlock.FACING)
                         ? state.getValue(HorizontalDirectionalBlock.FACING) : Direction.NORTH;
 
-                double offsetX = device.getBaseOffsetX();
-                double offsetZ = device.getBaseOffsetZ();
-                double offsetY = device.getBaseOffsetY();
+                double offsetX = device.getBaseOffsetX(passenger);
+                double offsetZ = device.getBaseOffsetZ(passenger);
+                double offsetY = device.getBaseOffsetY(passenger);
 
 
                 double finalLocalX;
@@ -96,6 +96,7 @@ public class SeatEntity extends Entity {
             action.accept(device);
         }
     }
+
 
     @Override
     public void tick() {

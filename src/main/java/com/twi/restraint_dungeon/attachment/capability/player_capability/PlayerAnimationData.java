@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.attachment.capability.player_capability;
 
 import com.mojang.serialization.Codec;
 import com.twi.restraint_dungeon.animation.utils.AnimationLayer;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -28,8 +29,16 @@ public class PlayerAnimationData {
     public void popAnimation(AnimationLayer layer) {
         List<String> list = layerSequences.get(layer);
         if (list != null && !list.isEmpty()) {
-            list.remove(0);
+            list.removeFirst();
         }
+    }
+
+    public void clearLayerSequence(AnimationLayer layer){
+        layerSequences.get(layer).clear();
+    }
+
+    public void clearAllSequences(){
+        layerSequences.clear();
     }
 
     public boolean isEmpty() {

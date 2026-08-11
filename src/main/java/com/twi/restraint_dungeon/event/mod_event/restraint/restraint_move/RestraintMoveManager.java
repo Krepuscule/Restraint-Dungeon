@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -92,15 +93,7 @@ public class RestraintMoveManager {
                             serverPlayer.onGround()
                     );
 
-
-//            ClientboundRotateHeadPacket headRotPacket =
-//                    new net.minecraft.network.protocol.game.ClientboundRotateHeadPacket(
-//                            serverPlayer,
-//                            byteYaw
-//                    );
-
             serverPlayer.serverLevel().getChunkSource().broadcast(serverPlayer, bodyRotPacket);
-//            serverPlayer.serverLevel().getChunkSource().broadcast(serverPlayer, headRotPacket);
         }
     }
 
@@ -137,5 +130,29 @@ public class RestraintMoveManager {
             PacketDistributor.sendToPlayer(serverPlayer,
                     new ClientSyncRestraintMoveStagePayload(moveId, "MID", dir));
         }
+    }
+
+    public static void forceResetPlayerMove(UUID playerUUID) {
+        PlayerRestraintMove activeMove = ACTIVE_PLAYER_MOVES.remove(playerUUID);
+        if (activeMove != null) {
+            activeMove.reset();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        forceResetPlayerMove(event.getOriginal().getUUID());
+        forceResetPlayerMove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        forceResetPlayerMove(event.getEntity().getUUID());
+    }
+
+
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        forceResetPlayerMove(event.getEntity().getUUID());
     }
 }

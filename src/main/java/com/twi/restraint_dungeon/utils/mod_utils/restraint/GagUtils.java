@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.restraint;
 
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,7 +19,7 @@ public class GagUtils {
 
     public static List<String> GAG_MESSAGE_IGNORE_LIST = new ArrayList<>(Arrays.asList(
             ",",".","/",";","\"","<",">","?",":","'","(",")","[","]","{","}","|","\\","!","~","`","@","#","$","%","^","&","*","-","_","+","=",
-            "，","。","、","《","》","？","；","：","”","‘","【","】","、","·","！","￥","……","（","）","—-","——"));
+            "，","。","、","《","》","？","；","：","”","‘","【","】","、","·","！","￥","……","（","）","—-","——"," "));
 
     public static Component createGagChatMessage(Component message, Player sender){
 
@@ -31,11 +32,11 @@ public class GagUtils {
 
     }
 
-    public static int getChatLimitedRange(Player player){
-        ItemStack firstGag = getFirstGag(player);
+    public static int getChatLimitedRange(LivingEntity entity){
+        ItemStack firstGag = getFirstGag(entity);
         if(firstGag.getItem() instanceof RestraintItem restraintItem){
-            return restraintItem.getGagMessageSpreadRange(player);
-        }else if(isBeenHeavyGag(player)){
+            return restraintItem.getGagMessageSpreadRange(entity);
+        }else if(isBeenHeavyGag(entity)){
             return defaultHeavyGagLimitedChatRange;
         }else {
             return defaultGagLimitedChatRange;

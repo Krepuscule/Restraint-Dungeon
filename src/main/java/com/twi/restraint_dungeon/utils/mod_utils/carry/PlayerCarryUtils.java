@@ -2,6 +2,7 @@ package com.twi.restraint_dungeon.utils.mod_utils.carry;
 
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerCarryCapability;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.PlayerCarryStateEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
@@ -210,8 +211,8 @@ public class PlayerCarryUtils {
                     serverCarrier.server.getPlayerList().broadcastAll(new ClientboundSetPassengersPacket(carrier));
                 }
 
-                if (passenger instanceof Mob mob) {
-                    mob.setNoAi(true);
+                if (passenger instanceof BaseNPCEntity npc) {
+                    npc.setNoAi(true);
                 }
                 type.onStart(carrier, passenger);
 
@@ -236,8 +237,8 @@ public class PlayerCarryUtils {
                 serverCarrier.server.getPlayerList().broadcastAll(new ClientboundSetPassengersPacket(carrier));
             }
 
-            if (passenger instanceof Mob mob) {
-                mob.setNoAi(false);
+            if (passenger instanceof BaseNPCEntity npc) {
+                npc.setNoAi(false);
             }
 
             updateRestraintPosition(passenger, RestraintPosition.STANDING);
