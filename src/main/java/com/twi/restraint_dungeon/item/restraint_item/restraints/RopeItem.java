@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearCutStrugglingState;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.isNearHookStrugglingState;
@@ -71,7 +72,7 @@ public class RopeItem extends RestraintItem {
         // 如果处于连接束缚状态，无法挣脱手臂和腿部的绳子
         if(RestraintUtils.isBeenConnectBind(entity)){
             if(bodyPart == PlayerRestraintPart.restraint_arms_bind || bodyPart == PlayerRestraintPart.restraint_legs_bind){
-                return Component.translatable("item.restraint_dungeon.rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
+                return Component.translatable("item." + MODID + ".rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
             }
         }
         return null;
@@ -82,7 +83,7 @@ public class RopeItem extends RestraintItem {
         if(entity instanceof Player player){
             if(RestraintUtils.isBeenConnectBind(player)){
                 if(bodyPart == PlayerRestraintPart.restraint_arms_bind || bodyPart == PlayerRestraintPart.restraint_legs_bind){
-                    return Component.translatable("item.restraint_dungeon.rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
+                    return Component.translatable("item." + MODID + ".rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
                 }
             }
         }
@@ -97,7 +98,7 @@ public class RopeItem extends RestraintItem {
         // 他人解助时的逻辑
         if(RestraintUtils.isBeenConnectBind(target)){
             if(bodyPart == PlayerRestraintPart.restraint_arms_bind || bodyPart == PlayerRestraintPart.restraint_legs_bind){
-                return Component.translatable("item.restraint_dungeon.rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
+                return Component.translatable("item." + MODID + ".rope.cant_be_released_when_connect").withStyle(ChatFormatting.DARK_RED);
             }
         }
         return null;
@@ -125,32 +126,28 @@ public class RopeItem extends RestraintItem {
 
 
         if(getRestraintPosition(target) != RestraintPosition.LYING_DOWN){
-            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_lying").withStyle(ChatFormatting.RED);
+            return Component.translatable("item." + MODID + ".rope.connect_bind.need_lying_down").withStyle(ChatFormatting.RED);
         }
 
 
         if(!hasRopeOnArms){
-            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_rope_bind_arms").withStyle(ChatFormatting.RED);
+            return Component.translatable("item." + MODID + ".rope.connect_bind.need_rope_bind_arms").withStyle(ChatFormatting.RED);
         }
         if(!hasRopeOnLegs){
-            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_rope_bind_legs").withStyle(ChatFormatting.RED);
+            return Component.translatable("item." + MODID + ".rope.connect_bind.need_rope_bind_legs").withStyle(ChatFormatting.RED);
         }
 
         if(getArmsPose(target) != ArmsPose.CROSS_BEHIND_BACK){
-            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_correct_arms_pose").withStyle(ChatFormatting.RED);
+            return Component.translatable("item." + MODID + ".rope.connect_bind.need_correct_arms_pose").withStyle(ChatFormatting.RED);
         }
 
         if(getLegsPose(target) != LegsPose.LEGS_TOGETHER){
-            return Component.translatable("item.restraint_dungeon.rope.connect_bind.need_correct_legs_pose").withStyle(ChatFormatting.RED);
+            return Component.translatable("item." + MODID + ".rope.connect_bind.need_correct_legs_pose").withStyle(ChatFormatting.RED);
         }
 
         return null;
     }
 
-    /**
-     * 当该拘束具为最下层的连接拘束具时，玩家在切换到连接状态前所需要的姿势,若为Null则该连接拘束具不会限制姿势切换
-     * @param entity 当前实体
-     */
     public RestraintPosition getConnectBindPreviousPosition(LivingEntity entity){
         return RestraintPosition.LYING_DOWN;
     }

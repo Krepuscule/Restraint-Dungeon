@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position;
 
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability;
 import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
@@ -20,8 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.setChangingPosition;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.updateRestraintPosition;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 
 @EventBusSubscriber(modid = MODID)
 public class RestraintServerHandler {
@@ -112,7 +112,12 @@ public class RestraintServerHandler {
         };
     }
 
-    public static boolean canStanding(LivingEntity entity) { return true; }
+    public static boolean canStanding(LivingEntity entity) {
+        if(getRestraintPosition(entity) == RestraintPosition.KNEELING && getLegsPose(entity) == RestraintCapability.LegsPose.SPLIT_LEGS){
+            return false;
+        }
+        return true;
+    }
 
     public static boolean canKneeling(LivingEntity entity) { return true; }
 

@@ -32,7 +32,6 @@ public class CalmEffect extends MobEffect {
             entity.removeEffect(ModEffects.CLIMAX_DENY);
         }
 
-        // 2. 清空快感值
         if (PleasantUtils.getPleasantValue(entity) != 0) {
             PleasantUtils.updatePleasantValue(entity, 0);
         }

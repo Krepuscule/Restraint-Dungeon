@@ -14,35 +14,35 @@ public class ModAttributes {
 
     public static final DeferredHolder<Attribute, Attribute> RESTRAINT_STRENGTH = ATTRIBUTES.register("restraint_strength",
             () -> new RangedAttribute(
-                    "attribute.restraint_dungeon.restraint_strength",
+                    "attribute." + MODID + ".restraint_strength",
                     1.0D, 0.0D, 100.0D
             ).setSyncable(true)
     );
 
     public static final DeferredHolder<Attribute, Attribute> STRUGGLE_STRENGTH = ATTRIBUTES.register("struggle_strength",
             () -> new RangedAttribute(
-                    "attribute.restraint_dungeon.struggle_strength",
+                    "attribute." + MODID + ".struggle_strength",
                     1.0D, 0.0D, 100.0D
             ).setSyncable(true)
     );
 
     public static final DeferredHolder<Attribute, Attribute> STRUGGLE_SPEED = ATTRIBUTES.register("struggle_speed",
             () -> new RangedAttribute(
-                    "attribute.restraint_dungeon.struggle_speed",
+                    "attribute." + MODID + ".struggle_speed",
                     1.0D, 0.0D, 100.0D
             ).setSyncable(true)
     );
 
     public static final DeferredHolder<Attribute, Attribute> STRUGGLE_RANGE = ATTRIBUTES.register("struggle_range",
             () -> new RangedAttribute(
-                    "attribute.restraint_dungeon.struggle_range",
+                    "attribute." + MODID + ".struggle_range",
                     1.0D, 0.0D, 100.0D
             ).setSyncable(true)
     );
 
     public static final DeferredHolder<Attribute, Attribute> RESTRAINT_MOVE_ATTRIBUTES = ATTRIBUTES.register("restraint_move_attributes",
             () -> new RangedAttribute(
-                    "attribute.restraint_dungeon.restraint_move_attributes",
+                    "attribute." + MODID + ".restraint_move_attributes",
                     1.0D, 0.0D, 100.0D
             ).setSyncable(true)
     );

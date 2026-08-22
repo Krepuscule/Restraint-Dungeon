@@ -10,6 +10,7 @@
   "client": [
     "client.EntityRendererMixin",
     "client.GuiMixin",
+    "client.LivingEntityRendererAccessor",
     "client.MixinItemInHandLayer",
     "client.PlayerCameraMixin"
   ],

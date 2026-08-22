@@ -53,20 +53,32 @@ public class PleasantEvent {
 
     @SubscribeEvent
     public static void onEffectExpired(MobEffectEvent.Expired event) {
-        LivingEntity entity = event.getEntity();
-        if (entity.level().isClientSide()) return;
+        handleClimaxEnd(event.getEntity(), event.getEffectInstance());
+    }
 
-        MobEffectInstance expiredInstance = event.getEffectInstance();
+    @SubscribeEvent
+    public static void onEffectRemoved(MobEffectEvent.Remove event) {
+        handleClimaxEnd(event.getEntity(), event.getEffectInstance());
+    }
+
+
+    private static void handleClimaxEnd(LivingEntity entity, MobEffectInstance expiredInstance) {
+        if (entity == null || entity.level().isClientSide()) return;
 
         if (expiredInstance != null && expiredInstance.is(ModEffects.CLIMAX)) {
-
-            entity.addEffect(new MobEffectInstance(
-                    ModEffects.CALM,
-                    1200,
-                    0,
-                    false,
-                    false
-            ));
+            if (entity.getServer() != null) {
+                entity.getServer().execute(() -> {
+                    if (entity.isAlive()) {
+                        entity.addEffect(new MobEffectInstance(
+                                ModEffects.CALM,
+                                1200,
+                                0,
+                                false,
+                                false
+                        ));
+                    }
+                });
+            }
         }
     }
 }

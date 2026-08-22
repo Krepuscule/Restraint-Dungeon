@@ -427,6 +427,16 @@ public class RestraintEvent {
 //    }
 
     private static void clearRestraintAttachments(Player player) {
+
+        // 拘束装置相关
+        if(isRidingRestraintDevice(player)){
+            DeviceContext deviceContext = getRestraintDeviceContext(player);
+            if (deviceContext != null && deviceContext.device() != null) {
+                deviceContext.device().forceDismount(player.level(), deviceContext.pos(), player);
+            }
+        }
+
+
         // 拘束属性相关
         setChangingPosition(player, false);
         if(getRestraintPosition(player) == RestraintPosition.CARRIED

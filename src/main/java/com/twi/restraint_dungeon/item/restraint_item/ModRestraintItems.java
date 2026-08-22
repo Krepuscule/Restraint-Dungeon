@@ -81,6 +81,14 @@ public class ModRestraintItems {
 
     public static final DeferredHolder<Item, RingGagItem> RING_GAG = RESTRAINT_ITEMS.register("ring_gag",
             () -> new RingGagItem(new Item.Properties()));
+    public static final DeferredHolder<Item, HarnessBallgagItem> HARNESS_BALL_GAG = RESTRAINT_ITEMS.register("harness_ball_gag",
+            () -> new HarnessBallgagItem(new Item.Properties()));
+    public static final DeferredHolder<Item, SplitBinderItem> SPLIT_BINDER = RESTRAINT_ITEMS.register("split_binder",
+            () -> new SplitBinderItem(new Item.Properties()));
+    public static final DeferredHolder<Item, LeatherMittenItem> LEATHER_MITTEN = RESTRAINT_ITEMS.register("leather_mitten",
+            () -> new LeatherMittenItem(new Item.Properties()));
+    public static final DeferredHolder<Item, K9CorsetItem> K9_CORSET = RESTRAINT_ITEMS.register("k9_corset",
+            () -> new K9CorsetItem(new Item.Properties()));
 
     // --- 功能性道具 ---
     public static final DeferredHolder<Item, MiraiTechSuitRemote> MIRAI_TECH_SUIT_REMOTE = RESTRAINT_ITEMS.register("mirai_tech_suit_remote",

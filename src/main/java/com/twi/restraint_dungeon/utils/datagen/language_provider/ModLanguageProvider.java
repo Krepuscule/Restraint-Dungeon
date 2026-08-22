@@ -66,6 +66,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".mirai_tech_mitten", "MiRai Tech:Active Restrain Mitten");
         add("item." + MODID + ".mirai_tech_boot", "MiRai Tech:Protocol Standard Boot");
         add("item." + MODID + ".ring_gag", "Ring gag");
+        add("item." + MODID + ".harness_ball_gag","Harness Ball Gag");
+        add("item." + MODID + ".split_binder","SplitBinder");
+        add("item." + MODID + ".leather_mitten","Leather Mitten");
+        add("item." + MODID + ".k9_corset","K0 Corset");
 
         add("item." + MODID + ".mirai_tech_suit_remote", "MiRai Control Pad");
 
@@ -121,6 +125,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".tooltips.describe.mirai_tech_boot", "The MiRai technology, the perfect outcome of meticulous comfort and protection research, can be operated through a core connection and is specifically designed to reduce the probability of users getting injured due to movement.");
         add("item." + MODID + ".tooltips.describe.mirai_tech_suit_remote", "The central control panel of MiRai Technology can be paired simply by holding the clothes and the panel with both hands. After that, you can enjoy a perfect control experience!");
         add("item." + MODID + ".tooltips.describe.ring_gag","A tough ring make your mouth open.");
+        add("item." + MODID + ".tooltips.describe.harness_ball_gag","A harness ball gag, make your mouth keeping stuffed.");
+        add("item." + MODID + ".tooltips.describe.split_binder","A special ArmsBinder make your arms and legs tied close to become a good pet.");
+        add("item." + MODID + ".tooltips.describe.leather_mitten","The leather wrap around your hands make your hands like the cutie pet's claw.");
+        add("item." + MODID + ".tooltips.describe.k9_corset","Make your lying cutie become a truly pet.");
 
         add("item." + MODID + ".tooltips.describe.vibrator_deactivate","A little pink toy can make different use");
         add("item." + MODID + ".tooltips.describe.vibrator_activate","A little vibrator shake below your sensitive body");
@@ -150,13 +158,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".slime.grow_to_latex", "The Slime on your body is solidifying to Latex!");
         add("item." + MODID + ".cursed_collar.add_magic_rope", "Cursed Collar is activating and Binding on your body!");
 
+        add("item." + MODID + ".split_binder.invalid_position","Invalid position of this target!");
+
         add("item." + MODID + ".message.lock.has_been_paired", "This Lock has been Paired!");
         add("item." + MODID + ".message.lock.pair_success", "Pair Successful!");
         add("item." + MODID + ".message.lock.no_pair", "This Lock not have the key pair,Can't be use for now!");
         add("item." + MODID + ".message.lock.target_self", "yourself");
         add("item." + MODID + ".message.lock.success.pre", "You have Locked for");
         add("item." + MODID + ".message.lock.success.end", "Successful!");
-        add("item." + MODID + ".message.lock.success_target_player", "Someone has locked your restraint!");
+        add("item." + MODID + ".message.lock.success_target_player", "One of your restraint has been locked!!");
         add("item." + MODID + ".lock.tooltips.pairing", "Current Pair:");
         add("item." + MODID + ".lock.tooltips.unpairing", "No Pair Key");
         add("item." + MODID + ".message.lock.no_restraint", "This Part hasn't lockable restraint!");
@@ -169,7 +179,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".message.key.has_been_paired", "This Key has been Paired");
         add("item." + MODID + ".message.key.success.pre", "You have Unlocked for");
         add("item." + MODID + ".message.key.success.end", "Successful！");
-        add("item." + MODID + ".message.key.success_target_player", "Someone help you unlock a restraint!");
+        add("item." + MODID + ".message.key.success_target_player", "One of your restraint has been unlock!");
         add("item." + MODID + ".message.key.no_unlockable_item", "No restraint needs to be unlocked!！");
         add("item." + MODID + ".message.key.not_locked", "This restraint didn't be locked!");
         add("item." + MODID + ".message.key.no_pair", "This key hasn't been paired!");
@@ -183,17 +193,24 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".common_key.use_to_bound","Press Mouse Right can bound this key to yourself");
 
         add("item." + MODID + ".rope.cant_be_released_when_connect", "You need release the connect rope before you release the arms and legs rope!");
-        add("item." + MODID + ".rope.connect_bind.need_lying", "Need the target lying down!");
+        add("item." + MODID + ".rope.connect_bind.need_lying_down", "Need the target lying down!");
         add("item." + MODID + ".rope.connect_bind.need_rope_bind_arms", "Need use the Rope bind the target's arms first!");
         add("item." + MODID + ".rope.connect_bind.need_rope_bind_legs", "Need use the Rope bind the target's legs first!");
         add("item." + MODID + ".rope.connect_bind.need_correct_arms_pose","Current ArmsPose can't use the rope to connect!");
         add("item." + MODID + ".rope.connect_bind.need_correct_legs_pose","Current LegsPose can't use the rope to connect!");
+
+        add("item." + MODID + ".k9_corset.connect_bind.need_lying_down","Need the target lying down!");
+        add("item." + MODID + ".k9_corset.connect_bind.need_split_bind_arms","Need use the ArmsSplitBinder bind the target's arms first!");
+        add("item." + MODID + ".k9_corset.connect_bind.need_split_bind_legs","Need use the LegsSplitBinder bind the target's legs first!");
+        add("item." + MODID + ".k9_corset.connect_bind.need_correct_arms_pose","Current ArmsPose can't use the Corset to connect!");
+        add("item." + MODID + ".k9_corset.connect_bind.need_correct_legs_pose","Current LegsPose can't use the rope to connect!");
+
         add("item." + MODID + ".slime.cant_use_kidnap", "Slime can't use to restraint target!");
         add("item." + MODID + ".slime.expand_to_releaser", "The slime expand to your hands!");
         add("item." + MODID + ".latex.cant_use_kidnap", "The Latex can't use to restraint target");
         add("item." + MODID + ".latex.cant_release", "You need use the sharp item to cut off the latex");
 
-        add("item." + MODID + ".restraint_tool.equipped_tool","Someone add a tools on your body!");
+        add("item." + MODID + ".restraint_tool.equipped_tool","A tool has been add to your body!");
         add("item." + MODID + ".restraint_tool.equip_success","Equip Success!");
         add("item." + MODID + ".restraint_tool.part_full", "You can't add more tools to this target!");
         add("item." + MODID + ".restraint_tool.get_max_usage","Already get the max usage of this tool!");
@@ -283,7 +300,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("hud." + MODID + ".struggle.restraint_has_been_block", "This Restraint has been blocked by another restraint,can't be struggle!");
         add("hud." + MODID + ".struggle.cant_be_release", "You can't release this restraint by yourself！");
         add("hud." + MODID + ".struggle.restraint_has_been_lock", "This restraint has been lock,can't be released！");
-        add("hud." + MODID + ".struggle_stopped_by_damage", "Someone hurt you make you struggle stop!");
+        add("hud." + MODID + ".struggle_stopped_by_damage", "taking hurt you make you struggle stop!");
         add("hud." + MODID + ".restraint_part_hud_selected", "Selected Body Part:");
         add("hud." + MODID + ".already_locked", "Locking!");
         add("hud." + MODID + ".struggle.strength.instruction", "touch the left and right button Quickly!");
@@ -370,7 +387,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("event." + MODID + ".kidnap.fail", "Can't use the Restraint on this target!");
         add("event." + MODID + ".kidnap.done", "Bind Done!");
         add("event." + MODID + ".kidnap.kidnapped", "Someone has already bind Restraint on you!");
-        add("event." + MODID + ".kidnap.struggle_interrupted", "Someone try to add restraint to your!");
+        add("event." + MODID + ".kidnap.struggle_interrupted", "A restraint change interrupted your struggle progress!");
         add("event." + MODID + ".release.has_been_bind", "You has been bond,Can't release other's restraint!");
         add("event." + MODID + ".release.already_releasing", "You have already releasing, Can't release this target!");
         add("event." + MODID + ".release.need_stop_struggle", "You need stop the target struggle first!");
@@ -436,7 +453,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".fail_carry.locked_by_block", "You can't take the target from this block!");
         add("action." + MODID + ".fail_carry.target_in_device","Target on the Restraint Device!");
         add("action." + MODID + ".fail_hug.need_target_sitting", "You need let the target sit down!");
+        add("action." + MODID + ".fail_hug.invalid_legs_pose","Need bind the target legs together!");
         add("action." + MODID + ".fail_shoulder.need_target_standing", "You need let the target standing!");
+        add("action." + MODID + ".fail_shoulder.invalid_legs_pose","Need bind the target legs together!");
         add("action." + MODID + ".fail_rope_connection_carry.need_target_rope_connection","You need connect the rope bind on target!");
 
         add("action." + MODID + ".fail_carrying.not_carrying", "You didn't carry any target!");
@@ -503,6 +522,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".mirai_tech_mitten", "MiRai科技:活动抑制手套");
         add("item." + MODID + ".mirai_tech_boot", "MiRai科技:仪式规范长靴");
         add("item." + MODID + ".ring_gag","圆环口塞");
+        add("item." + MODID + ".harness_ball_gag","马具式口球");
+        add("item." + MODID + ".split_binder","连缚拘束套");
+        add("item." + MODID + ".leather_mitten","皮革束手套");
+        add("item." + MODID + ".k9_corset","K9束腰");
 
         add("item." + MODID + ".mirai_tech_suit_remote", "MiRai核心控制面板");
         add("item." + MODID + ".mirai_tech_lock", "MiRai智能锁");
@@ -558,6 +581,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".tooltips.describe.mirai_tech_boot", "MiRai科技经过专门的舒适度与保护性研究的完美产物，可通过核心连接操作，专用于降低用户因移动而受伤的概率。");
         add("item." + MODID + ".tooltips.describe.mirai_tech_suit_remote", "MiRai科技的中心控制面板，双手手持衣物和面板即可配对，随后便可享受完美的控制体验！");
         add("item." + MODID + ".tooltips.describe.ring_gag","一个坚固的圆环迫使你张开嘴巴露出可爱的小舌尖。");
+        add("item." + MODID + ".tooltips.describe.harness_ball_gag","采用围绕头部上下连锁固定的口球，使其更加牢固地塞住你的嘴巴。");
+        add("item." + MODID + ".tooltips.describe.split_binder","将你的手臂与双腿并紧固定在一起，使你变得像小宠物一样可爱。");
+        add("item." + MODID + ".tooltips.describe.leather_mitten","严密的皮革将你的十指紧紧包裹在一起，让你的双手只能像小宠物的爪子一样摆动。");
+        add("item." + MODID + ".tooltips.describe.k9_corset","严格的束腰可以让你趴在地上的小可爱成为一个真正的小宠物。");
 
         add("item." + MODID + ".tooltips.describe.vibrator_deactivate","一个特别的粉色小玩具，看起来似乎有别的特殊用途");
         add("item." + MODID + ".tooltips.describe.vibrator_activate","一个小巧的跳蛋正在你敏感的身体中震动");
@@ -587,13 +614,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".slime.grow_to_latex", "你身上的黏液正一点点凝固为乳胶！");
         add("item." + MODID + ".cursed_collar.add_magic_rope", "诅咒项圈凭空产生了一副魔法绳索绑住了你！");
 
+        add("item." + MODID + ".split_binder.invalid_position","当前目标的姿势无法使用该拘束具！");
+
         add("item." + MODID + ".message.lock.has_been_paired", "该拘束具锁已经配对过了！");
         add("item." + MODID + ".message.lock.pair_success", "配对成功！");
         add("item." + MODID + ".message.lock.no_pair", "该拘束具锁还未进行配对，无法使用！");
         add("item." + MODID + ".message.lock.target_self", "自己");
         add("item." + MODID + ".message.lock.success.pre", "成功为");
         add("item." + MODID + ".message.lock.success.end", "上锁！");
-        add("item." + MODID + ".message.lock.success_target_player", "有人为你的拘束具上了锁！");
+        add("item." + MODID + ".message.lock.success_target_player", "你的拘束具被上了锁！");
         add("item." + MODID + ".lock.tooltips.pairing", "当前匹配：");
         add("item." + MODID + ".lock.tooltips.unpairing", "未匹配钥匙");
         add("item." + MODID + ".message.lock.no_restraint", "这个部位没有可以上锁的拘束具！");
@@ -606,7 +635,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".message.key.has_been_paired", "这把钥匙已经配对过了！");
         add("item." + MODID + ".message.key.success.pre", "成功为");
         add("item." + MODID + ".message.key.success.end", "解锁！");
-        add("item." + MODID + ".message.key.success_target_player", "有人为你解开了拘束具上的一个锁！");
+        add("item." + MODID + ".message.key.success_target_player", "拘束具上的一个锁被解开了！");
         add("item." + MODID + ".message.key.no_unlockable_item", "没有可以解锁的拘束具！");
         add("item." + MODID + ".message.key.not_locked", "该拘束具没有上锁！");
         add("item." + MODID + ".message.key.no_pair", "该钥匙还未进行匹配！");
@@ -620,17 +649,24 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item." + MODID + ".common_key.use_to_bound","右键可将拥有者绑定为自己");
 
         add("item." + MODID + ".rope.cant_be_released_when_connect", "你需要先解开连接手脚的绳子才能解开手臂和双腿的绳子束缚！");
-        add("item." + MODID + ".rope.connect_bind.need_lying", "需要先让目标趴下！");
+        add("item." + MODID + ".rope.connect_bind.need_lying_down", "需要先让目标趴下！");
         add("item." + MODID + ".rope.connect_bind.need_rope_bind_arms", "需要先用绳子束缚目标的双臂！");
         add("item." + MODID + ".rope.connect_bind.need_rope_bind_legs", "需要先用绳子束缚目标的双腿！");
         add("item." + MODID + ".rope.connect_bind.need_correct_arms_pose","当前双臂的捆绑姿势无法使用绳子连接！");
         add("item." + MODID + ".rope.connect_bind.need_correct_legs_pose","当前双腿的捆绑姿势无法使用绳子连接！");
+
+        add("item." + MODID + ".k9_corset.connect_bind.need_lying_down","需要先让目标趴下！");
+        add("item." + MODID + ".k9_corset.connect_bind.need_split_bind_arms","需要先用束手套束缚目标的双臂！");
+        add("item." + MODID + ".k9_corset.connect_bind.need_split_bind_legs","需要先用束腿套束缚目标的双腿！");
+        add("item." + MODID + ".k9_corset.connect_bind.need_correct_arms_pose","当前双臂的捆绑姿势无法使用束腰连接！");
+        add("item." + MODID + ".k9_corset.connect_bind.need_correct_legs_pose","当前双腿的捆绑姿势无法使用束腰连接！");
+
         add("item." + MODID + ".slime.cant_use_kidnap", "黏液无法用于束缚目标！");
         add("item." + MODID + ".slime.expand_to_releaser", "你解下的黏液蔓延到了你的手上！");
         add("item." + MODID + ".latex.cant_use_kidnap", "已经凝固的乳胶无法用于束缚目标");
         add("item." + MODID + ".latex.cant_release", "已经凝固的坚实乳胶只能用锋利的物品切割下来");
 
-        add("item." + MODID + ".restraint_tool.equipped_tool","有人在你身上放入了一个小玩具！");
+        add("item." + MODID + ".restraint_tool.equipped_tool","你身上被放入了一个小玩具！");
         add("item." + MODID + ".restraint_tool.equip_success","成功安放小玩具！");
         add("item." + MODID + ".restraint_tool.part_full", "无法再为目标添加更多的小玩具了！");
         add("item." + MODID + ".restraint_tool.get_max_usage","该目标身上装备该类型的小玩具已经达到上限!");
@@ -812,7 +848,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("event." + MODID + ".kidnap.fail", "无法将该拘束具绑在目标身上！");
         add("event." + MODID + ".kidnap.done", "捆绑完成！");
         add("event." + MODID + ".kidnap.kidnapped", "有人将拘束具束缚在了你的身上！");
-        add("event." + MODID + ".kidnap.struggle_interrupted", "有人正试图增添你的束缚！");
+        add("event." + MODID + ".kidnap.struggle_interrupted", "你身上的束缚变化打断了挣扎！");
 
         add("event." + MODID + ".release.has_been_bind", "你的双手正被捆绑着，无法释放别人的束缚！");
         add("event." + MODID + ".release.need_main_hand_empty_or_release_tool", "你需要空手或者手持工具才能为目标解开束缚！");
@@ -879,7 +915,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".fail_carry.locked_by_block", "你无法将该目标从拘束架上带走！");
         add("action." + MODID + ".fail_carry.target_in_device","目标正在拘束装置上！");
         add("action." + MODID + ".fail_hug.need_target_sitting", "需要让目标先坐下去！");
+        add("action." + MODID + ".fail_hug.invalid_legs_pose","需要让目标的双腿并在一起捆住！");
         add("action." + MODID + ".fail_shoulder.need_target_standing", "需要让目标先站起来！");
+        add("action." + MODID + ".fail_shoulder.invalid_legs_pose","需要让目标的双腿并在一起捆住！");
         add("action." + MODID + ".fail_rope_connection_carry.need_target_rope_connection","需要先把目标用绳子连上手脚！");
 
         add("action." + MODID + ".fail_carrying.not_carrying", "当前没有抱着任何目标！");
@@ -908,7 +946,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("npc." + MODID + ".test_npc.node.main_npc_gagged","呜嗯咕呜呜呜呜……");
         add("npc." + MODID + ".test_npc.node.main_both_gagged","咕呜呜？呜嗯……");
         add("npc." + MODID + ".test_npc.node.main_ungagged","呼……咕呜……谢谢……这里是Galaxy，有什么……可以帮助你的吗？");
-        add("npc." + MODID + ".test_npc.node.about_update","这次更新主要为Galaxy添加了更为详细的对话和修改~NPC系统目前更加完善了~现在所有的拘束具都可以附加”绑定诅咒“和”消失诅咒“了！同时按照大家的建议修正了一系列的BUG哦！具体版本更新内容请检查群内反馈频道的详细更新说明哦！");
+        add("npc." + MODID + ".test_npc.node.about_update","这次更新添加了2套手臂束缚动作和一套双腿束缚动作，并且添加了配套的K9系列拘束具，修正了高潮状态的视觉效果，并且按照大家的建议修正了一系列的BUG哦！具体版本更新内容请检查群内反馈频道的详细更新说明哦！哦对~你暂时不能欺负我了哦~");
         add("npc." + MODID + ".test_npc.node.about_me","啊哈~我吗？正如你所见，我是一个负责引导大家和信息公开的使者哦~我知道你在想什么~不妨试试看？");
         add("npc." + MODID + ".test_npc.node.about_restraints","拘束具是所有功能的核心物品，每个拘束具有其独特的耐久、敏感值、挣扎选项、可使用部位以及独特的特性，并且根据不同的环境、叠加、交互情况会产生特别的效果，拘束具不止局限于直接使用的物品，也会通过其他方式出现~你可以使用拘束具区抓捕其他小可爱，或者穿满拘束具成为小可爱之一哦~");
         add("npc." + MODID + ".test_npc.node.about_restraint_interact","身上穿满拘束具并不意味着你什么都做不了~除了简单地增减身上的束缚外，你还可以用拴绳牵引戴着项圈的小可爱，甚至还可以在被捆绑的状态下移动和交互哦~");

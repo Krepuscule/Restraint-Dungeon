@@ -111,7 +111,8 @@ public class PlayerAnimationController {
 
     public static String getPlayerConnectionBodyTransitionAnimation(ServerPlayer player,RestraintItem ri){
         if(ri.getConnectBindTranslateAnimation(player) != null){
-            return ri.getConnectBindTranslateAnimation(player) + "_body";
+//            return ri.getConnectBindTranslateAnimation(player) + "_body";
+            return ri.getConnectBindTranslateAnimation(player);
         }
         return null;
 
@@ -134,7 +135,8 @@ public class PlayerAnimationController {
     public static String getPlayerConnectionBodyReleaseAnimation(ServerPlayer player,RestraintItem ri){
 
         if(ri.getConnectBindReleaseAnimation(player) != null){
-            return ri.getConnectBindReleaseAnimation(player) + "_body";
+//            return ri.getConnectBindReleaseAnimation(player) + "_body";
+            return ri.getConnectBindReleaseAnimation(player);
         }
         return null;
     }
@@ -341,19 +343,19 @@ public class PlayerAnimationController {
 
         if(player == null || action == null || action.getActionId().equals("NONE")) return null;
 
-//        if(action instanceof AnimAction animAction){
-//            if(isTarget){
-//                return "action_anim_" + animAction.getActionId().toLowerCase() + "_target";
-//            }else{
-//                return "action_anim_" + animAction.getActionId().toLowerCase() + "_action";
-//            }
-//        }else if(action instanceof CarryAction carryAction){
-//            if(isTarget){
-//                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_target";
-//            }else{
-//                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_action";
-//            }
-//        }else
+        if(action instanceof AnimAction animAction){
+            if(isTarget){
+                return "action_anim_" + animAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_anim_" + animAction.getActionId().toLowerCase() + "_action";
+            }
+        }else if(action instanceof CarryAction carryAction){
+            if(isTarget){
+                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_carry_" + carryAction.getActionId().toLowerCase() + "_action";
+            }
+        }else
 
             if(action instanceof CarryingAction carryingAction){
             CarryType type = getCurrentCarryType(player);

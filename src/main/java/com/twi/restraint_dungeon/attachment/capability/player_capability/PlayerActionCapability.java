@@ -11,26 +11,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerActionCapability {
-    // --- 核心属性 ---
     private String currentAction;
     private UUID partnerUUID;
     private boolean isTarget;
 
-    // 默认构造函数
     public PlayerActionCapability() {
         this.currentAction = "NONE";
         this.partnerUUID = null;
         this.isTarget = false;
     }
 
-    // 全参构造函数
     private PlayerActionCapability(String currentAction, Optional<UUID> partnerUUID, boolean isTarget) {
         this.currentAction = currentAction;
         this.partnerUUID = partnerUUID.orElse(null);
         this.isTarget = isTarget;
     }
 
-    // --- 逻辑方法 ---
 
     public void reset() {
         this.currentAction = "NONE";
@@ -38,7 +34,6 @@ public class PlayerActionCapability {
         this.isTarget = false;
     }
 
-    // --- Getters & Setters ---
 
     public String getCurrentAction() { return currentAction; }
     public void setCurrentAction(String currentAction) { this.currentAction = currentAction; }

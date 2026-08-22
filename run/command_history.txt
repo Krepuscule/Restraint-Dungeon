@@ -1,31 +1,4 @@
 /summon restraint_dungeon:test_npc
-/kill @e[type=restraint_dungeon:test_npc]
-/summon restraint_dungeon:test_npc
-/kill @e[type=restraint_dungeon:test_npc]
-/summon restraint_dungeon:test_npc
-/kill @e[type=restraint_dungeon:test_npc]
-/summon restraint_dungeon:test_npc
-/kill @e[type=restraint_dungeon:test_npc]
-/summon restraint_dungeon:test_npc
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/kill @e[type=restraint_dungeon:test_npc]
-/gamemode creative
-/summon restraint_dungeon:test_npc
 /gamemode survival
 /gamemode creative
 /gamemode survival
@@ -48,3 +21,30 @@
 /kill
 /summon restraint_dungeon:test_npc
 /kill @e[type=restraint_dungeon:test_npc]
+/kill
+/time set day
+/kill
+/summon restraint_dungeon:test_npc
+/kill
+/effect give Dev restraint_dungeon:climax infinite 1
+/effect give Dev restraint_dungeon:climax infinite 5
+/effect give Dev restraint_dungeon:climax infinite 10
+/effect give Dev restraint_dungeon:climax infinite 5
+/effect clear
+/effect give Dev restraint_dungeon:climax infinite 5
+/effect clear
+/effect give Dev restraint_dungeon:climax infinite 10
+/effect clear
+/effect give Dev restraint_dungeon:climax infinite 3
+/effect clear
+/kill
+/effect give Dev restraint_dungeon:climax infinite 3
+/effect clear
+/effect give Dev restraint_dungeon:climax infinite 3
+/effect clear
+/effect give Dev restraint_dungeon:climax infinite 3
+/effect give Dev restraint_dungeon:climax 10 3 true
+/kill
+/effect give Dev restraint_dungeon:climax infinite 3 true
+/effect clear
+/kill

@@ -495,6 +495,14 @@ public class RestraintItem extends Item implements GeoItem {
     /* ---------------------------------------------- 连接拘束部位属性 --------------------------------------------------- */
 
     /**
+     * 判断是否按照默认方式读取该拘束具的贴图（如果你不知道这是什么，请勿使用）
+     * @param entity 当前实体
+     */
+    public boolean shouldRenderConnectionBind(LivingEntity entity){
+        return false;
+    }
+
+    /**
      * 当该拘束具为最下层的连接拘束具时，玩家在切换到连接状态前所需要的姿势,若为Null则该连接拘束具不会限制姿势切换
      * @param entity 当前实体
      */
@@ -820,7 +828,7 @@ public class RestraintItem extends Item implements GeoItem {
         if(actionEntity == null || actionEntity.getAttribute(ModAttributes.RESTRAINT_STRENGTH) == null) return DEFAULT_RELEASE_TIME;
 
 
-        return (long) (DEFAULT_RELEASE_TIME *
+        return (long) (DEFAULT_RELEASE_TIME /
                 Objects.requireNonNull(actionEntity.getAttribute(ModAttributes.RESTRAINT_STRENGTH)).getValue());
     }
 
@@ -923,7 +931,7 @@ public class RestraintItem extends Item implements GeoItem {
             PoseStack poseStack, MultiBufferSource bufferSource, int packedLight,int packedOverlay) {
 
         //TODO:后续解决连接拘束具的渲染问题
-        if(part == PlayerRestraintPart.restraint_connection) return null;
+        if(part == PlayerRestraintPart.restraint_connection && !shouldRenderConnectionBind(entity)) return null;
 
         if(!shouldRestraintDraw(stack,part,index)) return null;
 

@@ -58,7 +58,7 @@ public class TestNPCEntity extends BaseNPCEntity {
 
     @Override
     public boolean canBeKidnap(){
-        return true;
+        return false;
     }
 
     @Override

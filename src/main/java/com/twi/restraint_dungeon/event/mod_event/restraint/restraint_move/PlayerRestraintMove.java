@@ -56,18 +56,21 @@ public abstract class PlayerRestraintMove {
     }
 
     public void updateTick(LivingEntity entity) {
-        if (timer > 0) timer--;
 
+        if (timer > 0) timer--;
         if (entity.level().isClientSide) {
             onTick(entity);
         }
 
         if (timer <= 0) {
+
             if (currentStage == Stage.MID && hasCustomClientEndCondition() && !entity.level().isClientSide) {
                 return;
             }
             advanceStage(entity);
+
         }
+
     }
 
     protected abstract void onTick(LivingEntity entity);

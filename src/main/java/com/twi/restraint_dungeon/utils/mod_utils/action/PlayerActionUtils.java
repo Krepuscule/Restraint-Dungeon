@@ -18,13 +18,12 @@ public class PlayerActionUtils {
     }
 
     /**
-     * 更新实体的动作数据（会触发 NeoForge 的数据变更追踪）
+     * 更新实体的动作数据
      */
     public static void setData(LivingEntity entity, PlayerActionCapability data) {
         entity.setData(ModAttachments.PLAYER_ACTION, data);
     }
 
-    // --- 快捷操作方法 ---
 
     /**
      * 设置当前动作 ID

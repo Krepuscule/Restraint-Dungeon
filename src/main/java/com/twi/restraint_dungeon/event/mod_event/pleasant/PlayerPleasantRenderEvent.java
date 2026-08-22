@@ -1,9 +1,11 @@
 package com.twi.restraint_dungeon.event.mod_event.pleasant;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.twi.restraint_dungeon.effect.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -12,6 +14,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.ArrayList;
@@ -24,36 +27,130 @@ public class PlayerPleasantRenderEvent {
 
     private static final List<HeartParticle> hearts = new ArrayList<>();
 
-    // --- 纹理路径 ---
     private static final ResourceLocation HEART_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(MODID, "textures/gui/icon/climax_heart.png");
 
-    // --- 配置参数 ---
     private static final float ZONE_WIDTH_PCT = 0.05f;
     private static final float ZONE_HEIGHT_PCT = 0.05f;
     private static final int RENDER_DENSITY = 40;
     private static long lastSpawnTime = 0;
 
-    /**
-     * 渲染爱心粒子
-     */
+
+    private static final float BASE_SHAKE_INTENSITY = 0.25f;
+    private static final float VIGNETTE_DEPTH_RATIO = 1.0f / 8.0f;
+    private static final int BASE_PINK_COLOR = 0xFFB6C1;
+    private static final float BASE_VIGNETTE_ALPHA = 0.18f;
+
+
+
+    private static int lastTriggerTick = 0;
+    private static float currentShakeStrength = 0.0f;
+
+    @SubscribeEvent
+    public static void onComputeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !mc.player.hasEffect(ModEffects.CLIMAX)) return;
+
+        MobEffectInstance effect = mc.player.getEffect(ModEffects.CLIMAX);
+        int amplifier = effect != null ? effect.getAmplifier() : 0;
+        int effectLevel = Math.clamp(amplifier + 1, 1, 10);
+
+        int interval = Math.max(1, Math.round(100.0f - (effectLevel - 1.0f) * 11.0f));
+
+        int currentTick = mc.player.tickCount;
+
+        if (currentTick - lastTriggerTick >= interval) {
+            lastTriggerTick = currentTick;
+            float mappedLevel = 1.0f + (effectLevel - 1.0f) * (3.0f / 9.0f);
+            currentShakeStrength = mappedLevel * BASE_SHAKE_INTENSITY * 1.5f;
+        } else {
+            currentShakeStrength *= 0.82f;
+        }
+
+        long time = System.currentTimeMillis();
+        float speed = 0.08f + effectLevel * 0.005f;
+
+        float shakeYaw = (float) (Math.sin(time * speed) * 0.45 * currentShakeStrength);
+        float shakePitch = (float) (Math.cos(time * (speed * 1.33f)) * 0.45 * currentShakeStrength);
+        float shakeRoll = (float) (Math.sin(time * (speed * 0.67f)) * 0.25 * currentShakeStrength);
+
+        event.setYaw(event.getYaw() + shakeYaw);
+        event.setPitch(event.getPitch() + shakePitch);
+        event.setRoll(event.getRoll() + shakeRoll);
+    }
+
+
     @SubscribeEvent
     public static void onRenderGuiLayer(RenderGuiLayerEvent.Post event) {
-
         if (event.getName() != VanillaGuiLayers.PLAYER_HEALTH) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !mc.player.hasEffect(ModEffects.CLIMAX)) return;
 
+        MobEffectInstance effect = mc.player.getEffect(ModEffects.CLIMAX);
+        int amplifier = effect != null ? effect.getAmplifier() : 0;
+
         GuiGraphics guiGraphics = event.getGuiGraphics();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+
+        renderPinkVignette(guiGraphics, screenWidth, screenHeight, amplifier);
+
         for (HeartParticle heart : hearts) {
             heart.render(guiGraphics, HEART_TEXTURE);
         }
     }
 
-    /**
-     * 帧更新事件：负责计算粒子位移、渐隐以及生成新粒子
-     */
+
+    private static void renderPinkVignette(GuiGraphics gui, int width, int height, int amplifier) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+
+        int steps = 40;
+        int level = amplifier + 1;
+        float progressFactor = Math.min(1.0f, (level - 1) / 9.0f);
+
+        int maxThickness = Math.max(width, height) / 2;
+
+        float targetRatio = VIGNETTE_DEPTH_RATIO + (0.5f - VIGNETTE_DEPTH_RATIO) * progressFactor;
+
+        int baseR = (BASE_PINK_COLOR >> 16) & 0xFF;
+        int baseG = (BASE_PINK_COLOR >> 8) & 0xFF;
+        int baseB = BASE_PINK_COLOR & 0xFF;
+
+        int r = baseR;
+        int g = (int) (baseG * (1.0f - 0.5f * progressFactor));
+        int b = (int) (baseB * (1.0f - 0.4f * progressFactor));
+        int dynamicPinkColor = (r << 16) | (g << 8) | b;
+
+        for (int i = 0; i < steps; i++) {
+            float progress = (float) i / steps;
+            float nextProgress = (float) i / steps + (1.0f / steps);
+
+            float currentRatio = progress * 0.5f;
+
+            if (currentRatio > targetRatio) {
+                continue;
+            }
+
+            float alphaProgress = currentRatio / targetRatio;
+            float alpha = (1.0f - alphaProgress) * BASE_VIGNETTE_ALPHA;
+            int color = ((int)(alpha * 255) << 24) | dynamicPinkColor;
+
+            int t1 = (int) (maxThickness * progress);
+            int t2 = (int) (maxThickness * nextProgress);
+
+            gui.fill(0, t1, width, t2, color);
+            gui.fill(0, height - t2, width, height - t1, color);
+            gui.fill(t1, 0, t2, height, color);
+            gui.fill(width - t2, 0, width - t1, height, color);
+        }
+
+        RenderSystem.disableBlend();
+    }
+
+
     @SubscribeEvent
     public static void onRenderFrame(RenderFrameEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
@@ -100,7 +197,6 @@ public class PlayerPleasantRenderEvent {
                 continue;
             }
 
-            // 边界检查触发渐隐
             boolean reached = false;
             final float s = HeartParticle.SIZE;
             switch (heart.originSide) {

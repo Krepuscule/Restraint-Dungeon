@@ -26,6 +26,9 @@ public abstract class BaseAction {
     /** 最大交互距离 */
     public double getMaxDistance() { return 2.0; }
 
+    /** 动画交互距离 */
+    public double getAnimationDistance(){return 1.0;}
+
     /** 获取本地化显示名称 */
     public Component getDisplayName() {
         return Component.translatable("action." + MODID + "." + getActionId().toLowerCase());

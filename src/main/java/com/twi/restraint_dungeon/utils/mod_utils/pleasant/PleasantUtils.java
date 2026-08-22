@@ -12,6 +12,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
+
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.ThrillUtils.getThrillLevel;
 
@@ -79,6 +83,8 @@ public class PleasantUtils {
     /**
      * 更新实体的属性值
      */
+    private static final Map<UUID, Double> LAST_REDUCTION_MAP = new WeakHashMap<>();
+
     public static void updatePleasantAttributes(LivingEntity entity, double pleasantValue) {
         double reduction;
         if (pleasantValue >= 100) reduction = -0.50;
@@ -88,25 +94,33 @@ public class PleasantUtils {
         else if (pleasantValue >= 50) reduction = -0.20;
         else reduction = 0.0;
 
-        // 原版属性
+        UUID entityUUID = entity.getUUID();
+        double lastReduction = LAST_REDUCTION_MAP.getOrDefault(entityUUID, 999.0);
+        if (Math.abs(lastReduction - reduction) < 1e-4) {
+            return;
+        }
+        LAST_REDUCTION_MAP.put(entityUUID, reduction);
+
         applyOrRemove(entity, Attributes.MOVEMENT_SPEED, PLEASANT_MODIFIER_ID.withSuffix("_movement_speed"), reduction);
         applyOrRemove(entity, Attributes.ATTACK_DAMAGE, PLEASANT_MODIFIER_ID.withSuffix("_attack_damage"), reduction);
         applyOrRemove(entity, Attributes.ATTACK_SPEED, PLEASANT_MODIFIER_ID.withSuffix("_attack_speed"), reduction);
         applyOrRemove(entity, Attributes.ATTACK_KNOCKBACK, PLEASANT_MODIFIER_ID.withSuffix("_attack_knockback"), reduction);
         applyOrRemove(entity, Attributes.KNOCKBACK_RESISTANCE, PLEASANT_MODIFIER_ID.withSuffix("_knockback_resistance"), reduction);
 
-        // 自定义属性同步
         applyOrRemove(entity, ModAttributes.RESTRAINT_STRENGTH, PLEASANT_MODIFIER_ID.withSuffix("_restraint_strength"), reduction);
         applyOrRemove(entity, ModAttributes.STRUGGLE_STRENGTH, PLEASANT_MODIFIER_ID.withSuffix("_struggle_strength"), reduction);
         applyOrRemove(entity, ModAttributes.STRUGGLE_SPEED, PLEASANT_MODIFIER_ID.withSuffix("_struggle_speed"), reduction);
         applyOrRemove(entity, ModAttributes.STRUGGLE_RANGE, PLEASANT_MODIFIER_ID.withSuffix("_struggle_range"), reduction);
     }
 
-    private static void applyOrRemove(LivingEntity entity, Holder<Attribute> attr, ResourceLocation id, double amount) {
+    private static void applyOrRemove(LivingEntity entity, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr, ResourceLocation id, double amount) {
         AttributeInstance inst = entity.getAttribute(attr);
         if (inst == null) return;
 
-        inst.removeModifier(id);
+        if (inst.getModifier(id) != null) {
+            inst.removeModifier(id);
+        }
+
         if (amount != 0.0) {
             inst.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }

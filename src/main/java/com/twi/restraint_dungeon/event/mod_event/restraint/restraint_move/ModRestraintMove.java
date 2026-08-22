@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move;
 
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.impl.RestraintCrawlingMove;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.impl.RestraintHoppingMove;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.impl.RestraintJerkingMove;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,6 +17,7 @@ public class ModRestraintMove {
         event.enqueueWork(() -> {
             RestraintMoveManager.register(new RestraintHoppingMove());
             RestraintMoveManager.register(new RestraintJerkingMove());
+            RestraintMoveManager.register(new RestraintCrawlingMove());
         });
     }
 }

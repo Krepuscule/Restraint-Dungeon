@@ -11,11 +11,11 @@ import net.minecraft.network.codec.StreamCodec;
 public class RestraintCapability {
 
     public enum ArmsPose {
-        NONE, CROSS_BEHIND_BACK, CROSS_UP,BEND_ARMS
+        NONE, CROSS_BEHIND_BACK, CROSS_UP, SPLIT_ARMS
     }
 
     public enum LegsPose {
-        NONE, LEGS_TOGETHER,SPLITED_LEGS
+        NONE, LEGS_TOGETHER, SPLIT_LEGS
     }
 
     public enum PlayerRestraintPart {

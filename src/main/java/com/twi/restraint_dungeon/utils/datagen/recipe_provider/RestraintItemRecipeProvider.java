@@ -65,11 +65,23 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
         // 皮革镣铐
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.LEATHER_CUFFS.get())
                 .pattern(" G ")
-                .pattern("LCL")
-                .pattern("   ")
+                .pattern("LAL")
+                .pattern(" C ")
                 .define('C',Items.CHAIN)
                 .define('L', Items.LEATHER)
                 .define('G',Items.GOLD_NUGGET)
+                .define('A',ModMaterials.RUBBER.get())
+                .unlockedBy("has_leather", RecipeProvider.has(Items.LEATHER))
+                .save(output);
+
+        // 皮革束手套
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.LEATHER_MITTEN.get())
+                .pattern(" A ")
+                .pattern("LAL")
+                .pattern("C C")
+                .define('C',Items.CHAIN)
+                .define('L', Items.LEATHER)
+                .define('A',ModMaterials.RUBBER.get())
                 .unlockedBy("has_leather", RecipeProvider.has(Items.LEATHER))
                 .save(output);
 
@@ -83,11 +95,12 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
         // 皮革项圈
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.LEATHER_COLLAR.get())
                 .pattern(" G ")
-                .pattern("L L")
+                .pattern("LAL")
                 .pattern(" N ")
                 .define('N',Items.NAME_TAG)
                 .define('L', Items.LEATHER)
                 .define('G',Items.GOLD_NUGGET)
+                .define('A',ModMaterials.RUBBER.get())
                 .unlockedBy("has_leather", RecipeProvider.has(Items.LEATHER))
                 .save(output);
 
@@ -103,6 +116,18 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
                 .pattern(" G ")
                 .pattern("LRL")
                 .pattern(" A ")
+                .define('A',ModMaterials.RUBBER.get())
+                .define('R',Items.RED_DYE)
+                .define('L', Items.LEATHER)
+                .define('G',Items.GOLD_NUGGET)
+                .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
+                .save(output);
+
+        // 马具式口球
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.HARNESS_BALL_GAG.get())
+                .pattern("LGL")
+                .pattern("ARA")
+                .pattern("LAL")
                 .define('A',ModMaterials.RUBBER.get())
                 .define('R',Items.RED_DYE)
                 .define('L', Items.LEATHER)
@@ -128,6 +153,16 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
                 .pattern(" A ")
                 .define('A',ModMaterials.RUBBER.get())
                 .define('G',Items.GOLD_NUGGET)
+                .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
+                .save(output);
+
+        // 连缚拘束套
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.SPLIT_BINDER.get())
+                .pattern("AIA")
+                .pattern("AIA")
+                .pattern(" A ")
+                .define('A',ModMaterials.RUBBER.get())
+                .define('I',Items.IRON_NUGGET)
                 .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
                 .save(output);
 
@@ -207,6 +242,17 @@ public class RestraintItemRecipeProvider extends RecipeProvider {
                 .define('R',Items.REDSTONE)
                 .define('E',Items.ENDER_PEARL)
                 .unlockedBy("has_lapis", RecipeProvider.has(Items.LAPIS_LAZULI))
+                .save(output);
+
+        // K9束腰
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModRestraintItems.K9_CORSET.get())
+                .pattern("LAL")
+                .pattern("ASA")
+                .pattern(" A ")
+                .define('A',ModMaterials.RUBBER.get())
+                .define('L', Items.LEATHER)
+                .define('S',Items.SADDLE)
+                .unlockedBy("has_latex", RecipeProvider.has(ModMaterials.RUBBER.get()))
                 .save(output);
 
         // 跳蛋

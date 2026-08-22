@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.action.impl;
 
 import com.twi.restraint_dungeon.action.type.CarryAction;
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import net.minecraft.ChatFormatting;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDevice;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getLegsPose;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 
@@ -29,7 +31,7 @@ public class ShoulderAction extends CarryAction {
 
     @Override
     public int getAnimTicks() {
-        return 10;
+        return 40;
     }
 
     @Override
@@ -52,6 +54,10 @@ public class ShoulderAction extends CarryAction {
 
         if(getRestraintPosition(entity) != RestraintPosition.STANDING){
             return Component.translatable("action." + MODID + ".fail_shoulder.need_target_standing").withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(getLegsPose(entity) != RestraintCapability.LegsPose.LEGS_TOGETHER){
+            return Component.translatable("action." + MODID + ".fail_shoulder.invalid_legs_pose").withStyle(ChatFormatting.DARK_RED);
         }
 
         return null;

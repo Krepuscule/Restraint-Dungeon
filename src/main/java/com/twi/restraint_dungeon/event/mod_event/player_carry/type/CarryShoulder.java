@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.event.mod_event.player_carry.type;
 
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability;
 import com.twi.restraint_dungeon.block.restraint_device.RestraintDevice;
 import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
@@ -17,8 +18,7 @@ import java.util.Objects;
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.getRestraintDevice;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.isRidingRestraintDevice;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
-import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.updateRestraintPosition;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.*;
 
 public class CarryShoulder extends CarryType {
@@ -36,6 +36,10 @@ public class CarryShoulder extends CarryType {
 
         if(getRestraintPosition(passenger) != RestraintPositionEvent.RestraintPosition.STANDING){
             return Component.translatable("action." + MODID + ".fail_shoulder.need_target_standing").withStyle(ChatFormatting.DARK_RED);
+        }
+
+        if(getLegsPose(passenger) != RestraintCapability.LegsPose.LEGS_TOGETHER){
+            return Component.translatable("action." + MODID + ".fail_hug.invalid_legs_pose").withStyle(ChatFormatting.DARK_RED);
         }
 
         return null;

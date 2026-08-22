@@ -1,5 +1,6 @@
 package com.twi.restraint_dungeon.item.restraint_item.restraints;
 
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import net.minecraft.ChatFormatting;
@@ -80,17 +81,20 @@ public class TapeItem extends RestraintItem {
         return super.onLooseStruggle(playerUUID, ItemLockIndex);
     }
 
-    /**
-     * 是否可以作为填充式口球使用
-     */
+    public RestraintCapability.ArmsPose setBindArmsPose(LivingEntity entity){
+        if(this.canBindCurrentPart(entity)){
+            return RestraintCapability.ArmsPose.CROSS_UP;
+        }
+        return RestraintCapability.ArmsPose.NONE;
+    }
+
+
     @Override
     public boolean canStuffedGag(LivingEntity entity, ItemStack gagStack) {
         return false;
     }
 
-    /**
-     * 是否可以作为覆盖/封口式口球使用
-     */
+
     @Override
     public boolean canBlockedGag(LivingEntity entity, ItemStack gagStack) {
         return true;

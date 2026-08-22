@@ -203,6 +203,7 @@ public class RestraintPositionEvent {
 
         if (hit instanceof EntityHitResult eHit && eHit.getEntity() instanceof LivingEntity target && target.distanceToSqr(mc.player) <= 2 * 2) {
             if (!isBusyState(target) && !isRidingRestraintDevice(target) && isBeenFullyBind(target)
+                    && !isBeenBindArms(mc.player) && !isBeenBindLegs(mc.player) && !isBeenBindHands(mc.player)
                     && (target instanceof Player || target instanceof BaseNPCEntity)) {
                 PacketDistributor.sendToServer(new PlayerSetTargetPositionPayload(target.getUUID(), dir));
             }
