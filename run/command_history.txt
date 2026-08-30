@@ -1,9 +1,3 @@
-/summon restraint_dungeon:test_npc
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/gamemode survival
 /gamemode creative
 /gamemode survival
 /gamemode creative
@@ -48,3 +42,9 @@
 /effect give Dev restraint_dungeon:climax infinite 3 true
 /effect clear
 /kill
+/enchant Dev restraint_dungeon:curse_of_vivification
+/gamemode survival
+/gamemode creative
+/enchant Dev restraint_dungeon:curse_of_vivification
+/gamemode survival
+/gamemode creative

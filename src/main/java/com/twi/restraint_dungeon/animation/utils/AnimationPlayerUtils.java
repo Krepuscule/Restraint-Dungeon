@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.animation.utils;
 
 import com.twi.restraint_dungeon.action.BaseAction;
+import com.twi.restraint_dungeon.action.impl.StopAction;
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability.PlayerRestraintPart;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerAnimationData;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static com.twi.restraint_dungeon.animation.utils.PlayerAnimationController.*;
 import static com.twi.restraint_dungeon.animation.utils.PlayerAnimationController.getStrugglingBodyAnimation;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentAction;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isBeingCarried;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenConnectBind;
@@ -238,11 +240,51 @@ public class AnimationPlayerUtils {
     }
 
     public static void updateActionAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+        if(!action.shouldAnim()) return;
         List<String> full_body_animations = new ArrayList<>();
+
 
         if(getActionFullBodyAnimation(player, action, hitResult, isTarget) != null){
             full_body_animations.add(getActionFullBodyAnimation(player, action, hitResult, isTarget));
         }
+
+
+        sendAnimationSequence(player,full_body_animations,AnimationLayer.FULL_BODY);
+    }
+
+    public static void updateInfiniteActionAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+        if(!action.shouldAnim()) return;
+        List<String> full_body_animations = new ArrayList<>();
+
+        if(getInfiniteActionStartAnimation(player,action,hitResult,isTarget) != null){
+            full_body_animations.add(getInfiniteActionStartAnimation(player, action, hitResult, isTarget));
+        }
+
+        if(getInfiniteActionAnimation(player, action, hitResult, isTarget) != null){
+            full_body_animations.add(getInfiniteActionAnimation(player, action, hitResult, isTarget));
+        }
+
+        sendAnimationSequence(player,full_body_animations,AnimationLayer.FULL_BODY);
+    }
+
+    public static void stopInfiniteActionAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+        if(!action.shouldAnim()) return;
+        BaseAction before = getCurrentAction(player);
+        List<String> full_body_animations = new ArrayList<>();
+
+
+        if(getActionStopAnimation(player, before, hitResult, isTarget) != null){
+            full_body_animations.add(getActionStopAnimation(player, before, hitResult, isTarget));
+        }
+
+
+        sendAnimationSequence(player,full_body_animations,AnimationLayer.FULL_BODY);
+    }
+
+    public static void clearFullBodyAnimation(ServerPlayer player){
+
+        List<String> full_body_animations = new ArrayList<>();
+        full_body_animations.add("clear_full_body_animation");
 
         sendAnimationSequence(player,full_body_animations,AnimationLayer.FULL_BODY);
     }

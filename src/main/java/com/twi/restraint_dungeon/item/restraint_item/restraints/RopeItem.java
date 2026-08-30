@@ -174,7 +174,18 @@ public class RopeItem extends RestraintItem {
 
     @Override
     public Vector3f getConnectBindViewOffset(Player player, ItemStack stack){
-        return new Vector3f(0.0f, -1.25f, -1.0f);
+        return new Vector3f(0.0f, -0.2f, -1.0f);
+    }
+
+    @Override
+    public List<Float> getConnectBindEntityDimensions(LivingEntity entity, ItemStack stack){
+
+        return List.of(1.25F,0.5F);
+    }
+    @Override
+    public List<Double> getConnectBindLeashOffset(LivingEntity entity, ItemStack stack){
+
+        return List.of(0.0D, -0.35D, -1.2D);
     }
 
     @Override

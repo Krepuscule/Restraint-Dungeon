@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
@@ -50,17 +51,22 @@ public class CarryShoulder extends CarryType {
         if(passenger instanceof BaseNPCEntity){
             return new Vec3(-0.4F,0.4F,-0.25F);
         }
-        return new Vec3(-0.4F, 1.0F, -0.25F);
+        return new Vec3(-0.4F, 0.5F, -0.25F);
     }
 
     @Override
     public Vector3f getPassengerFirstPersonCameraOffset(Player carrier, LivingEntity passenger){
-        return new Vector3f(0.0f,-0.4f,-1.0f);
+        return new Vector3f(0.0f,-0.2f,-0.9f);
     }
 
     @Override
     public Vector3f getPassengerFirstPersonCameraRotation(Player carrier, LivingEntity passenger) {
         return new Vector3f(0.0f,180.0f,0.0f);
+    }
+
+    @Override
+    public List<Float> getPassengerEntityDimensions(Player carrier, LivingEntity passenger) {
+        return List.of(0.75F,1.6F);
     }
 
     @Override

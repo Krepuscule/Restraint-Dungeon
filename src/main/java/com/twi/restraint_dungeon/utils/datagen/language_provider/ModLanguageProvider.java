@@ -274,6 +274,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.minecraft.lingering_potion.effect.strong_sticky_potion","Lingering Potion of Stickiness");
         add("item.minecraft.tipped_arrow.effect.strong_sticky_potion","Arrow of stickiness");
 
+        add("enchantment." + MODID + ".curse_of_vivification","Curse of Vivification");
+        add("enchantment." + MODID + ".curse_of_vivification.head.activate","Your Helmet has been lived and became a chain to gagged your mouth!");
+        add("enchantment." + MODID + ".curse_of_vivification.chest.activate","Your Chestplate has been lived and became lots of chains to bond your arms!");
+        add("enchantment." + MODID + ".curse_of_vivification.leg.activate","Your Leggings has been lived and became lots of chains to bond your legs!");
+        add("enchantment." + MODID + ".curse_of_vivification.feet.activate","Your Boots has been lived and became lots of chains to bond your legs!");
+        add("enchantment." + MODID + ".curse_of_vivification.activate","Your Armor has been lived and became a active restraint chain!");
+
         // --- Keys ---
         add("key." + MODID + ".category", "Restraint Dungeon");
         add("key." + MODID + ".restraint_menu", "Open Restraint Menu");
@@ -428,6 +435,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".release", "Release");
         add("action." + MODID + ".slap", "Slap");
         add("action." + MODID + ".feed", "Feed");
+        add("action." + MODID + ".touch", "Touch");
+        add("action." + MODID + ".stroke", "Stroke");
+        add("action." + MODID + ".stop","Stop");
+
         add("action." + MODID + ".escape.target_released", "Target has released from you!");
         add("action." + MODID + ".escape.escape_from_carry", "You have escaped from carrier!");
 
@@ -468,6 +479,12 @@ public class ModLanguageProvider extends LanguageProvider {
 
         add("action." + MODID + ".fail_feed.food_not_in_main_hand", "You need handle the food item!");
         add("action." + MODID + ".fail_feed.incorrect_carry_type", "Can't feed the target on current carry pose!");
+
+        add("action." + MODID + ".fail_touch.invalid_target","Invalid target!");
+        add("action." + MODID + ".fail_touch.invalid_position","You need take the target kneeling down!");
+
+        add("action." + MODID + ".fail_stroke.invalid_target","Invalid target!");
+        add("action." + MODID + ".fail_stroke.invalid_position","You need take the target standing up!");
 
 
         add("npc." + MODID + ".test_npc.name_00","Galaxy");
@@ -734,6 +751,14 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.minecraft.lingering_potion.effect.strong_sticky_potion","强效滞留型黏着药水");
         add("item.minecraft.tipped_arrow.effect.strong_sticky_potion","强效黏着之箭");
 
+
+        add("enchantment." + MODID + ".curse_of_vivification","活化诅咒");
+        add("enchantment." + MODID + ".curse_of_vivification.head.activate","你的头盔开始活化凝结成一条锁链封住了你的嘴巴！");
+        add("enchantment." + MODID + ".curse_of_vivification.chest.activate","你的盔甲开始活化凝结成数条锁链锁住了你的双臂！");
+        add("enchantment." + MODID + ".curse_of_vivification.leg.activate","你的护腿开始活化凝结成数条锁链锁住了你的双腿！");
+        add("enchantment." + MODID + ".curse_of_vivification.feet.activate","你的护靴开始活化凝结成数条锁链锁住了你的双腿！");
+        add("enchantment." + MODID + ".curse_of_vivification.activate","你身上的盔甲开始活跃躁动并化为了一条拘束锁链！");
+
         // --- 按键绑定 (Keys) ---
         add("key." + MODID + ".category", "拘束地牢");
         add("key." + MODID + ".restraint_menu", "打开束缚信息菜单");
@@ -890,6 +915,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("action." + MODID + ".release", "释放");
         add("action." + MODID + ".slap", "拍打");
         add("action." + MODID + ".feed", "喂食");
+        add("action." + MODID + ".touch", "摸头");
+        add("action." + MODID + ".stroke", "扣扣");
+        add("action." + MODID + ".stop","停止动作");
+
         add("action." + MODID + ".escape.target_released", "目标从你身上挣脱了下来！");
         add("action." + MODID + ".escape.escape_from_carry", "你从对方身上挣脱了下来！");
 
@@ -930,6 +959,12 @@ public class ModLanguageProvider extends LanguageProvider {
 
         add("action." + MODID + ".fail_feed.food_not_in_main_hand", "必须持有可以食用的物品！");
         add("action." + MODID + ".fail_feed.incorrect_carry_type", "当前抱着目标的姿势下无法喂食目标！");
+
+        add("action." + MODID + ".fail_touch.invalid_target","该目标无效！");
+        add("action." + MODID + ".fail_touch.invalid_position","你需要先让目标保持跪姿！");
+
+        add("action." + MODID + ".fail_stroke.invalid_target","该目标无效！");
+        add("action." + MODID + ".fail_stroke.invalid_position","你需要先让目标站立起来！");
 
         add("event." + MODID + ".npc_conversation_tip.prefix","按下 [");
         add("event." + MODID + ".npc_conversation_tip.suffix","] 开始对话");

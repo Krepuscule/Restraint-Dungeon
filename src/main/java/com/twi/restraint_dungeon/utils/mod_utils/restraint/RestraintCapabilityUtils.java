@@ -11,9 +11,11 @@ import com.twi.restraint_dungeon.event.custom_event.PoseChangeEvent.*;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.event.system_handler_event.LivingEntityServerTaskScheduler;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.network.payload.player_restraint.PositionClientRefreshPayload;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstArmsBind;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstLegsBind;
@@ -80,6 +82,12 @@ public class RestraintCapabilityUtils {
             cap.setRestraintPosition(newPos);
             sync(entity, cap);
             entity.refreshDimensions();
+            if(!entity.level().isClientSide){
+                PacketDistributor.sendToPlayersTrackingEntityAndSelf(
+                        entity,
+                        new PositionClientRefreshPayload(entity.getId())
+                );
+            }
         }
     }
 

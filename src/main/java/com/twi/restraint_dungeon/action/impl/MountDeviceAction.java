@@ -31,6 +31,11 @@ public class MountDeviceAction extends AnimAction {
     }
 
     @Override
+    public boolean shouldAnim() {
+        return false;
+    }
+
+    @Override
     public double getMaxDistance() {
         return 2.0;
     }

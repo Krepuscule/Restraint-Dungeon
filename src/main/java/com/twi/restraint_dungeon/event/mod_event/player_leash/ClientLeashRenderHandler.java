@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerLeashData;
+import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
+import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.utils.mod_utils.leash.PlayerLeashUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
@@ -27,6 +30,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import org.joml.Matrix4f;
+
+import java.util.List;
+
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
+import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstConnectBind;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class ClientLeashRenderHandler {
@@ -48,8 +56,7 @@ public class ClientLeashRenderHandler {
         Vec3 leasherRopePos = leasher.getRopeHoldPosition(partialTicks);
 
         double bodyRotRad = (double)(leashedPlayer.getPreciseBodyRotation(partialTicks) * ((float)Math.PI / 180F)) + (Math.PI / 2D);
-        Vec3 playerOffset = leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.4D, 0.0D); // 下移至颈部
-
+        Vec3 playerOffset = getDynamicLeashOffset(leashedPlayer, partialTicks);
         double leashOffsetX = Math.cos(bodyRotRad) * playerOffset.z + Math.sin(bodyRotRad) * playerOffset.x;
         double leashOffsetZ = Math.sin(bodyRotRad) * playerOffset.z - Math.cos(bodyRotRad) * playerOffset.x;
 
@@ -111,5 +118,40 @@ public class ClientLeashRenderHandler {
 
         consumer.addVertex(matrix, xPos - p_352315_, yPos + p_352138_, zPos + p_352162_).setColor(r, g, b, 1.0F).setLight(k);
         consumer.addVertex(matrix, xPos + p_352315_, yPos + p_352293_ - p_352138_, zPos - p_352162_).setColor(r, g, b, 1.0F).setLight(k);
+    }
+
+    private static Vec3 getDynamicLeashOffset(Player leashedPlayer, float partialTicks) {
+        Vec3 default_offset = leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.3D, -0.1D);
+        RestraintPosition position = getRestraintPosition(leashedPlayer);
+
+        if(position == RestraintPosition.CONNECTING){
+        }
+        if(position == RestraintPosition.KNEELING){
+            return leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.3D, -0.1D);
+        }
+        if(position == RestraintPosition.SITTING){
+            return leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.3D, -0.1D);
+        }
+        if(position == RestraintPosition.LYING_UP){
+            return leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.2D, -1.2D);
+        }
+        if(position == RestraintPosition.LYING_LEFT){
+            return leashedPlayer.getLeashOffset(partialTicks).add(0.2D, -0.2D, -1.15D);
+        }
+        if(position == RestraintPosition.LYING_RIGHT){
+            return leashedPlayer.getLeashOffset(partialTicks).add(-0.2D, -0.2D, -1.15D);
+        }
+        if(position == RestraintPosition.LYING_DOWN){
+            return leashedPlayer.getLeashOffset(partialTicks).add(0.0D, -0.35D, -1.2D);
+        }
+        if(position == RestraintPosition.CONNECTING){
+            ItemStack stack = getFirstConnectBind(leashedPlayer);
+            if(stack.getItem() instanceof RestraintItem ri){
+                List<Double> list = ri.getConnectBindLeashOffset(leashedPlayer,stack);
+                return leashedPlayer.getLeashOffset(partialTicks).add(list.getFirst(),list.get(1),list.getLast());
+            }
+        }
+
+        return default_offset;
     }
 }

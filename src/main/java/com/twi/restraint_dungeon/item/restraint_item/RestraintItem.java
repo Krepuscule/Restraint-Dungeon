@@ -396,7 +396,7 @@ public class RestraintItem extends Item implements GeoItem {
      * @param entity 目标实体
      * @param collarStack 拘束具ItemStack
      */
-    public MutableComponent getAdditionCollarName(LivingEntity entity, ItemStack collarStack) {
+    public MutableComponent getAdditionCollarName(LivingEntity entity, ItemStack collarStack, Component baseName) {
         if (collarStack.has(DataComponents.CUSTOM_NAME)) {
             Component titleName = collarStack.getHoverName();
 
@@ -407,31 +407,11 @@ public class RestraintItem extends Item implements GeoItem {
 
             return Component.empty()
                     .append(prefix)
-                    .append(entity.getName())
+                    .append(baseName)
                     .append(Component.literal(" "));
         }
 
-        return entity.getName().copy();
-    }
-
-    /**
-     * 当该拘束具为最下层的项圈拘束具时，修改玩家头顶的 NameTag
-     * @param entity 目标玩家
-     * @param collarStack 拘束具ItemStack
-     */
-    public MutableComponent getAdditionCollarNameTag(LivingEntity entity, ItemStack collarStack) {
-        if (collarStack.has(DataComponents.CUSTOM_NAME)) {
-            MutableComponent prefix = Component.literal("* ")
-                    .append(collarStack.getHoverName())
-                    .append(" * ")
-                    .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);
-
-            return Component.empty()
-                    .append(prefix)
-                    .append(entity.getName());
-        }
-
-        return entity.getName().copy();
+        return baseName.copy();
     }
 
     /* ---------------------------------------------- 连接其它部位束缚部分 --------------------------------------------------- */
@@ -558,6 +538,26 @@ public class RestraintItem extends Item implements GeoItem {
      */
     public Vector3f getConnectBindViewRotation(Player player, ItemStack stack){
         return null;
+    }
+
+    /**
+     * 当该拘束具为最下层的连接拘束具时，该实体碰撞箱的缩放大小值（第一个参数表示横向，第二个参数表示纵向）
+     * @param entity 当前实体,
+     * @param stack 连接部位的拘束具
+     */
+    public List<Float> getConnectBindEntityDimensions(LivingEntity entity, ItemStack stack){
+
+        return List.of(1.2F,1.8F);
+    }
+
+    /**
+     * 当该拘束具为最下层的连接拘束具时，该玩家的拴绳连接点
+     * @param entity 当前实体,
+     * @param stack 连接部位的拘束具
+     */
+    public List<Double> getConnectBindLeashOffset(LivingEntity entity, ItemStack stack){
+
+        return List.of(0.0D, -0.35D, -1.2D);
     }
 
     /**
@@ -911,6 +911,12 @@ public class RestraintItem extends Item implements GeoItem {
         }
     }
 
+    /**
+     * 获取当前拘束具在对应部位的贴图
+     * @param stack 拘束具ItemStack
+     * @param part 拘束具对应部位
+     * @param index 当前拘束具所在部位的索引
+     */
     public boolean shouldRestraintDraw(ItemStack stack,PlayerRestraintPart part,int index){
         return true;
     }

@@ -1,5 +1,7 @@
 package com.twi.restraint_dungeon.utils.mod_utils.action;
 
+import com.twi.restraint_dungeon.action.BaseAction;
+import com.twi.restraint_dungeon.action.utils.ActionManager;
 import com.twi.restraint_dungeon.attachment.ModAttachments;
 import com.twi.restraint_dungeon.attachment.capability.player_capability.PlayerActionCapability;
 import net.minecraft.Util;
@@ -34,7 +36,7 @@ public class PlayerActionUtils {
         setData(entity, data);
     }
 
-    public static String getCurrentAction(LivingEntity entity) {
+    public static String getCurrentActionId(LivingEntity entity) {
         return getData(entity).getCurrentAction();
     }
 
@@ -44,11 +46,12 @@ public class PlayerActionUtils {
     public static void setPartner(LivingEntity entity, @Nullable UUID partnerUUID) {
         PlayerActionCapability data = getData(entity);
         data.setPartnerUUID(partnerUUID);
+
         setData(entity, data);
     }
 
     @Nullable
-    public static UUID getPartnerUUID(LivingEntity entity) {
+    public static UUID getActionPartnerUUID(LivingEntity entity) {
         return getData(entity).getPartnerUUID();
     }
 
@@ -78,7 +81,21 @@ public class PlayerActionUtils {
      * 判定实体当前是否处于任何动作中
      */
     public static boolean isDoingAction(LivingEntity entity) {
-        return !getCurrentAction(entity).equals("NONE");
+        return !getCurrentActionId(entity).equals("NONE");
+    }
+
+    /**
+     * 获取指定实体当前正在执行的 BaseAction 实例
+     * @param entity 目标实体
+     * @return 对应的 BaseAction，如果没在执行动作或动作不存在则返回 null
+     */
+    @Nullable
+    public static BaseAction getCurrentAction(LivingEntity entity) {
+        String actionId = getCurrentActionId(entity);
+        if (actionId == null || actionId.equals("NONE")) {
+            return null;
+        }
+        return ActionManager.get(actionId);
     }
 
     /**

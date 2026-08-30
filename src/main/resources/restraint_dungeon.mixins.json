@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MixinEntity",
-    "MixinSendChatMessage"
+    "MixinSendChatMessage",
+    "client.EntityPoseLockMixin",
+    "client.LivingEntityHeadTurnMixin"
   ],
   "client": [
     "client.EntityRendererMixin",

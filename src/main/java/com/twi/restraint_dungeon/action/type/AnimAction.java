@@ -86,12 +86,15 @@ public abstract class AnimAction extends BaseAction {
         return true;
     }
 
+    private float initialYaw;
+    private float initialPitch;
+
     @Override
-    public void onStart(ServerPlayer actionPlayer, LivingEntity target,HitResult hitResult) {
+    public void onStart(ServerPlayer actionPlayer, LivingEntity target, HitResult hitResult) {
+        this.initialYaw = actionPlayer.getYRot();
+        this.initialPitch = actionPlayer.getXRot();
 
-        float yaw = actionPlayer.getYRot();
-        float radians = (float) Math.toRadians(yaw);
-
+        float radians = (float) Math.toRadians(initialYaw);
         double offsetX = -Math.sin(radians) * 1.0F;
         double offsetZ = Math.cos(radians) * 1.0F;
 
@@ -99,27 +102,27 @@ public abstract class AnimAction extends BaseAction {
         double targetY = actionPlayer.getY();
         double targetZ = actionPlayer.getZ() + offsetZ;
 
-        actionPlayer.setYRot(yaw);
-        actionPlayer.setYBodyRot(yaw);
-        actionPlayer.setYHeadRot(yaw);
-        actionPlayer.connection.teleport(actionPlayer.getX(), actionPlayer.getY(), actionPlayer.getZ(), yaw, actionPlayer.getXRot());
+        actionPlayer.setYRot(initialYaw);
+        actionPlayer.setXRot(initialPitch);
+        actionPlayer.setYBodyRot(initialYaw);
+        actionPlayer.setYHeadRot(initialYaw);
+        actionPlayer.connection.teleport(actionPlayer.getX(), actionPlayer.getY(), actionPlayer.getZ(), initialYaw, initialPitch);
 
-        target.setYRot(yaw);
-        target.setYBodyRot(yaw);
-        target.setYHeadRot(yaw);
+        target.setYRot(initialYaw);
+        target.setXRot(initialPitch);
+        target.setYBodyRot(initialYaw);
+        target.setYHeadRot(initialYaw);
 
         if (target instanceof ServerPlayer targetPlayer) {
-            targetPlayer.connection.teleport(targetX, targetY, targetZ, yaw, target.getXRot());
+            targetPlayer.connection.teleport(targetX, targetY, targetZ, initialYaw, initialPitch);
         } else {
-            target.moveTo(targetX, targetY, targetZ, yaw, target.getXRot());
+            target.moveTo(targetX, targetY, targetZ, initialYaw, initialPitch);
         }
     }
 
     @Override
-    public void onTick(ServerPlayer actionPlayer, LivingEntity target,HitResult result, int ticksRemaining) {
-        float syncYaw = actionPlayer.getYRot();
-        float radians = (float) Math.toRadians(syncYaw);
-
+    public void onTick(ServerPlayer actionPlayer, LivingEntity target, HitResult result, int ticksRemaining) {
+        float radians = (float) Math.toRadians(initialYaw);
         double offsetX = -Math.sin(radians) * 1.0F;
         double offsetZ = Math.cos(radians) * 1.0F;
 
@@ -127,18 +130,21 @@ public abstract class AnimAction extends BaseAction {
         double targetY = actionPlayer.getY();
         double targetZ = actionPlayer.getZ() + offsetZ;
 
-        actionPlayer.setYBodyRot(syncYaw);
-        actionPlayer.setYHeadRot(syncYaw);
+        actionPlayer.setYRot(initialYaw);
+        actionPlayer.setXRot(initialPitch);
+        actionPlayer.setYBodyRot(initialYaw);
+        actionPlayer.setYHeadRot(initialYaw);
 
-        target.setYRot(syncYaw);
-        target.setYBodyRot(syncYaw);
-        target.setYHeadRot(syncYaw);
+        target.setYRot(initialYaw);
+        target.setXRot(initialPitch);
+        target.setYBodyRot(initialYaw);
+        target.setYHeadRot(initialYaw);
 
-        if (target instanceof ServerPlayer targetPlayer) {
-            targetPlayer.connection.teleport(targetX, targetY, targetZ, syncYaw, targetPlayer.getXRot());
-        } else {
-            target.moveTo(targetX, targetY, targetZ, syncYaw, target.getXRot());
-        }
+//        if (target instanceof ServerPlayer targetPlayer) {
+//            targetPlayer.connection.teleport(targetX, targetY, targetZ, initialYaw, initialPitch);
+//        } else {
+//            target.moveTo(targetX, targetY, targetZ, initialYaw, initialPitch);
+//        }
     }
 
     @Override

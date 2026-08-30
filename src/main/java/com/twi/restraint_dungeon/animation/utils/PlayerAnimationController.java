@@ -111,8 +111,7 @@ public class PlayerAnimationController {
 
     public static String getPlayerConnectionBodyTransitionAnimation(ServerPlayer player,RestraintItem ri){
         if(ri.getConnectBindTranslateAnimation(player) != null){
-//            return ri.getConnectBindTranslateAnimation(player) + "_body";
-            return ri.getConnectBindTranslateAnimation(player);
+            return ri.getConnectBindTranslateAnimation(player) + "_body";
         }
         return null;
 
@@ -271,7 +270,7 @@ public class PlayerAnimationController {
                 return null;
             }
         }else{
-            if((isBeenBindArms(player) || part == PlayerRestraintPart.restraint_legs_bind) && part != PlayerRestraintPart.restraint_connection){
+            if(isBeenBindArms(player) || part == PlayerRestraintPart.restraint_legs_bind){
                 if(position == RestraintPosition.CARRIED){
                     CarryType type = getCurrentCarryType(player);
                     if (type != null && isBeingCarried(player)) {
@@ -342,6 +341,8 @@ public class PlayerAnimationController {
     public static String  getActionFullBodyAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
 
         if(player == null || action == null || action.getActionId().equals("NONE")) return null;
+
+        if(!action.shouldAnim()) return null;
 
         if(action instanceof AnimAction animAction){
             if(isTarget){
@@ -417,4 +418,81 @@ public class PlayerAnimationController {
         return null;
     }
 
+    public static String getInfiniteActionStartAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+
+        if(player == null || action == null || action.getActionId().equals("NONE")) return null;
+
+        if(!action.shouldAnim()) return null;
+
+        if(action instanceof AnimAction animAction){
+            if(isTarget){
+                return "action_anim_start_" + animAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_anim_start_" + animAction.getActionId().toLowerCase() + "_action";
+            }
+        }else if(action instanceof CarryingAction carryingAction){
+            CarryType type = getCurrentCarryType(player);
+            if(type == null || type.getID().equals("NONE")) return null;
+
+            if(isTarget){
+                return "action_" + type.getID().toLowerCase() + "_start_" + carryingAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_" + type.getID().toLowerCase() + "_start_" + carryingAction.getActionId().toLowerCase() + "_action";
+            }
+        }
+
+        return null;
+    }
+
+    public static String getInfiniteActionAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+
+        if(player == null || action == null || action.getActionId().equals("NONE")) return null;
+
+        if(!action.shouldAnim()) return null;
+
+        if(action instanceof AnimAction animAction){
+            if(isTarget){
+                return "action_anim_" + animAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_anim_" + animAction.getActionId().toLowerCase() + "_action";
+            }
+        }else if(action instanceof CarryingAction carryingAction){
+            CarryType type = getCurrentCarryType(player);
+            if(type == null || type.getID().equals("NONE")) return null;
+
+            if(isTarget){
+                return "action_" + type.getID().toLowerCase() + "_" + carryingAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_" + type.getID().toLowerCase() + "_" + carryingAction.getActionId().toLowerCase() + "_action";
+            }
+        }
+
+        return null;
+    }
+
+    public static String getActionStopAnimation(ServerPlayer player, BaseAction action, HitResult hitResult,boolean isTarget){
+
+        if(player == null || action == null || action.getActionId().equals("NONE")) return null;
+
+        if(!action.shouldAnim()) return null;
+
+        if(action instanceof AnimAction animAction){
+            if(isTarget){
+                return "action_anim_stop_" + animAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_anim_stop_" + animAction.getActionId().toLowerCase() + "_action";
+            }
+        }else if(action instanceof CarryingAction carryingAction){
+            CarryType type = getCurrentCarryType(player);
+            if(type == null || type.getID().equals("NONE")) return null;
+
+            if(isTarget){
+                return "action_" + type.getID().toLowerCase() + "_stop_" + carryingAction.getActionId().toLowerCase() + "_target";
+            }else{
+                return "action_" + type.getID().toLowerCase() + "_stop_" + carryingAction.getActionId().toLowerCase() + "_action";
+            }
+        }
+
+        return null;
+    }
 }

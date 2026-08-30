@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
@@ -68,6 +69,16 @@ public abstract class CarryType {
     /** 获取乘客玩家第一人称相机位置的旋转 */
     public Vector3f getPassengerFirstPersonCameraRotation(Player carrier, LivingEntity passenger) {
         return new Vector3f(0.0f,0.0f,0.0f);
+    }
+
+    /** 获取动作玩家的碰撞箱大小 */
+    public List<Float> getCarrierEntityDimensions(Player carrier, LivingEntity passenger) {
+        return List.of(0.6F,1.8F);
+    }
+
+    /** 获取目标玩家的碰撞箱大小 */
+    public List<Float> getPassengerEntityDimensions(Player carrier, LivingEntity passenger) {
+        return List.of(0.6F,1.8F);
     }
 
 

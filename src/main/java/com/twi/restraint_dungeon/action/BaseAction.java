@@ -17,11 +17,27 @@ import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils
 
 public abstract class BaseAction {
 
+
     /** 唯一的 Action ID */
     public abstract String getActionId();
 
     /** 动画/持续时间（Tick） */
     public abstract int getAnimTicks();
+
+    /** 该动作是否需要播放动画 */
+    public boolean shouldAnim() {
+        return true;
+    }
+
+    /** 该动作播放的动画是否应该面对玩家（默认是背对目标玩家的，如果你的动画目标玩家需要转过身去，请将其重写为True,否则动画会出现怪异的旋转) */
+    public boolean shouldAnimFaceActor() {
+        return false;
+    }
+
+    /** 该动画是否持续播放 */
+    public boolean isInfinite() {
+        return false;
+    }
 
     /** 最大交互距离 */
     public double getMaxDistance() { return 2.0; }

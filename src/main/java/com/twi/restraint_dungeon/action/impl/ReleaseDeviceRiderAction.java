@@ -35,6 +35,11 @@ public class ReleaseDeviceRiderAction extends AnimAction {
     }
 
     @Override
+    public boolean shouldAnim() {
+        return false;
+    }
+
+    @Override
     public double getMaxDistance() {
         return 4.0;
     }

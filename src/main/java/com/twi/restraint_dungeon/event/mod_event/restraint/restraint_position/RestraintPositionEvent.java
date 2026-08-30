@@ -63,12 +63,12 @@ public class RestraintPositionEvent {
 
     // --- 姿势偏移量常量 ---
     private static final Vector3f STANDING_OFFSET = new Vector3f(0.0f, 0.0f, 0.0f);
-    private static final Vector3f KNEELING_OFFSET = new Vector3f(0.0f, -0.45f, 0.0f);
-    private static final Vector3f SITTING_OFFSET = new Vector3f(0.0f, -0.65f, 0.0f);
-    private static final Vector3f LYING_UP_OFFSET = new Vector3f(0.0f, -1.25f, -0.85f);
-    private static final Vector3f LYING_LEFT_OFFSET = new Vector3f(-0.25f, -1.35f, -0.9f);
-    private static final Vector3f LYING_RIGHT_OFFSET = new Vector3f(0.25f, -1.35f, -0.9f);
-    private static final Vector3f LYING_DOWN_OFFSET = new Vector3f(0.0f, -1.3f, -1.0f);
+    private static final Vector3f KNEELING_OFFSET = new Vector3f(0.0f, -0.05f, 0.0f);
+    private static final Vector3f SITTING_OFFSET = new Vector3f(0.0f, -0.05f, 0.0f);
+    private static final Vector3f LYING_UP_OFFSET = new Vector3f(0.0f, -0.05f, -0.85f);
+    private static final Vector3f LYING_LEFT_OFFSET = new Vector3f(-0.25f, -0.15f, -0.9f);
+    private static final Vector3f LYING_RIGHT_OFFSET = new Vector3f(0.25f, -0.15f, -0.9f);
+    private static final Vector3f LYING_DOWN_OFFSET = new Vector3f(0.0f, -0.2f, -1.0f);
 
 
     // --- 姿势旋转量常量 ---

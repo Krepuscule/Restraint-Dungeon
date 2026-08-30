@@ -10,6 +10,8 @@ public class ModActions {
         ActionManager.register(new MountDeviceAction());
         ActionManager.register(new DismountDeviceAction());
         ActionManager.register(new ReleaseDeviceRiderAction());
+        ActionManager.register(new TouchAction());
+        ActionManager.register(new StrokeAction());
 
         ActionManager.register(new HugAction());
         ActionManager.register(new ShoulderAction());
@@ -18,5 +20,7 @@ public class ModActions {
         ActionManager.register(new ReleaseAction());
         ActionManager.register(new FeedAction());
         ActionManager.register(new SlapAction());
+
+        ActionManager.register(new StopAction());
     }
 }

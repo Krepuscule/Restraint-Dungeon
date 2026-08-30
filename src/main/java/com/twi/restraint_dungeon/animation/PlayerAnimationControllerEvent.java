@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.animation;
 
 import com.twi.restraint_dungeon.action.BaseAction;
+import com.twi.restraint_dungeon.action.impl.StopAction;
 import com.twi.restraint_dungeon.action.type.AnimAction;
 import com.twi.restraint_dungeon.action.type.CarryAction;
 import com.twi.restraint_dungeon.action.type.CarryingAction;
@@ -16,31 +17,31 @@ import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_move.Player
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.network.payload.player_animator.PlayerAnimationSequencePayload;
-import com.twi.restraint_dungeon.utils.restraint_stack.RestraintStackUtils;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.animation.utils.AnimationPlayerUtils.*;
-import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.getCarriedPassenger;
-import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isTargetFlag;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getActionPartnerUUID;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.getFirstConnectBind;
 import static com.twi.restraint_dungeon.utils.mod_utils.struggle.StruggleUtils.getPlayerStrugglingItem;
@@ -285,36 +286,131 @@ public class PlayerAnimationControllerEvent {
     }
 
     @SubscribeEvent
-    public static void onPlayerActionStart(PlayerActionEvent.Start event){
+    public static void onPlayerActionBefore(PlayerActionEvent.Before event){
         Player player = event.getEntity();
         BaseAction action = event.getAction();
         HitResult hitResult = event.getHitResult();
 
         if(action == null || !(player instanceof ServerPlayer serverPlayer) || player.level().isClientSide) return;
 
+        if(!(action instanceof StopAction)) return;
+
         LivingEntity target = null;
-
-        if(action instanceof AnimAction){
-
-            if(hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living){
-                target = living;
-            }
-
-        }else if(action instanceof CarryAction){
-
-            if(hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living){
-                target = living;
-            }
+        BaseAction current = getCurrentAction(player);
 
 
-        }else if(action instanceof CarryingAction){
+        if(isCarrier(player)){
             target = getCarriedPassenger(player);
+        }else if(isBeingCarried(player)){
+            target = getCarrier(player);
+        }else if (!player.level().isClientSide && player.level() instanceof ServerLevel serverLevel && getActionPartnerUUID(player) != null) {
+            Entity foundLocal = serverLevel.getEntity(Objects.requireNonNull(getActionPartnerUUID(player)));
+            if (foundLocal instanceof LivingEntity living) {
+                target = living;
+            }
+            ServerPlayer foundPlayer = serverLevel.getServer().getPlayerList().getPlayer(Objects.requireNonNull(getActionPartnerUUID(player)));
+            if (foundPlayer != null) {
+                target = foundPlayer;
+            }
 
+            for (ServerLevel otherLevel : serverLevel.getServer().getAllLevels()) {
+                if (otherLevel == serverLevel) continue;
+                Entity foundOther = otherLevel.getEntity(Objects.requireNonNull(getActionPartnerUUID(player)));
+                if (foundOther instanceof LivingEntity living) {
+                    target = living;
+                }
+            }
         }
 
-        updateActionAnimation(serverPlayer,action,hitResult,false);
-        if(target instanceof ServerPlayer targetPlayer){
-            updateActionAnimation(targetPlayer,action,hitResult,true);
+        if(target != null){
+            stopInfiniteActionAnimation(serverPlayer,action,hitResult,false);
+            if(target instanceof ServerPlayer targetPlayer){
+                stopInfiniteActionAnimation(targetPlayer,action,hitResult,true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerActionStart(PlayerActionEvent.Start event){
+        Player player = event.getEntity();
+        BaseAction action = event.getAction();
+        HitResult hitResult = event.getHitResult();
+
+        if(action == null || !(player instanceof ServerPlayer serverPlayer) || player.level().isClientSide) return;
+        if(action instanceof StopAction) return;;
+
+        LivingEntity target = null;
+
+        if(action.isInfinite()){
+            if(action instanceof AnimAction){
+
+                if(hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living){
+                    target = living;
+                }
+
+            }else if(action instanceof CarryingAction){
+                target = getCarriedPassenger(player);
+
+            }
+
+            if(target != null){
+                updateInfiniteActionAnimation(serverPlayer,action,hitResult,false);
+                if(target instanceof ServerPlayer targetPlayer){
+                    updateInfiniteActionAnimation(targetPlayer,action,hitResult,true);
+                }
+            }
+
+        }else{
+            if(action instanceof AnimAction){
+
+                if(hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living){
+                    target = living;
+                }
+
+            }else if(action instanceof CarryAction){
+
+                if(hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living){
+                    target = living;
+                }
+
+
+            }else if(action instanceof CarryingAction){
+                target = getCarriedPassenger(player);
+
+            }
+
+            if(target != null){
+                updateActionAnimation(serverPlayer,action,hitResult,false);
+                if(target instanceof ServerPlayer targetPlayer){
+                    updateActionAnimation(targetPlayer,action,hitResult,true);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerActionAbort(PlayerActionEvent.Abort event){
+        Player player = event.getEntity();
+        LivingEntity entity = event.getTargetEntity();
+
+        if(player instanceof ServerPlayer serverPlayer){
+            RestraintPosition position = getRestraintPosition(serverPlayer);
+            clearFullBodyAnimation(serverPlayer);
+            if(position == RestraintPosition.CARRIED){
+                updateCarryingAnimation(serverPlayer,isTargetFlag(serverPlayer));
+            }else{
+                updateRestraintAnimation(serverPlayer);
+            }
+        }
+
+        if(entity instanceof ServerPlayer serverPlayer_target){
+            RestraintPosition position_target = getRestraintPosition(serverPlayer_target);
+            clearFullBodyAnimation(serverPlayer_target);
+            if(position_target == RestraintPosition.CARRIED){
+                updateCarryingAnimation(serverPlayer_target,isTargetFlag(serverPlayer_target));
+            }else{
+                updateRestraintAnimation(serverPlayer_target);
+            }
         }
     }
 

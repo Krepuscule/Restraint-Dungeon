@@ -49,6 +49,11 @@ public class ReleaseAction extends CarryingAction {
     }
 
     @Override
+    public boolean shouldAnim() {
+        return false;
+    }
+
+    @Override
     public double getMaxDistance() {
         return 3.0;
     }

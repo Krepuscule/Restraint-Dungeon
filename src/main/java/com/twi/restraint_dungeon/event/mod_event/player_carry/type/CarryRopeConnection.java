@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
+import java.util.List;
+
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.getRestraintPosition;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintCapabilityUtils.updateRestraintPosition;
@@ -58,16 +60,21 @@ public class CarryRopeConnection extends CarryType {
         if(passenger instanceof BaseNPCEntity){
             return new Vec3(-0.5F,0.25F,-0.15F);
         }
-        return new Vec3(-0.5F, 0.9F, -0.15F);
+        return new Vec3(-0.5F, 0.4F, -0.15F);
     }
 
     @Override
     public Vector3f getPassengerFirstPersonCameraOffset(Player carrier, LivingEntity passenger){
-        return new Vector3f(0.4f,-1.0f,-1.2f);
+        return new Vector3f(0.4f,-0.2f,-1.2f);
     }
 
     public Vector3f getPassengerFirstPersonCameraRotation(Player carrier, LivingEntity passenger) {
         return new Vector3f(0.0f,180.0f,0.0f);
+    }
+
+    @Override
+    public List<Float> getPassengerEntityDimensions(Player carrier, LivingEntity passenger) {
+        return List.of(1.25F,0.5F);
     }
 
     @Override

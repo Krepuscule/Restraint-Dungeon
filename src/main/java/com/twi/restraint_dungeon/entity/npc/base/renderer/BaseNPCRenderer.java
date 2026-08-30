@@ -24,6 +24,7 @@ public class BaseNPCRenderer extends GeoEntityRenderer<BaseNPCEntity> {
         super(renderManager, new BaseNPCModel());
 
         this.addRenderLayer(new GeoRestraintTextureLayer(this));
+        this.addRenderLayer(new GeoRestraintToolTextureLayer(this));
 
 
         this.addRenderLayer(new BlockAndItemGeoLayer<BaseNPCEntity>(this) {

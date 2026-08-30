@@ -149,12 +149,24 @@ public class K9CorsetItem extends RestraintItem {
 
     @Override
     public Vector3f getConnectBindViewOffset(Player player, ItemStack stack){
-        return new Vector3f(0.0f, -1.3f, -1.0f);
+        return new Vector3f(0.0f, -0.15f, -1.0f);
     }
 
     @Override
     public Vector3f getConnectBindViewRotation(Player player, ItemStack stack){
         return new Vector3f(0.0f, 180.0f, 0.0f);
+    }
+
+    @Override
+    public List<Float> getConnectBindEntityDimensions(LivingEntity entity, ItemStack stack){
+
+        return List.of(1.25F,0.6F);
+    }
+
+    @Override
+    public List<Double> getConnectBindLeashOffset(LivingEntity entity, ItemStack stack){
+
+        return List.of(0.0D, -0.3D, -1.2D);
     }
 
     @Override

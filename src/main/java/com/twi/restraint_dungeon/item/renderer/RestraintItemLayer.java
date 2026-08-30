@@ -53,7 +53,6 @@ public class RestraintItemLayer<T extends LivingEntity, M extends HumanoidModel<
                 ItemStack stack = list.get(index);
                 if (stack.getItem() instanceof RestraintItem item) {
 
-
                     int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
 
                     item.applyRestraintVisibility(innerModel, parentModel,null,stack,part,index, entity);

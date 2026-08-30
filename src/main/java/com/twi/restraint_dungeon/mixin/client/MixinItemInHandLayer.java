@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentActionId;
 import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
 import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.isCarrier;
 import static com.twi.restraint_dungeon.utils.mod_utils.restraint.RestraintUtils.isBeenBindArms;
@@ -33,7 +33,7 @@ public class MixinItemInHandLayer {
 
         if(isDoingAction(entity)){
             if(entity instanceof Player player) {
-                BaseAction action = ActionManager.get(getCurrentAction(player));
+                BaseAction action = ActionManager.get(getCurrentActionId(player));
                 if(action != null  && !action.renderMainHandItem(player)) {
                     ci.cancel();
                 }

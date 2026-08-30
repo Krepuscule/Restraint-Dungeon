@@ -1,6 +1,7 @@
 package com.twi.restraint_dungeon.action.utils;
 
 import com.twi.restraint_dungeon.action.BaseAction;
+import com.twi.restraint_dungeon.action.type.AnimAction;
 import com.twi.restraint_dungeon.event.custom_event.PlayerActionEvent;
 import com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils;
 import net.minecraft.server.MinecraftServer;
@@ -38,9 +39,16 @@ public class ActionTask {
 
 
 
+    public BaseAction getAction() { return action; }
+
+    public void forceAbortNow(MinecraftServer server) {
+        ServerPlayer actionPlayer = server.getPlayerList().getPlayer(carrierUUID);
+        LivingEntity target = targetUUID != null ? getTarget(server, targetUUID) : null;
+        handleAbort(actionPlayer, target);
+    }
+
     public boolean tick(MinecraftServer server) {
         ServerPlayer actionPlayer = server.getPlayerList().getPlayer(carrierUUID);
-
         LivingEntity target = targetUUID != null ? getTarget(server, targetUUID) : null;
 
         boolean isTargetInvalid = targetUUID != null && (target == null || !target.isAlive());
@@ -54,18 +62,22 @@ public class ActionTask {
             return true;
         }
 
-        action.onTick(actionPlayer, target,hitResult, remaining);
+        action.onTick(actionPlayer, target, hitResult, remaining);
 
-        if (--remaining <= 0) {
-            action.onFinish(actionPlayer, target,hitResult);
-            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Finish(actionPlayer, action, target));
+        if (!action.isInfinite()) {
+            if (--remaining <= 0) {
+                action.onFinish(actionPlayer, target, hitResult);
+                NeoForge.EVENT_BUS.post(new PlayerActionEvent.Finish(actionPlayer, action, target));
 
-            if (target != null) {
-                PlayerActionUtils.unlinkAction(actionPlayer, target);
-            } else {
-                PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
+                if (target != null) {
+                    PlayerActionUtils.unlinkAction(actionPlayer, target);
+                } else {
+                    PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
+                }
+                return true;
             }
-            return true;
+        } else {
+            remaining--;
         }
 
         return false;
@@ -73,15 +85,19 @@ public class ActionTask {
 
 
     private void handleAbort(ServerPlayer actionPlayer, @Nullable LivingEntity target) {
-        if (actionPlayer != null) {
-            action.onAbort(actionPlayer, target,hitResult);
-            NeoForge.EVENT_BUS.post(new PlayerActionEvent.Abort(actionPlayer, action, target));
 
-            if (target != null) {
+        action.onAbort(actionPlayer, target, hitResult);
+        NeoForge.EVENT_BUS.post(new PlayerActionEvent.Abort(actionPlayer, action, target));
+
+        if (target != null) {
+            if (actionPlayer != null) {
                 PlayerActionUtils.unlinkAction(actionPlayer, target);
             } else {
-                PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
+                PlayerActionUtils.resetSingleAction(target,action.getActionId());
             }
+        }
+        else if (actionPlayer != null) {
+            PlayerActionUtils.resetSingleAction(actionPlayer, action.getActionId());
         }
     }
 

@@ -7,6 +7,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +38,7 @@ public record PlayerStruggleModePayload(String modeName) implements CustomPacket
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             var player = context.player();
+            if(!(player instanceof ServerPlayer serverPlayer)) return;
             if(!modeName.equals(StruggleMode.NONE.name()) && canBeStruggle(player) != null){
                 player.displayClientMessage(Objects.requireNonNull(canBeStruggle(player)),true);
                 return;
@@ -43,6 +46,9 @@ public record PlayerStruggleModePayload(String modeName) implements CustomPacket
             try {
                 StruggleMode mode = StruggleMode.valueOf(this.modeName());
                 updateStruggleMode(player, mode);
+                if(!modeName.equals(StruggleMode.NONE.name())){
+                    PacketDistributor.sendToPlayer(serverPlayer,new ActivateStrugglePayload());
+                }
 
             } catch (IllegalArgumentException e) {
                 RestraintDungeon.LOGGER.error("Received invalid struggle mode from player {}: {}",

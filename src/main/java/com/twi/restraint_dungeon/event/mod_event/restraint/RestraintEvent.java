@@ -8,11 +8,14 @@ import com.twi.restraint_dungeon.client.gui.RestraintInfoMenu;
 import com.twi.restraint_dungeon.client.hud.struggle_hud.StruggleHUDManager;
 import com.twi.restraint_dungeon.client.keybind.ModKeyBinds;
 import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
+import com.twi.restraint_dungeon.event.custom_event.RestraintEquipEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintPositionChangeEvent;
 import com.twi.restraint_dungeon.event.custom_event.RestraintUpdateEvent;
+import com.twi.restraint_dungeon.event.mod_event.player_carry.CarryType;
 import com.twi.restraint_dungeon.event.mod_event.restraint.restraint_position.RestraintPositionEvent.RestraintPosition;
 import com.twi.restraint_dungeon.event.system_handler_event.LivingEntityServerTaskScheduler;
 import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
+import com.twi.restraint_dungeon.network.payload.player_restraint.PositionClientRefreshPayload;
 import com.twi.restraint_dungeon.network.payload.player_struggle.InterruptStrugglePayload;
 import com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils;
 import com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils;
@@ -25,7 +28,11 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.player.Player;
@@ -43,6 +50,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
+import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
@@ -56,7 +64,8 @@ import java.util.List;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
 import static com.twi.restraint_dungeon.utils.block_utils.RestraintDeviceUtils.*;
-import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.clearCarryData;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.isDoingAction;
+import static com.twi.restraint_dungeon.utils.mod_utils.carry.PlayerCarryUtils.*;
 import static com.twi.restraint_dungeon.utils.mod_utils.kidnap.KidnapUtils.clearKidnapData;
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.ThrillUtils.calPlayerThrillLevel;
 import static com.twi.restraint_dungeon.utils.mod_utils.pleasant.ThrillUtils.updateThrillLevel;
@@ -150,6 +159,7 @@ public class RestraintEvent {
                         player
                 )
         );
+
     }
 
     /**
@@ -220,7 +230,7 @@ public class RestraintEvent {
     @SubscribeEvent
     public static void onRenderHand(RenderHandEvent event) {
         Player player = Minecraft.getInstance().player;
-        if (isBeenBindArms(player)) {
+        if (isBeenBindArms(player) || isDoingAction(player)) {
             event.setCanceled(true);
         }
     }
@@ -234,7 +244,7 @@ public class RestraintEvent {
         ItemStack collarStack = getFirstCollar(player);
 
         if (!collarStack.isEmpty() && collarStack.getItem() instanceof RestraintItem restraintItem) {
-            MutableComponent finalName = restraintItem.getAdditionCollarName(player, collarStack);
+            MutableComponent finalName = restraintItem.getAdditionCollarName(player, collarStack, event.getDisplayname());
             event.setDisplayname(finalName);
         }
     }
@@ -246,12 +256,7 @@ public class RestraintEvent {
     @SubscribeEvent
     public static void onRenderNameTag(RenderNameTagEvent event) {
         if (event.getEntity() instanceof Player player) {
-            ItemStack collarStack = getFirstCollar(player);
-
-            if (!collarStack.isEmpty() && collarStack.getItem() instanceof RestraintItem restraintItem) {
-                MutableComponent finalName = restraintItem.getAdditionCollarNameTag(player, collarStack);
-                event.setContent(finalName);
-            }
+            player.refreshDisplayName();
         }
     }
 
@@ -360,6 +365,10 @@ public class RestraintEvent {
             clearRestraintAttachments(player);
             var cap = player.getData(ModAttachments.RESTRAINT_STACK);
             player.setData(ModAttachments.RESTRAINT_STACK, cap);
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(
+                    player,
+                    new PositionClientRefreshPayload(player.getId())
+            );
         }
     }
 
@@ -395,6 +404,7 @@ public class RestraintEvent {
                 updateRestraintPosition(newPlayer,RestraintPosition.CONNECTING);
             }
         } else {
+
         }
     }
 
@@ -414,17 +424,87 @@ public class RestraintEvent {
         }
     }
 
-    //TODO: 玩家碰撞箱修改
-//    @SubscribeEvent
-//    public static void onPlayerSize(EntityEvent.Size event) {
-//        if (event.getEntity() instanceof Player player) {
-//
-//            if (isCarrier(player)) {
-//                event.setNewSize(EntityDimensions.scalable(1.2F, 1.8F));
-//            }
-//
-//        }
-//    }
+    @SubscribeEvent
+    public static void onStartTrack(PlayerEvent.StartTracking event){
+        Player player = event.getEntity();
+        Entity target = event.getTarget();
+        if(target instanceof LivingEntity living){
+            if(getRestraintPosition(living) != RestraintPosition.STANDING){
+                PacketDistributor.sendToPlayer(
+                        (ServerPlayer) player,
+                        new PositionClientRefreshPayload(living.getId())
+                );
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntitySize(EntityEvent.Size event) {
+        if (event.getEntity() instanceof Player player) {
+
+            if (player instanceof ServerPlayer serverPlayer) {
+                if (serverPlayer.connection == null) {
+                    return;
+                }
+            }
+
+            RestraintPosition position = getRestraintPosition(player);
+
+            if(position == RestraintPosition.KNEELING){
+                event.setNewSize(EntityDimensions.scalable(0.6F, 1.5F));
+            }
+            else if(position == RestraintPosition.SITTING){
+                event.setNewSize(EntityDimensions.scalable(0.6F, 1.2F));
+            }
+            else if(position == RestraintPosition.LYING_UP){
+                event.setNewSize(EntityDimensions.scalable(1.25F, 0.5F));
+            }
+            else if(position == RestraintPosition.LYING_LEFT){
+                event.setNewSize(EntityDimensions.scalable(1.25F, 0.5F));
+            }
+            else if(position == RestraintPosition.LYING_RIGHT){
+                event.setNewSize(EntityDimensions.scalable(1.25F, 0.5F));
+            }
+            else if(position == RestraintPosition.LYING_DOWN){
+                event.setNewSize(EntityDimensions.scalable(1.25F, 0.5F));
+            }
+
+            else if(position == RestraintPosition.CONNECTING){
+                ItemStack stack = getFirstConnectBind(player);
+                if(stack.getItem() instanceof RestraintItem ri){
+                    List<Float> list = ri.getConnectBindEntityDimensions(player,stack);
+                    event.setNewSize(EntityDimensions.scalable(list.getFirst(),list.getLast()));
+                }
+            }
+            else if(position == RestraintPosition.CARRIED){
+                CarryType type = getCarryType(getCarryState(player));
+                if(isCarrier(player)){
+                    LivingEntity entity = getCarriedPassenger(player);
+                    List<Float> list = type.getCarrierEntityDimensions(player,entity);
+                    event.setNewSize(EntityDimensions.scalable(list.getFirst(),list.getLast()));
+                }else{
+                    Player carrier = getCarrier(player);
+                    List<Float> list = type.getPassengerEntityDimensions(carrier,player);
+                    event.setNewSize(EntityDimensions.scalable(list.getFirst(),list.getLast()));
+                }
+            }
+
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPositionChange(RestraintPositionChangeEvent.Post event){
+        LivingEntity entity = event.getEntity();
+
+        if (!entity.level().isClientSide()) {
+            entity.refreshDimensions();
+
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(
+                    entity,
+                    new PositionClientRefreshPayload(entity.getId())
+            );
+        }
+    }
 
     private static void clearRestraintAttachments(Player player) {
 

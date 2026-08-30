@@ -2,10 +2,14 @@ package com.twi.restraint_dungeon.item.restraint_tool;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.twi.restraint_dungeon.attachment.capability.common_capability.RestraintCapability;
+import com.twi.restraint_dungeon.entity.npc.base.BaseNPCEntity;
+import com.twi.restraint_dungeon.item.restraint_item.RestraintItem;
 import com.twi.restraint_dungeon.utils.restraint_stack.RestraintToolsUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -32,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
@@ -192,6 +197,42 @@ public class RestraintToolItem extends Item implements GeoItem {
 
                 return InteractionResult.SUCCESS;
             }
+        }else if(target instanceof BaseNPCEntity npc){
+            if (player.level().isClientSide()) {
+                return InteractionResult.sidedSuccess(true);
+            }
+
+            if (isToolsFull(npc)) {
+                player.displayClientMessage(
+                        Component.translatable("item." + MODID + ".restraint_tool.part_full").withStyle(ChatFormatting.DARK_RED),
+                        true
+                );
+                return InteractionResult.FAIL;
+            } else if (isMaxToolsEquip(target, stack, false)) {
+                player.displayClientMessage(
+                        Component.translatable("item." + MODID + ".restraint_tool.get_max_usage").withStyle(ChatFormatting.DARK_RED),
+                        true
+                );
+                return InteractionResult.FAIL;
+            } else {
+                ItemStack toolToEquip = stack.copyWithCount(1);
+
+                RestraintToolsUtils.addRestraintTool(npc, toolToEquip);
+
+                if (!player.isCreative()) {
+                    stack.shrink(1);
+                }
+
+                player.swing(hand, true);
+
+
+                player.displayClientMessage(
+                        Component.translatable("item." + MODID + ".restraint_tool.equip_success").withStyle(ChatFormatting.GREEN),
+                        true
+                );
+
+                return InteractionResult.SUCCESS;
+            }
         }
         return super.interactLivingEntity(stack, player, target, hand);
     }
@@ -226,50 +267,70 @@ public class RestraintToolItem extends Item implements GeoItem {
 
     }
 
+    public record restraintToolRenderData(
+            PoseStack stack,
+            RenderType renderType,
+            VertexConsumer baseBuffer,
+            int packedLight,
+            int packedOverlay
+    ){}
+
     /**
      * 小玩具渲染实现
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void renderRestraintToolLayer(
-            M innerModel, M parentModel, T player, int index, ItemStack stack,
-            PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> restraintToolRenderData renderRestraintToolLayer(T entity,  int index, ItemStack stack,
+                                                                                                                       PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
         boolean isSlim = false;
 
-        if(player instanceof AbstractClientPlayer clientPlayer){
+        if(entity instanceof AbstractClientPlayer clientPlayer){
             isSlim = clientPlayer.getSkin().model() == PlayerSkin.Model.SLIM;
+        }else if (entity instanceof BaseNPCEntity npc) {
+            isSlim = npc.isSlimModel();
         }
 
-        this.applyToolsVisibility(innerModel, parentModel, player);
-
-        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
-
-        ResourceLocation texture = this.getTextureResourceLocation(player, stack,index,isSlim);
-        VertexConsumer baseBuffer = bufferSource.getBuffer(RenderType.armorCutoutNoCull(texture));
+        ResourceLocation texture = this.getTextureResourceLocation(entity,stack,index,isSlim);
+        RenderType type = RenderType.armorCutoutNoCull(texture);
+        VertexConsumer baseBuffer = bufferSource.getBuffer(type);
 
 
-        innerModel.renderToBuffer(poseStack, baseBuffer, packedLight, overlay);
+        return new restraintToolRenderData(poseStack,type,baseBuffer,packedLight,packedOverlay);
     }
 
     /**
      * 控制具体的模型部位渲染
      * 子类可以重写此方法来实现特殊的渲染需求
      */
-    @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void applyToolsVisibility(
-            M child, M parent,  T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void applyToolsVisibility(
+            M child, M parent, BakedGeoModel geoModel, ItemStack stack, int index, T entity) {
 
-        child.setAllVisible(false);
-        child.head.visible = true;
-        child.body.visible = true;
-        child.leftArm.visible = true;
-        child.rightArm.visible = true;
-        child.leftLeg.visible = true;
-        child.rightLeg.visible = true;
+        if(child == null && parent == null && geoModel != null){
+            geoModel.getBone("head").get().setHidden(false);
+            geoModel.getBone("torso").get().setHidden(false);
+            geoModel.getBone("left_arm").get().setHidden(false);
+            geoModel.getBone("right_arm").get().setHidden(false);
+            geoModel.getBone("left_leg").get().setHidden(false);
+            geoModel.getBone("right_leg").get().setHidden(false);
+
+            if (shouldRenderSecondLayer(child, parent,geoModel,entity)) {
+                setSecondLayerVisibility(child, parent,geoModel,entity);
+            }
+        }else if (child != null && parent != null && geoModel == null){
+            child.setAllVisible(false);
 
 
-        if (shouldRenderSencondLayer(child, parent, player)) {
-            setSecondLayerVisibility(child, parent, player);
+            child.head.visible = parent.head.visible;
+            child.body.visible = parent.body.visible;
+            child.leftArm.visible = parent.leftArm.visible;
+            child.rightArm.visible = parent.rightArm.visible;
+            child.leftLeg.visible = parent.leftLeg.visible;
+            child.rightLeg.visible = parent.rightLeg.visible;
+
+
+            if (shouldRenderSecondLayer(child, parent,geoModel, entity)) {
+                setSecondLayerVisibility(child, parent,geoModel, entity);
+            }
         }
     }
 
@@ -277,7 +338,8 @@ public class RestraintToolItem extends Item implements GeoItem {
      * 总体控制开关，判断其是否应该渲染二层皮肤部分
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> boolean shouldRenderSencondLayer(M child, M parent,  T player){
+    public <T extends LivingEntity, M extends HumanoidModel<T>> boolean shouldRenderSecondLayer(
+            M child, M parent, BakedGeoModel geoModel, T entity) {
         return false;
     }
 
@@ -286,23 +348,51 @@ public class RestraintToolItem extends Item implements GeoItem {
      * 子类可以重写此方法来实现特殊的渲染需求
      */
     @OnlyIn(Dist.CLIENT)
-    public <T extends Player, M extends PlayerModel<T>> void setSecondLayerVisibility(
-            M child, M parent, T player) {
+    public <T extends LivingEntity, M extends HumanoidModel<T>> void setSecondLayerVisibility(
+            M child, M parent, BakedGeoModel geoModel,  T entity) {
 
-        // 同步二层皮肤的旋转与位置 (对齐骨骼)
-        child.jacket.copyFrom(parent.body);
-        child.leftSleeve.copyFrom(parent.leftArm);
-        child.rightSleeve.copyFrom(parent.rightArm);
-        child.leftPants.copyFrom(parent.leftLeg);
-        child.rightPants.copyFrom(parent.rightLeg);
+        if(child == null && parent == null && geoModel != null){
 
+            geoModel.getBone("headwear").get().setHidden(false);
+            geoModel.getBone("jacket").get().setHidden(false);
+            geoModel.getBone("left_arm_layer").get().setHidden(false);
+            geoModel.getBone("left_arm_bend_layer").get().setHidden(false);
+            geoModel.getBone("right_arm_layer").get().setHidden(false);
+            geoModel.getBone("right_arm_bend_layer").get().setHidden(false);
+            geoModel.getBone("left_leg_layer").get().setHidden(false);
+            geoModel.getBone("left_leg_bend_layer").get().setHidden(false);
+            geoModel.getBone("right_leg_layer").get().setHidden(false);
+            geoModel.getBone("right_leg_bend_layer").get().setHidden(false);
 
-        child.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
-        child.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
-        child.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-        child.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-        child.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
-        child.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+        } else if (child != null && parent != null && geoModel == null) {
+            if (child instanceof PlayerModel<?> playerChild && parent instanceof PlayerModel<?> playerParent) {
+
+                playerChild.jacket.copyFrom(playerParent.body);
+                playerChild.leftSleeve.copyFrom(playerParent.leftArm);
+                playerChild.rightSleeve.copyFrom(playerParent.rightArm);
+                playerChild.leftPants.copyFrom(playerParent.leftLeg);
+                playerChild.rightPants.copyFrom(playerParent.rightLeg);
+
+                if(entity instanceof Player player){
+
+                    playerChild.hat.visible = player.isModelPartShown(PlayerModelPart.HAT);
+                    playerChild.jacket.visible = player.isModelPartShown(PlayerModelPart.JACKET);
+                    playerChild.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
+                    playerChild.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+                    playerChild.leftPants.visible = player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
+                    playerChild.rightPants.visible = player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+
+                }else {
+                    playerChild.hat.visible = true;
+                    playerChild.jacket.visible = true;
+                    playerChild.leftSleeve.visible = true;
+                    playerChild.rightSleeve.visible = true;
+                    playerChild.leftPants.visible = true;
+                    playerChild.rightPants.visible = true;
+                }
+
+            }
+        }
 
     }
 }

@@ -178,8 +178,6 @@ public class PlayerStruggleModeSelectMenu extends Screen {
         ItemStack strugglingItem = getPlayerStrugglingItem(player);
         int itemIndex = getPlayerStrugglingItemIndex(player);
 
-        if(!(strugglingItem.getItem() instanceof RestraintItem)) return;
-
         if (entry.struggleMode == StruggleMode.RELEASE) {
             handleSelfReleaseMode(player, strugglingItem, currentPart, itemIndex);
         } else {
@@ -196,7 +194,6 @@ public class PlayerStruggleModeSelectMenu extends Screen {
     private void handleStruggleMode(MenuEntry entry,Player player, ItemStack stack, PlayerRestraintPart part, int index) {
 
        PacketDistributor.sendToServer(new PlayerStruggleModePayload(entry.struggleMode().name()));
-       StruggleHUDManager.activate(entry.struggleMode());
 
        this.onClose();
     }

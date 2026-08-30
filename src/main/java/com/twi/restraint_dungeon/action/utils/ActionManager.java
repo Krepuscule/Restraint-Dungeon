@@ -3,7 +3,6 @@ package com.twi.restraint_dungeon.action.utils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.twi.restraint_dungeon.action.BaseAction;
-import com.twi.restraint_dungeon.action.type.CarryAction;
 import com.twi.restraint_dungeon.action.type.CarryingAction;
 import com.twi.restraint_dungeon.event.custom_event.PlayerActionEvent;
 import com.twi.restraint_dungeon.mixin.client.LivingEntityRendererAccessor;
@@ -35,14 +34,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.twi.restraint_dungeon.RestraintDungeon.MODID;
-import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentAction;
-import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getPartnerUUID;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getCurrentActionId;
+import static com.twi.restraint_dungeon.utils.mod_utils.action.PlayerActionUtils.getActionPartnerUUID;
 
 @EventBusSubscriber(modid = MODID)
 public class ActionManager {
@@ -64,16 +64,36 @@ public class ActionManager {
      * 执行动作入口
      */
     public static void execute(ServerPlayer actionPlayer, String actionId, HitResult hitResult) {
+
         BaseAction action = get(actionId);
         if (action == null) return;
+
+        NeoForge.EVENT_BUS.post(new PlayerActionEvent.Before(actionPlayer, action, hitResult));
+
+        if ("STOP".equals(actionId)) {
+            ActionTask currentTask = getActiveTask(actionPlayer);
+            if (currentTask != null) {
+                currentTask.forceAbortNow(actionPlayer.server);
+                ACTIVE_TASKS.remove(currentTask);
+            }
+            return;
+        }
+
+        if (PlayerActionUtils.isDoingAction(actionPlayer)) {
+            ActionTask currentTask = getActiveTask(actionPlayer);
+            if (currentTask != null && currentTask.getAction().isInfinite()) {
+                currentTask.forceAbortNow(actionPlayer.server);
+                ACTIVE_TASKS.remove(currentTask);
+            } else {
+                return;
+            }
+        }
 
         Component failureReason = action.canUse(actionPlayer, hitResult);
         if (failureReason != null) {
             actionPlayer.displayClientMessage(failureReason, true);
             return;
         }
-
-        if (PlayerActionUtils.isDoingAction(actionPlayer)) return;
 
 
         LivingEntity target = null;
@@ -111,6 +131,16 @@ public class ActionManager {
         ACTIVE_TASKS.removeIf(task -> task.tick(server));
     }
 
+    @Nullable
+    public static ActionTask getActiveTask(ServerPlayer player) {
+        for (ActionTask task : ACTIVE_TASKS) {
+            if (task.getCarrierUUID().equals(player.getUUID())) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     /**
      * 强制停止某个实体的所有动作任务
      */
@@ -133,13 +163,13 @@ public class ActionManager {
         Player player = event.getEntity();
         if (!(player instanceof AbstractClientPlayer renderPlayer)) return;
 
-        String currentAction = getCurrentAction(renderPlayer);
+        String currentAction = getCurrentActionId(renderPlayer);
         BaseAction action = get(currentAction);
         if (currentAction == null || currentAction.equals("NONE")) {
             return;
         }
 
-        UUID partnerUUID = getPartnerUUID(renderPlayer);
+        UUID partnerUUID = getActionPartnerUUID(renderPlayer);
 
         if (partnerUUID == null || partnerUUID.equals(Util.NIL_UUID)) {
             return;
@@ -160,7 +190,7 @@ public class ActionManager {
         MultiBufferSource buffer = event.getMultiBufferSource();
         int packedLight = event.getPackedLight();
 
-        float targetYaw = calculateYawToTarget(renderPlayer, partnerPlayer);
+        float targetYaw = calculatePlayerYaw(renderPlayer, partnerPlayer, action);
 
         poseStack.pushPose();
 
@@ -191,7 +221,7 @@ public class ActionManager {
 
         poseStack.scale(1.0F, 1.0F, 1.0F);
 
-        renderPlayerModel(renderer, renderPlayer, poseStack, buffer, packedLight,partialTicks);
+        renderPlayerModel(renderer, renderPlayer, poseStack, buffer, packedLight, partialTicks);
 
         poseStack.popPose();
 
@@ -230,20 +260,33 @@ public class ActionManager {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static float calculateYawToTarget(AbstractClientPlayer fromPlayer, AbstractClientPlayer toPlayer) {
-
+    private static float calculatePlayerYaw(AbstractClientPlayer renderPlayer, AbstractClientPlayer partnerPlayer, BaseAction action) {
         AbstractClientPlayer actor, target;
-        if (fromPlayer.getUUID().compareTo(toPlayer.getUUID()) <= 0) {
-            actor = fromPlayer;
-            target = toPlayer;
+
+        boolean isRenderPlayerActor = renderPlayer.getUUID().compareTo(partnerPlayer.getUUID()) <= 0;
+        if (isRenderPlayerActor) {
+            actor = renderPlayer;
+            target = partnerPlayer;
         } else {
-            actor = toPlayer;
-            target = fromPlayer;
+            actor = partnerPlayer;
+            target = renderPlayer;
         }
 
         double deltaX = target.getX() - actor.getX();
         double deltaZ = target.getZ() - actor.getZ();
+        float baseYaw = (float) Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0F;
 
-        return (float) Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0F;
+        boolean shouldFaceActor = isFacingActor(target, action);
+
+        if (isRenderPlayerActor) {
+            return baseYaw;
+        } else {
+            return shouldFaceActor ? baseYaw + 180.0F : baseYaw;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static boolean isFacingActor(AbstractClientPlayer player, BaseAction action) {
+        return action.shouldAnimFaceActor();
     }
 }

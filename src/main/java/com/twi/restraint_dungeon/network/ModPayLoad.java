@@ -108,7 +108,19 @@ public class ModPayLoad {
                 RequestOpenTargetInventoryPayload::handle
         );
 
+        registrar.playToClient(
+                PositionClientRefreshPayload.TYPE,
+                PositionClientRefreshPayload.STREAM_CODEC,
+                PositionClientRefreshPayload::handle
+        );
+
         /* ----------------------------------------- 挣扎能力相关 ---------------------------------------*/
+
+        registrar.playToClient(
+                ActivateStrugglePayload.TYPE,
+                ActivateStrugglePayload.STREAM_CODEC,
+                ActivateStrugglePayload::handle
+        );
 
         registrar.playToServer(
                 PlayerIsStrugglingPayload.TYPE,
