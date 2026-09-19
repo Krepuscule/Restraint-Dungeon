@@ -1,14 +1,3 @@
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/kill @e[type=restraint_dungeon:test_npc]
-/summon restraint_dungeon:test_npc
-/gamemode survival
-/gamemode creative
-/gamemode survival
-/gamemode creative
-/kill
-/summon restraint_dungeon:test_npc
 /kill
 /summon restraint_dungeon:test_npc
 /kill @e[type=restraint_dungeon:test_npc]
@@ -48,3 +37,14 @@
 /enchant Dev restraint_dungeon:curse_of_vivification
 /gamemode survival
 /gamemode creative
+/summon restraint_dungeon:vivified_armor
+/gamemode survival
+/gamemode creative
+/gamemode survival
+/summon restraint_dungeon:vivified_armor
+/gamemode creative
+/summon restraint_dungeon:vivified_armor
+/kill @e[type=restraint_dungeon:vivified_armor]
+/summon restraint_dungeon:vivified_armor
+/kill @e[type=restraint_dungeon:vivified_armor]
+/summon restraint_dungeon:vivified_armor

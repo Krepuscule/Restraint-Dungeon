@@ -72,9 +72,9 @@ public abstract class BaseNPCEntity extends PathfinderMob implements GeoEntity {
 
     public String getModelLocation() {
         if(isSlimModel()){
-            return "geo/npc_slim.geo.json";
+            return "geo/npc/npc_slim.geo.json";
         }else{
-            return "geo/npc_wide.geo.json";
+            return "geo/npc/npc_wide.geo.json";
         }
     }
 

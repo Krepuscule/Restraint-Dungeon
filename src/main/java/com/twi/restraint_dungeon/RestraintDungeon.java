@@ -12,6 +12,7 @@ import com.twi.restraint_dungeon.client.ModMenuTypes;
 import com.twi.restraint_dungeon.client.sound.ModSounds;
 import com.twi.restraint_dungeon.effect.ModEffects;
 import com.twi.restraint_dungeon.effect.ModPotions;
+import com.twi.restraint_dungeon.entity.mob.ModMobs;
 import com.twi.restraint_dungeon.entity.npc.ModNPCs;
 import com.twi.restraint_dungeon.event.mod_event.player_carry.ModCarryTypes;
 import com.twi.restraint_dungeon.item.ModCreativeTabs;
@@ -63,5 +64,6 @@ public class RestraintDungeon {
         ModActions.register();
 
         ModNPCs.register(modEventBus);
+        ModMobs.register(modEventBus);
     }
 }

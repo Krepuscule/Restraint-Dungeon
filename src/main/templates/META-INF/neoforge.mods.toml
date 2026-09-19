@@ -65,13 +65,25 @@ ordering = "NONE"
 side = "BOTH"
 # Here's another dependency
 [[dependencies."${mod_id}"]]
-modId = "minecraft"
-type = "required"
-# This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "${minecraft_version_range}"
+modId = "geckolib"
+mandatory = true
+versionRange = "[4.8.4,)"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies."${mod_id}"]]
+modId = "playeranimator"
+mandatory = true
+versionRange = "[2.0.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "bendylib"
+mandatory = true
+versionRange = "[5.1,)"
+ordering = "NONE"
+side = "BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

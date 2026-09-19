@@ -17,7 +17,7 @@ license = "MIT"
 # The modid of the mod
 modId = "restraint_dungeon" #mandatory
 # The version number of the mod
-version = "0.0.4" #mandatory
+version = "0.0.5" #mandatory
 # A display name for the mod
 displayName = "RestraintDungeon" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://docs.neoforge.net/docs/misc/updatechecker/
@@ -32,7 +32,7 @@ displayName = "RestraintDungeon" #mandatory
 authors = "Crepuscule" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
-description = '''RestraintDungeon Mod 1.21.1 NeoForge testing~'''
+description = '''RestraintDungeon Mod 1.21.1 , Current Versionï¼0.0.5'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 [[mixins]]
@@ -65,13 +65,25 @@ ordering = "NONE"
 side = "BOTH"
 # Here's another dependency
 [[dependencies."restraint_dungeon"]]
-modId = "minecraft"
-type = "required"
-# This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.21.1,1.22)"
+modId = "geckolib"
+mandatory = true
+versionRange = "[4.8.4,)"
 ordering = "NONE"
 side = "BOTH"
 
+[[dependencies."restraint_dungeon"]]
+modId = "playeranimator"
+mandatory = true
+versionRange = "[2.0.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."restraint_dungeon"]]
+modId = "bendylib"
+mandatory = true
+versionRange = "[5.1,)"
+ordering = "NONE"
+side = "BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

@@ -136,9 +136,9 @@ public class WoodenTriangleHorseBlock extends RestraintDevice {
 
     @Override
     protected int getSignalStrength(BlockState state, Level level, BlockPos pos, LivingEntity entity) {
-        // TODO:完成NPC系统后补充
-//        if (entity instanceof Player || entity instanceof BaseNPCEntity)
-        if(entity instanceof Player) {
+
+        if (entity instanceof Player || entity instanceof BaseNPCEntity){
+
             return (int) getPleasantValue(entity) / 10;
         } 
 
